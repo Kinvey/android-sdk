@@ -42,7 +42,7 @@ open class UserGroup
  * @param client - an instance of Kinvey AbstractClient, configured for the application
  * @param initializer
  */
-(private val client: AbstractClient<*>, private val requestInitializer: KinveyClientRequestInitializer) {
+(private val client: AbstractClient<*>?, private val requestInitializer: KinveyClientRequestInitializer?) {
 
 
     /**
@@ -337,7 +337,7 @@ open class UserGroup
     fun create(group: UserGroupRequest): Create {
         Preconditions.checkNotNull(group, "group must not be null.")
         val create = Create(group)
-        this.client.initializeRequest(create)
+        this.client?.initializeRequest(create)
         return create
     }
 
@@ -345,7 +345,7 @@ open class UserGroup
     fun retrieve(groupID: String): Retrieve {
         Preconditions.checkNotNull(groupID, "groupID must not be null.")
         val retrieve = Retrieve(groupID)
-        client.initializeRequest(retrieve)
+        client?.initializeRequest(retrieve)
         return retrieve
     }
 
@@ -353,7 +353,7 @@ open class UserGroup
     fun update(group: UserGroupRequest): Update {
         Preconditions.checkNotNull(group, "group must not be null")
         val update = Update(group)
-        client.initializeRequest(update)
+        client?.initializeRequest(update)
         return update
     }
 
@@ -361,7 +361,7 @@ open class UserGroup
     fun delete(groupID: String): Delete {
         Preconditions.checkNotNull(groupID, "groupID must not be null.")
         val delete = Delete(groupID)
-        client.initializeRequest(delete)
+        client?.initializeRequest(delete)
         return delete
     }
 

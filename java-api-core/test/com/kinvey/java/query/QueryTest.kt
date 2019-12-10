@@ -28,15 +28,17 @@ import java.util.*
  */
 
 class QueryTest : TestCase() {
+
     private var myQuery: Query? = null
+
     override fun setUp() {
         myQuery = Query(MongoQueryFilterBuilder())
     }
 
     fun testGetJsonWithNullFactory() {
         try {
-            myQuery!!.equals("_id", "newEntity")
-            myQuery!!.getQueryFilterJson(null)
+            myQuery?.equals("_id", "newEntity")
+            myQuery?.getQueryFilterJson(null)
             fail(NULL_EXCEPTION_FAILURE)
         } catch (ex: NullPointerException) {
         }
@@ -44,14 +46,14 @@ class QueryTest : TestCase() {
 
     @Throws(IOException::class)
     fun testEquals() {
-        myQuery!!.equals("_id", "newEntity")
-        assertEquals("newEntity", myQuery!!.queryFilterMap!!["_id"])
+        myQuery?.equals("_id", "newEntity")
+        assertEquals("newEntity", myQuery?.queryFilterMap!!["_id"])
     }
 
     @Throws(IOException::class)
     fun testEqualsNullField() {
         try {
-            myQuery!!.equals(null, "newEntity")
+            myQuery?.equals(null, "newEntity")
             fail(NULL_EXCEPTION_FAILURE)
         } catch (ex: NullPointerException) {
         }
@@ -59,16 +61,16 @@ class QueryTest : TestCase() {
 
     @Throws(IOException::class)
     fun testGreaterThan() {
-        myQuery!!.greaterThan("_id", "2")
+        myQuery?.greaterThan("_id", "2")
         val lh = LinkedHashMap<String, Any>()
         lh["\$gt"] = "2"
-        assertEquals(lh, myQuery!!.queryFilterMap!!["_id"])
+        assertEquals(lh, myQuery?.queryFilterMap!!["_id"])
     }
 
     @Throws(IOException::class)
     fun testGreaterThanNullID() {
         try {
-            myQuery!!.greaterThan(null, 2)
+            myQuery?.greaterThan(null, 2)
             fail(NULL_EXCEPTION_FAILURE)
         } catch (ex: NullPointerException) {
         }
@@ -76,16 +78,16 @@ class QueryTest : TestCase() {
 
     @Throws(IOException::class)
     fun testLessThan() {
-        myQuery!!.lessThan("_id", "2")
+        myQuery?.lessThan("_id", "2")
         val lh = LinkedHashMap<String, Any>()
         lh["\$lt"] = "2"
-        assertEquals(lh, myQuery!!.queryFilterMap!!["_id"])
+        assertEquals(lh, myQuery?.queryFilterMap!!["_id"])
     }
 
     @Throws(IOException::class)
     fun testLessThanNullID() {
         try {
-            myQuery!!.lessThan(null, 2)
+            myQuery?.lessThan(null, 2)
             fail(NULL_EXCEPTION_FAILURE)
         } catch (ex: NullPointerException) {
         }
@@ -93,16 +95,16 @@ class QueryTest : TestCase() {
 
     @Throws(IOException::class)
     fun testGreaterThanEqualTo() {
-        myQuery!!.greaterThanEqualTo("_id", "345")
+        myQuery?.greaterThanEqualTo("_id", "345")
         val expected = LinkedHashMap<String, Any>()
         expected["\$gte"] = "345"
-        assertEquals(expected, myQuery!!.queryFilterMap!!["_id"])
+        assertEquals(expected, myQuery?.queryFilterMap!!["_id"])
     }
 
     @Throws(IOException::class)
     fun testGreaterThanEqualToNullID() {
         try {
-            myQuery!!.greaterThanEqualTo(null, 345)
+            myQuery?.greaterThanEqualTo(null, 345)
             fail(NULL_EXCEPTION_FAILURE)
         } catch (ex: NullPointerException) {
         }
@@ -110,16 +112,16 @@ class QueryTest : TestCase() {
 
     @Throws(IOException::class)
     fun testLessThanEqualTo() {
-        myQuery!!.lessThanEqualTo("_id", "123")
+        myQuery?.lessThanEqualTo("_id", "123")
         val expected = LinkedHashMap<String, Any>()
         expected["\$lte"] = "123"
-        assertEquals(expected, myQuery!!.queryFilterMap!!["_id"])
+        assertEquals(expected, myQuery?.queryFilterMap!!["_id"])
     }
 
     @Throws(IOException::class)
     fun testLessThanEqualToNullID() {
         try {
-            myQuery!!.lessThanEqualTo(null, 123)
+            myQuery?.lessThanEqualTo(null, 123)
             fail(NULL_EXCEPTION_FAILURE)
         } catch (ex: NullPointerException) {
         }
@@ -127,43 +129,43 @@ class QueryTest : TestCase() {
 
     @Throws(IOException::class)
     fun testNotEqual() {
-        myQuery!!.notEqual("_id", "newEntity")
+        myQuery?.notEqual("_id", "newEntity")
         val expected = LinkedHashMap<String, Any>()
         expected["\$ne"] = "newEntity"
-        assertEquals(expected, myQuery!!.queryFilterMap!!["_id"])
+        assertEquals(expected, myQuery?.queryFilterMap!!["_id"])
     }
 
     @Throws(IOException::class)
     fun testNotEqualNullID() {
         try {
-            myQuery!!.notEqual(null, "newEntity")
+            myQuery?.notEqual(null, "newEntity")
             fail(NULL_EXCEPTION_FAILURE)
         } catch (ex: NullPointerException) {
         }
     }
 
     fun testGreaterThanLessThan() {
-        myQuery!!.greaterThan("_id", "100")
-        myQuery!!.lessThan("_id", "1000")
+        myQuery?.greaterThan("_id", "100")
+        myQuery?.lessThan("_id", "1000")
         val expected = LinkedHashMap<String, Any>()
         expected["\$gt"] = "100"
         expected["\$lt"] = "1000"
-        assertEquals(expected, myQuery!!.queryFilterMap!!["_id"])
+        assertEquals(expected, myQuery?.queryFilterMap!!["_id"])
     }
 
     @Throws(IOException::class)
     fun testTwoKeys() {
-        myQuery!!.equals("city", "Boston")
-        myQuery!!.greaterThan("age", "21")
-        myQuery!!.lessThan("age", "30")
+        myQuery?.equals("city", "Boston")
+        myQuery?.greaterThan("age", "21")
+        myQuery?.lessThan("age", "30")
         val expected = LinkedHashMap<String, Any>()
         val expectedAge = LinkedHashMap<String, Any>()
         expected["city"] = "Boston"
         expectedAge["\$gt"] = "21"
         expectedAge["\$lt"] = "30"
         expected["age"] = expectedAge
-        assertEquals(expected["city"], myQuery!!.queryFilterMap!!["city"])
-        assertEquals(expected["age"], myQuery!!.queryFilterMap!!["age"])
+        assertEquals(expected["city"], myQuery?.queryFilterMap!!["city"])
+        assertEquals(expected["age"], myQuery?.queryFilterMap!!["age"])
     }
 
     fun testIn() {
@@ -171,15 +173,15 @@ class QueryTest : TestCase() {
         val myExpectedArray = arrayOf("1", "2", "3")
         val expected = LinkedHashMap<String, Any>()
         expected["\$in"] = myExpectedArray
-        myQuery!!.`in`("numbers", myArray)
+        myQuery?.`in`("numbers", myArray)
         assertArrayEquals(expected["\$in"] as Array<Any?>,
-                (myQuery!!.queryFilterMap!!["numbers"] as LinkedHashMap<String?, Any?>)["\$in"] as Array<Any?>)
+                (myQuery?.queryFilterMap!!["numbers"] as LinkedHashMap<String?, Any?>)["\$in"] as Array<Any?>)
     }
 
     fun testInNullField() {
         try {
             val myArray = arrayOf(1, 2, 3)
-            myQuery!!.`in`(null, myArray)
+            myQuery?.`in`(null, myArray)
             fail(NULL_EXCEPTION_FAILURE)
         } catch (ex: NullPointerException) {
         }
@@ -190,15 +192,15 @@ class QueryTest : TestCase() {
         val myExpectedArray = arrayOf("1", "2", "3")
         val expected = LinkedHashMap<String, Any>()
         expected["\$nin"] = myExpectedArray
-        myQuery!!.notIn("numbers", myArray)
+        myQuery?.notIn("numbers", myArray)
         assertArrayEquals(expected["\$nin"] as Array<Any?>,
-                (myQuery!!.queryFilterMap!!["numbers"] as LinkedHashMap<String?, Any?>)["\$nin"] as Array<Any?>)
+                (myQuery?.queryFilterMap!!["numbers"] as LinkedHashMap<String?, Any?>)["\$nin"] as Array<Any?>)
     }
 
     fun testNotInNullField() {
         try {
             val myArray = arrayOf<Int?>(1, 2, 3)
-            myQuery!!.notIn(null, myArray)
+            myQuery?.notIn(null, myArray)
             fail(NULL_EXCEPTION_FAILURE)
         } catch (ex: NullPointerException) {
         }
@@ -209,30 +211,30 @@ class QueryTest : TestCase() {
         val myExpectedArray = arrayOf("1", "2", "3")
         val expected = LinkedHashMap<String, Any>()
         expected["\$all"] = myExpectedArray
-        myQuery!!.all("numbers", myArray)
+        myQuery?.all("numbers", myArray)
         assertArrayEquals(expected["\$all"] as Array<Any?>,
-                (myQuery!!.queryFilterMap!!["numbers"] as LinkedHashMap<String?, Any?>)["\$all"] as Array<Any?>)
+                (myQuery?.queryFilterMap!!["numbers"] as LinkedHashMap<String?, Any?>)["\$all"] as Array<Any?>)
     }
 
     fun testAllNullField() {
         try {
             val myArray = arrayOf<Int?>(1, 2, 3)
-            myQuery!!.all(null, myArray)
+            myQuery?.all(null, myArray)
             fail(NULL_EXCEPTION_FAILURE)
         } catch (ex: NullPointerException) {
         }
     }
 
     fun testSize() {
-        myQuery!!.size("_id", 3)
+        myQuery?.size("_id", 3)
         val expected = LinkedHashMap<String, Any>()
         expected["\$size"] = 3
-        assertEquals(expected, myQuery!!.queryFilterMap!!["_id"])
+        assertEquals(expected, myQuery?.queryFilterMap!!["_id"])
     }
 
     fun setSizeNullKey() {
         try {
-            myQuery!!.size(null, 3)
+            myQuery?.size(null, 3)
             fail(NULL_EXCEPTION_FAILURE)
         } catch (ex: NullPointerException) {
         }
@@ -240,24 +242,24 @@ class QueryTest : TestCase() {
 
     fun testAnd() {
         val myQuery2 = Query(MongoQueryFilterBuilder())
-        myQuery!!.equals("City", "Boston")
+        myQuery?.equals("City", "Boston")
         myQuery2.greaterThan("Age", "21")
-        myQuery!!.and(myQuery2)
+        myQuery?.and(myQuery2)
         val city = LinkedHashMap<String, Any>()
         val age = LinkedHashMap<String, Any>()
         val ageWrapper = LinkedHashMap<String, Any>()
         city["City"] = "Boston"
         age["\$gt"] = "21"
         ageWrapper["Age"] = age
-        val expected: Array<LinkedHashMap<String, Any>> = arrayOfNulls<LinkedHashMap<*, *>>(2)
+        val expected = arrayOfNulls<LinkedHashMap<String, Any>?>(2)
         expected[0] = city
         expected[1] = ageWrapper
-        assertArrayEquals(expected, myQuery!!.queryFilterMap!!["\$and"] as Array<Any?>)
+        assertArrayEquals(expected, myQuery?.queryFilterMap!!["\$and"] as Array<Any?>)
     }
 
     fun testAndNullQuery() {
         try {
-            myQuery!!.and(null)
+            myQuery?.and(null)
             fail(NULL_EXCEPTION_FAILURE)
         } catch (ex: NullPointerException) {
         }
@@ -265,35 +267,35 @@ class QueryTest : TestCase() {
 
     fun testOr() {
         val myQuery2 = Query(MongoQueryFilterBuilder())
-        myQuery!!.equals("City", "Boston")
+        myQuery?.equals("City", "Boston")
         myQuery2.greaterThan("Age", "21")
-        myQuery!!.or(myQuery2)
+        myQuery?.or(myQuery2)
         val city = LinkedHashMap<String, Any>()
         val age = LinkedHashMap<String, Any>()
         val ageWrapper = LinkedHashMap<String, Any>()
         city["City"] = "Boston"
         age["\$gt"] = "21"
         ageWrapper["Age"] = age
-        val expected: Array<LinkedHashMap<String, Any>> = arrayOfNulls<LinkedHashMap<*, *>>(2)
+        val expected = arrayOfNulls<LinkedHashMap<String, Any>?>(2)
         expected[0] = city
         expected[1] = ageWrapper
-        assertArrayEquals(expected, myQuery!!.queryFilterMap!!["\$or"] as Array<Any?>)
+        assertArrayEquals(expected, myQuery?.queryFilterMap!!["\$or"] as Array<Any?>)
     }
 
     fun testOrNullQuery() {
         try {
-            myQuery!!.or(null)
+            myQuery?.or(null)
             fail(NULL_EXCEPTION_FAILURE)
         } catch (ex: NullPointerException) {
         }
     }
 
     fun testNot() {
-        myQuery!!.equals("City", "Boston")
-        myQuery!!.greaterThan("Age", 21)
-        myQuery!!.lessThan("Age", 65)
-        myQuery!!.notEqual("Status", "deleted")
-        myQuery!!.not()
+        myQuery?.equals("City", "Boston")
+        myQuery?.greaterThan("Age", 21)
+        myQuery?.lessThan("Age", 65)
+        myQuery?.notEqual("Status", "deleted")
+        myQuery?.not()
         val newMap = LinkedHashMap<String, LinkedHashMap<String, Any>>()
         val expected = LinkedHashMap<String, Any>()
         val city = LinkedHashMap<String, Any>()
@@ -305,68 +307,68 @@ class QueryTest : TestCase() {
         expected["City"] = city
         expected["Age"] = newMap
         expected["Status"] = "deleted"
-        assertEquals(expected, myQuery!!.queryFilterMap)
+        assertEquals(expected, myQuery?.queryFilterMap)
     }
 
     fun testSort() {
-        myQuery!!.greaterThan("Age", "18")
-        myQuery!!.addSort("State", Query.SortOrder.ASC)
-        myQuery!!.addSort("City", Query.SortOrder.ASC)
-        myQuery!!.addSort("Age", Query.SortOrder.DESC)
+        myQuery?.greaterThan("Age", "18")
+        myQuery?.addSort("State", AbstractQuery.SortOrder.ASC)
+        myQuery?.addSort("City", AbstractQuery.SortOrder.ASC)
+        myQuery?.addSort("Age", AbstractQuery.SortOrder.DESC)
         val expected = "{\"State\" : 1,\"City\" : 1,\"Age\" : -1}"
         assertEquals(expected, myQuery!!.sortString)
     }
 
     fun testSortNullField() {
-        myQuery!!.greaterThan("Age", "18")
+        myQuery?.greaterThan("Age", "18")
         try {
-            myQuery!!.addSort(null, Query.SortOrder.ASC)
+            myQuery?.addSort(null, AbstractQuery.SortOrder.ASC)
             fail(NULL_EXCEPTION_FAILURE)
         } catch (ex: NullPointerException) {
         }
     }
 
     fun testSortNullOrder() {
-        myQuery!!.greaterThan("Age", "18")
-        myQuery!!.addSort("age", null)
-        val actual = myQuery!!.sortString
+        myQuery?.greaterThan("Age", "18")
+        myQuery?.addSort("age", null)
+        val actual = myQuery?.sortString
         val expected = "{\"age\" : 1}"
         assertEquals(expected, actual)
     }
 
     fun testSortDoubleNull() {
-        myQuery!!.greaterThan("Age", "18")
+        myQuery?.greaterThan("Age", "18")
         try {
-            myQuery!!.addSort(null, null)
+            myQuery?.addSort(null, null)
             fail(NULL_EXCEPTION_FAILURE)
         } catch (ex: NullPointerException) {
         }
     }
 
     fun testNearSphere() {
-        myQuery!!.nearSphere("pointOfInterest", -71.056868, 42.360583)
+        myQuery?.nearSphere("pointOfInterest", -71.056868, 42.360583)
         val expected = LinkedHashMap<String, Any>()
         val point = arrayOf(42.360583, -71.056868)
         expected["\$nearSphere"] = point
-        val actual = myQuery!!.queryFilterMap!!["pointOfInterest"] as LinkedHashMap<String, Any>
+        val actual = myQuery?.queryFilterMap!!["pointOfInterest"] as LinkedHashMap<String, Any>
         assertEquals(expected.keys, actual.keys)
         assertArrayEquals(expected["\$nearSphere"] as Array<Double?>, actual["\$nearSphere"] as Array<Double?>)
     }
 
     fun testNearSphereWithDistance() {
-        myQuery!!.nearSphere("pointOfInterest", -71.056868, 42.360583, .05)
+        myQuery?.nearSphere("pointOfInterest", -71.056868, 42.360583, .05)
         val expected = LinkedHashMap<String, Any>()
         val point = arrayOf(42.360583, -71.056868)
         expected["\$nearSphere"] = point
         expected["\$maxDistance"] = .05
-        val actual = myQuery!!.queryFilterMap!!["pointOfInterest"] as LinkedHashMap<String, Any>
+        val actual = myQuery?.queryFilterMap!!["pointOfInterest"] as LinkedHashMap<String, Any>
         assertEquals(expected.keys, actual.keys)
         assertArrayEquals(expected["\$nearSphere"] as Array<Double?>, actual["\$nearSphere"] as Array<Double?>)
     }
 
     fun testNearSphereHighLat() {
         try {
-            myQuery!!.nearSphere("pointOfInterest", 90.000000, -71.324324)
+            myQuery?.nearSphere("pointOfInterest", 90.000000, -71.324324)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
         }
@@ -374,7 +376,7 @@ class QueryTest : TestCase() {
 
     fun testNearSphereExceedsHighLat() {
         try {
-            myQuery!!.nearSphere("pointOfInterest", 90.000001, -71.324324)
+            myQuery?.nearSphere("pointOfInterest", 90.000001, -71.324324)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
         }
@@ -382,7 +384,7 @@ class QueryTest : TestCase() {
 
     fun testNearSphereLowLat() {
         try {
-            myQuery!!.nearSphere("pointOfInterest", -90.000000, -71.324324)
+            myQuery?.nearSphere("pointOfInterest", -90.000000, -71.324324)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
         }
@@ -390,7 +392,7 @@ class QueryTest : TestCase() {
 
     fun testNearSphereExceedsLowLat() {
         try {
-            myQuery!!.nearSphere("pointOfInterest", -90.000001, -71.324324)
+            myQuery?.nearSphere("pointOfInterest", -90.000001, -71.324324)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
         }
@@ -398,7 +400,7 @@ class QueryTest : TestCase() {
 
     fun testNearSphereHighLon() {
         try {
-            myQuery!!.nearSphere("pointOfInterest", 42.523232, 180.00000)
+            myQuery?.nearSphere("pointOfInterest", 42.523232, 180.00000)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
         }
@@ -406,7 +408,7 @@ class QueryTest : TestCase() {
 
     fun testNearSphereExceedsHighdLon() {
         try {
-            myQuery!!.nearSphere("pointOfInterest", 42.523232, 180.00001)
+            myQuery?.nearSphere("pointOfInterest", 42.523232, 180.00001)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
         }
@@ -414,7 +416,7 @@ class QueryTest : TestCase() {
 
     fun testNearSphereLowLon() {
         try {
-            myQuery!!.nearSphere("pointOfInterest", 42.523232, -180.00000)
+            myQuery?.nearSphere("pointOfInterest", 42.523232, -180.00000)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
         }
@@ -422,7 +424,7 @@ class QueryTest : TestCase() {
 
     fun testNearSphereExceedsLowLon() {
         try {
-            myQuery!!.nearSphere("pointOfInterest", 42.523232, -180.00001)
+            myQuery?.nearSphere("pointOfInterest", 42.523232, -180.00001)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
         }
@@ -430,14 +432,14 @@ class QueryTest : TestCase() {
 
     fun testNearSphereNullField() {
         try {
-            myQuery!!.nearSphere(null, 42.523234, -73.234234)
+            myQuery?.nearSphere(null, 42.523234, -73.234234)
             fail(NULL_EXCEPTION_FAILURE)
         } catch (ex: NullPointerException) {
         }
     }
 
     fun testWithinBox() {
-        myQuery!!.withinBox("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583)
+        myQuery?.withinBox("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583)
         var within = LinkedHashMap<String, Any>()
         val inner = LinkedHashMap<String, Any>()
         val point = Array(2) { arrayOfNulls<Double?>(2) }
@@ -447,7 +449,7 @@ class QueryTest : TestCase() {
         point[1][1] = -70.544966
         inner["\$box"] = point
         within["\$within"] = inner
-        var actual = myQuery!!.queryFilterMap!!["pointOfInterest"] as LinkedHashMap<String, Any>
+        var actual = myQuery?.queryFilterMap!!["pointOfInterest"] as LinkedHashMap<String, Any>
         actual = actual["\$within"] as LinkedHashMap<String, Any>
         within = within["\$within"] as LinkedHashMap<String, Any>
         assertEquals(within.keys, actual.keys)
@@ -456,7 +458,7 @@ class QueryTest : TestCase() {
 
     fun testWithinBoxFieldNull() {
         try {
-            myQuery!!.withinBox(null, -71.056868, 42.360583, -70.544966, 40.360583)
+            myQuery?.withinBox(null, -71.056868, 42.360583, -70.544966, 40.360583)
             fail(NULL_EXCEPTION_FAILURE)
         } catch (ex: NullPointerException) {
         }
@@ -464,7 +466,7 @@ class QueryTest : TestCase() {
 
     fun testWithinBoxLatHighPoint1() {
         try {
-            myQuery!!.withinBox("pointOfInterest", 90.0000000, 42.360583, -70.544966, 40.360583)
+            myQuery?.withinBox("pointOfInterest", 90.0000000, 42.360583, -70.544966, 40.360583)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
         }
@@ -472,7 +474,7 @@ class QueryTest : TestCase() {
 
     fun testWithinBoxLatExceedsHighPoint1() {
         try {
-            myQuery!!.withinBox("pointOfInterest", 90.0000001, 42.360583, -70.544966, 40.360583)
+            myQuery?.withinBox("pointOfInterest", 90.0000001, 42.360583, -70.544966, 40.360583)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
         }
@@ -480,7 +482,7 @@ class QueryTest : TestCase() {
 
     fun testWithinBoxLatLowPoint1() {
         try {
-            myQuery!!.withinBox("pointOfInterest", -90.0000000, 42.360583, -70.544966, 40.360583)
+            myQuery?.withinBox("pointOfInterest", -90.0000000, 42.360583, -70.544966, 40.360583)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
         }
@@ -488,7 +490,7 @@ class QueryTest : TestCase() {
 
     fun testWithinBoxLatExceedsLowPoint1() {
         try {
-            myQuery!!.withinBox("pointOfInterest", -90.0000001, 42.360583, -70.544966, 40.360583)
+            myQuery?.withinBox("pointOfInterest", -90.0000001, 42.360583, -70.544966, 40.360583)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
         }
@@ -496,7 +498,7 @@ class QueryTest : TestCase() {
 
     fun testWithinBoxLonHighPoint1() {
         try {
-            myQuery!!.withinBox("pointOfInterest", 71.056868, 180.000000, -70.544966, 40.360583)
+            myQuery?.withinBox("pointOfInterest", 71.056868, 180.000000, -70.544966, 40.360583)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
         }
@@ -504,7 +506,7 @@ class QueryTest : TestCase() {
 
     fun testWithinBoxLonExceedsHighPoint1() {
         try {
-            myQuery!!.withinBox("pointOfInterest", 71.056868, 180.000001, -70.544966, 40.360583)
+            myQuery?.withinBox("pointOfInterest", 71.056868, 180.000001, -70.544966, 40.360583)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
         }
@@ -512,7 +514,7 @@ class QueryTest : TestCase() {
 
     fun testWithinBoxLonLowPoint1() {
         try {
-            myQuery!!.withinBox("pointOfInterest", 71.056868, -180.000000, -70.544966, 40.360583)
+            myQuery?.withinBox("pointOfInterest", 71.056868, -180.000000, -70.544966, 40.360583)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
         }
@@ -520,7 +522,7 @@ class QueryTest : TestCase() {
 
     fun testWithinBoxLonExceedsLowPoint1() {
         try {
-            myQuery!!.withinBox("pointOfInterest", 71.056868, -180.000001, -70.544966, 40.360583)
+            myQuery?.withinBox("pointOfInterest", 71.056868, -180.000001, -70.544966, 40.360583)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
         }
@@ -528,7 +530,7 @@ class QueryTest : TestCase() {
 
     fun testWithinBoxLatHighPoint2() {
         try {
-            myQuery!!.withinBox("pointOfInterest", -71.056868, 42.360583, 90.000000, 40.360583)
+            myQuery?.withinBox("pointOfInterest", -71.056868, 42.360583, 90.000000, 40.360583)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
         }
@@ -536,7 +538,7 @@ class QueryTest : TestCase() {
 
     fun testWithinBoxLatExceedsHighPoint2() {
         try {
-            myQuery!!.withinBox("pointOfInterest", -71.056868, 42.360583, 90.000001, 40.360583)
+            myQuery?.withinBox("pointOfInterest", -71.056868, 42.360583, 90.000001, 40.360583)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
         }
@@ -544,7 +546,7 @@ class QueryTest : TestCase() {
 
     fun testWithinBoxLatLowPoint2() {
         try {
-            myQuery!!.withinBox("pointOfInterest", -71.056868, 42.360583, -90.000000, 40.360583)
+            myQuery?.withinBox("pointOfInterest", -71.056868, 42.360583, -90.000000, 40.360583)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
         }
@@ -552,7 +554,7 @@ class QueryTest : TestCase() {
 
     fun testWithinBoxLatExceedsLowPoint2() {
         try {
-            myQuery!!.withinBox("pointOfInterest", -71.056868, 42.360583, -90.000001, 40.360583)
+            myQuery?.withinBox("pointOfInterest", -71.056868, 42.360583, -90.000001, 40.360583)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
         }
@@ -560,7 +562,7 @@ class QueryTest : TestCase() {
 
     fun testWithinBoxLonHighPoint2() {
         try {
-            myQuery!!.withinBox("pointOfInterest", 71.056868, -179.234234, -70.544966, 180.0000000)
+            myQuery?.withinBox("pointOfInterest", 71.056868, -179.234234, -70.544966, 180.0000000)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
         }
@@ -568,7 +570,7 @@ class QueryTest : TestCase() {
 
     fun testWithinBoxLonExceedsHighPoint2() {
         try {
-            myQuery!!.withinBox("pointOfInterest", 71.056868, -179.234234, -70.544966, 180.0000001)
+            myQuery?.withinBox("pointOfInterest", 71.056868, -179.234234, -70.544966, 180.0000001)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
         }
@@ -576,7 +578,7 @@ class QueryTest : TestCase() {
 
     fun testWithinBoxLonLowPoint2() {
         try {
-            myQuery!!.withinBox("pointOfInterest", 71.056868, -179.234234, -70.544966, -180.0000000)
+            myQuery?.withinBox("pointOfInterest", 71.056868, -179.234234, -70.544966, -180.0000000)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
         }
@@ -584,14 +586,14 @@ class QueryTest : TestCase() {
 
     fun testWithinBoxLonExceedsLowPoint2() {
         try {
-            myQuery!!.withinBox("pointOfInterest", 71.056868, -179.234234, -70.544966, -180.0000001)
+            myQuery?.withinBox("pointOfInterest", 71.056868, -179.234234, -70.544966, -180.0000001)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
         }
     }
 
     fun testWithinPolygon() {
-        myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
+        myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
                 -72.523423, 43.234343, -68.423423, 38.234323)
         var within = LinkedHashMap<String, Any>()
         val inner = LinkedHashMap<String, Any>()
@@ -606,7 +608,7 @@ class QueryTest : TestCase() {
         point[3][1] = -68.423423
         inner["\$polygon"] = point
         within["\$within"] = inner
-        var actual = myQuery!!.queryFilterMap!!["pointOfInterest"] as LinkedHashMap<String, Any>
+        var actual = myQuery?.queryFilterMap!!["pointOfInterest"] as LinkedHashMap<String, Any>
         assertEquals(within.keys, actual.keys)
         actual = actual["\$within"] as LinkedHashMap<String, Any>
         within = within["\$within"] as LinkedHashMap<String, Any>
@@ -616,7 +618,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonNullField() {
         try {
-            myQuery!!.withinPolygon(null, -71.056868, 42.360583, -70.544966, 40.360583,
+            myQuery?.withinPolygon(null, -71.056868, 42.360583, -70.544966, 40.360583,
                     -72.523423, 43.234343, -68.423423, 38.234323)
             fail(NULL_EXCEPTION_FAILURE)
         } catch (ex: NullPointerException) {
@@ -625,7 +627,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLatHighPoint1() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", 90.000000, 42.360583, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", 90.000000, 42.360583, -70.544966, 40.360583,
                     -72.523423, 43.234343, -68.423423, 38.234323)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
@@ -634,7 +636,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLatExceedsHighPoint1() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", 90.000001, 42.360583, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", 90.000001, 42.360583, -70.544966, 40.360583,
                     -72.523423, 43.234343, -68.423423, 38.234323)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
@@ -643,7 +645,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLatLowPoint1() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -90.000000, 42.360583, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -90.000000, 42.360583, -70.544966, 40.360583,
                     -72.523423, 43.234343, -68.423423, 38.234323)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
@@ -652,7 +654,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLatExceedsLowPoint1() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -90.000001, 42.360583, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -90.000001, 42.360583, -70.544966, 40.360583,
                     -72.523423, 43.234343, -68.423423, 38.234323)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
@@ -661,7 +663,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLonHighPoint1() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 180.000000, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 180.000000, -70.544966, 40.360583,
                     -72.523423, 43.234343, -68.423423, 38.234323)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
@@ -670,7 +672,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLonExceedsHighPoint1() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 180.000001, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 180.000001, -70.544966, 40.360583,
                     -72.523423, 43.234343, -68.423423, 38.234323)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
@@ -679,7 +681,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLonLowPoint1() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, -180.000000, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, -180.000000, -70.544966, 40.360583,
                     -72.523423, 43.234343, -68.423423, 38.234323)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
@@ -688,7 +690,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLonExceedsLowPoint1() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, -180.000001, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, -180.000001, -70.544966, 40.360583,
                     -72.523423, 43.234343, -68.423423, 38.234323)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
@@ -697,7 +699,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLatHighPoint2() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, 90.000000, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, 90.000000, 40.360583,
                     -72.523423, 43.234343, -68.423423, 38.234323)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
@@ -706,7 +708,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLatExceedsHighPoint2() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, 90.0000001, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, 90.0000001, 40.360583,
                     -72.523423, 43.234343, -68.423423, 38.234323)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
@@ -715,7 +717,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLatLowPoint2() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -90.000000, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -90.000000, 40.360583,
                     -72.523423, 43.234343, -68.423423, 38.234323)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
@@ -724,7 +726,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLatExceedsLowPoint2() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -90.0000001, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -90.0000001, 40.360583,
                     -72.523423, 43.234343, -68.423423, 38.234323)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
@@ -733,7 +735,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLonHighPoint2() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 180.000000,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 180.000000,
                     -72.523423, 43.234343, -68.423423, 38.234323)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
@@ -742,7 +744,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLonExceedsHighPoint2() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 180.0000001,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 180.0000001,
                     -72.523423, 43.234343, -68.423423, 38.234323)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
@@ -751,7 +753,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLonLowPoint2() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, -180.000000,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, -180.000000,
                     -72.523423, 43.234343, -68.423423, 38.234323)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
@@ -760,7 +762,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLonExceedsLowPoint2() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, -180.0000001,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, -180.0000001,
                     -72.523423, 43.234343, -68.423423, 38.234323)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
@@ -769,7 +771,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLatHighPoint3() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
                     90.0000000, 43.234343, -68.423423, 38.234323)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
@@ -778,7 +780,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLatExceedsHighPoint3() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
                     90.0000001, 43.234343, -68.423423, 38.234323)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
@@ -787,7 +789,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLatLowPoint3() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
                     -90.0000000, 43.234343, -68.423423, 38.234323)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
@@ -796,7 +798,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLatExceedsLowPoint3() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
                     -90.0000001, 43.234343, -68.423423, 38.234323)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
@@ -805,7 +807,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLonHighPoint3() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
                     -72.523423, 180.0000000, -68.423423, 38.234323)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
@@ -814,7 +816,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLonExceedsHighPoint3() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
                     -72.523423, 180.0000001, -68.423423, 38.234323)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
@@ -823,7 +825,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLonLowPoint3() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
                     -72.523423, -180.0000000, -68.423423, 38.234323)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
@@ -832,7 +834,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLonExceedsLowPoint3() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
                     -72.523423, -180.0000001, -68.423423, 38.234323)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
@@ -841,7 +843,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLatHighPoint4() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
                     -72.523423, 43.234343, 90.0000000, 38.234323)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
@@ -850,7 +852,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLatExceedsHighPoint4() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
                     -72.523423, 43.234343, 90.0000001, 38.234323)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
@@ -859,7 +861,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLatLowPoint4() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
                     -72.523423, 43.234343, -90.0000000, 38.234323)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
@@ -868,7 +870,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLatExceedsLowPoint4() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
                     -72.523423, 43.234343, -90.0000001, 38.234323)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
@@ -877,7 +879,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLonHighPoint4() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
                     -72.523423, 38.234323, -68.423423, 180.0000000)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
@@ -886,7 +888,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLonExceedsHighPoint4() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
                     -72.523423, 38.234323, -68.423423, 180.0000001)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
@@ -895,7 +897,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLonLowPoint4() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
                     -72.523423, 38.234323, -68.423423, -180.0000000)
         } catch (ex: IllegalArgumentException) {
             fail(ILLEGAL_ARGUMENT_EXCEPTION_UNEXPECTED)
@@ -904,7 +906,7 @@ class QueryTest : TestCase() {
 
     fun testWithinPolygonLonExceedsLowPoint4() {
         try {
-            myQuery!!.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
+            myQuery?.withinPolygon("pointOfInterest", -71.056868, 42.360583, -70.544966, 40.360583,
                     -72.523423, 38.234323, -68.423423, -180.0000001)
             fail(ILLEGAL_ARGUMENT_EXCEPTION_FAILURE)
         } catch (ex: IllegalArgumentException) {
@@ -912,22 +914,22 @@ class QueryTest : TestCase() {
     }
 
     fun testRegEx() {
-        myQuery!!.regEx("email", "^.*\\b(gmail|yahoo|hotmail)\\b.*$")
+        myQuery?.regEx("email", "^.*\\b(gmail|yahoo|hotmail)\\b.*$")
         val expected = LinkedHashMap<String, Any>()
         expected["\$regex"] = "^.*\\b(gmail|yahoo|hotmail)\\b.*$"
-        assertEquals(expected, myQuery!!.queryFilterMap!!["email"])
+        assertEquals(expected, myQuery?.queryFilterMap!!["email"])
     }
 
     fun testRegExNullKey() {
         try {
-            myQuery!!.regEx(null, "^.*\\b(gmail|yahoo|hotmail)\\b.*$")
+            myQuery?.regEx(null, "^.*\\b(gmail|yahoo|hotmail)\\b.*$")
             fail(NULL_EXCEPTION_FAILURE)
         } catch (ex: NullPointerException) {
         }
     }
 
     fun testStartsWith() {
-        myQuery!!.startsWith("firstname", "Jo")
+        myQuery?.startsWith("firstname", "Jo")
         val expected = LinkedHashMap<String, Any>()
         expected["\$regex"] = "^Jo"
         assertEquals(expected, myQuery!!.queryFilterMap!!["firstname"])
@@ -935,7 +937,7 @@ class QueryTest : TestCase() {
 
     fun testStartsWithNullKey() {
         try {
-            myQuery!!.startsWith(null, "Jo")
+            myQuery?.startsWith(null, "Jo")
             fail(NULL_EXCEPTION_FAILURE)
         } catch (ex: NullPointerException) {
         }

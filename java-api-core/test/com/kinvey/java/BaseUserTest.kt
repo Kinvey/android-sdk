@@ -16,6 +16,7 @@
 package com.kinvey.java
 
 import com.google.api.client.json.GenericJson
+import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.gson.GsonFactory
 import com.kinvey.java.auth.KinveyAuthRequest
 import com.kinvey.java.auth.KinveyAuthRequest.Builder
@@ -37,28 +38,30 @@ import java.lang.reflect.Field
  * @author mjsalinger
  * @since 2.0
  */
-class BaseUserTest : KinveyMockUnitTest<*>() {
-    private var requestManager: UserStoreRequestManager<BaseUser?>? = null
+class BaseUserTest : KinveyMockUnitTest<BaseUser>() {
+
+    private var requestManager: UserStoreRequestManager<BaseUser>? = null
+
     private fun initializeRequestManager(isNeedCreateUser: Boolean) {
-        requestManager = UserStoreRequestManager<BaseUser?>(client, MockBuilder(client!!.requestFactory!!.transport,
-                client!!.jsonFactory, "mockAppKey", "mockAppSecret", null))
+        requestManager = UserStoreRequestManager<BaseUser>(client, MockBuilder(client?.requestFactory?.transport,
+                client?.jsonFactory, "mockAppKey", "mockAppSecret", null))
         if (isNeedCreateUser) {
-            requestManager!!.getClient()!!.activeUser = BaseUser()
+            requestManager?.getClient()?.activeUser = BaseUser()
         }
     }
 
     fun testInitializeUser() {
-        val user = UserStoreRequestManager<BaseUser?>(client, MockBuilder(client!!.requestFactory!!.transport,
-                client!!.jsonFactory, "mockAppKey", "mockAppSecret", null))
+        val user = UserStoreRequestManager<BaseUser>(client, MockBuilder(client?.requestFactory?.transport,
+                client?.jsonFactory, "mockAppKey", "mockAppSecret", null))
         assertNotNull(user)
         assertEquals(client, user.getClient())
-        assertEquals(client!!.kinveyRequestInitializer, user.getClient()!!.kinveyRequestInitializer)
+        assertEquals(client?.kinveyRequestInitializer, user.getClient()?.kinveyRequestInitializer)
     }
 
     fun testInitializeUserNullClient() {
         try {
-            val user = UserStoreRequestManager<BaseUser?>(null, MockBuilder(client!!.requestFactory!!.transport,
-                    client!!.jsonFactory, "mockAppKey", "mockAppSecret", null))
+            val user = UserStoreRequestManager<BaseUser>(null, MockBuilder(client?.requestFactory?.transport,
+                    client?.jsonFactory, "mockAppKey", "mockAppSecret", null))
             fail("NullPointerException should be thrown")
         } catch (ex: NullPointerException) {
         }
@@ -66,7 +69,7 @@ class BaseUserTest : KinveyMockUnitTest<*>() {
 
     fun testInitializeNoBuilder() {
         try {
-            val user: UserStoreRequestManager<*> = UserStoreRequestManager<Any?>(client, null)
+            val user = UserStoreRequestManager<BaseUser>(client, null)
             fail("NullPointerException should be thrown")
         } catch (ex: NullPointerException) {
         }
@@ -76,7 +79,7 @@ class BaseUserTest : KinveyMockUnitTest<*>() {
     fun testLoginKinveyUserNullUsername() {
         initializeRequestManager(false)
         try {
-            requestManager!!.loginBlocking(null, "myPassword").execute()
+            requestManager?.loginBlocking(null, "myPassword")?.execute()
             fail("NullPointerException should be thrown")
         } catch (ex: NullPointerException) {
         }
@@ -86,7 +89,7 @@ class BaseUserTest : KinveyMockUnitTest<*>() {
     fun testLoginKinveyUserNullPassword() {
         initializeRequestManager(false)
         try {
-            requestManager!!.loginBlocking("myUserName", null).execute()
+            requestManager?.loginBlocking("myUserName", null)?.execute()
             fail("NullPointerException should be thrown")
         } catch (ex: NullPointerException) {
         }
@@ -96,10 +99,12 @@ class BaseUserTest : KinveyMockUnitTest<*>() {
     fun testLoginFacebookUserNullArguments() {
         initializeRequestManager(false)
         try {
-            requestManager!!.login(Type.FACEBOOK, null).execute()
+            requestManager?.login(Type.FACEBOOK, null)?.execute()
             fail("NullPointerException should be thrown")
         } catch (ex: IllegalArgumentException) {
-            assertEquals("Parameter specified as non-null is null: method com.kinvey.java.store.UserStoreRequestManager.login, parameter args", ex.message)
+            //assertEquals("Parameter specified as non-null is null: method com.kinvey.java.store.UserStoreRequestManager.login, parameter args", ex.message)
+            assertEquals("accessToken must not be empty", ex.message)
+
         }
     }
 
@@ -107,7 +112,7 @@ class BaseUserTest : KinveyMockUnitTest<*>() {
     fun testLoginFacebookTooFewArguments() {
         initializeRequestManager(false)
         try {
-            requestManager!!.login(Type.FACEBOOK, *arrayOf<String?>()).execute()
+            requestManager?.login(Type.FACEBOOK, *arrayOf<String?>())?.execute()
             fail("IllegalArgumentException should be thrown")
         } catch (ex: IllegalArgumentException) {
         }
@@ -117,7 +122,7 @@ class BaseUserTest : KinveyMockUnitTest<*>() {
     fun testLoginFacebookTooManyArguments() {
         initializeRequestManager(false)
         try {
-            requestManager!!.login(Type.FACEBOOK, *arrayOf<String?>("arg1", "arg2")).execute()
+            requestManager?.login(Type.FACEBOOK, *arrayOf<String?>("arg1", "arg2"))?.execute()
             fail("IllegalArgumentException should be thrown")
         } catch (ex: IllegalArgumentException) {
         }
@@ -126,19 +131,19 @@ class BaseUserTest : KinveyMockUnitTest<*>() {
     @Throws(IOException::class)
     fun testDeleteHardDeleteTrue() {
         initializeRequestManager(true)
-        val baseUser = requestManager!!.getClient()!!.activeUser
-        baseUser!!.id = "testUser"
-        val del = requestManager!!.deleteBlocking(true)
-        assertEquals(requestManager!!.getClient()!!.activeUser!!.id, del[USER_ID].toString())
+        val baseUser = requestManager?.getClient()?.activeUser
+        baseUser?.id = "testUser"
+        val del = requestManager?.deleteBlocking(true)
+        assertEquals(requestManager?.getClient()?.activeUser?.id, del!![USER_ID].toString())
         assertEquals(true, del["hard"])
     }
 
     @Throws(IOException::class)
     fun testDeleteHardDeleteFalse() {
         initializeRequestManager(true)
-        requestManager!!.getClient()!!.activeUser!!.id = "testUser"
-        val del = requestManager!!.deleteBlocking(false)
-        assertEquals(requestManager!!.getClient()!!.activeUser!!.id, del[USER_ID].toString())
+        requestManager?.getClient()?.activeUser?.id = "testUser"
+        val del = requestManager?.deleteBlocking(false)
+        assertEquals(requestManager?.getClient()?.activeUser?.id, del!![USER_ID].toString())
         assertEquals(false, del["hard"])
         assertEquals("DELETE", del.requestMethod)
     }
@@ -147,7 +152,7 @@ class BaseUserTest : KinveyMockUnitTest<*>() {
     fun testDeleteNullUser() {
         initializeRequestManager(false)
         try {
-            val del = requestManager!!.deleteBlocking(true)
+            val del = requestManager?.deleteBlocking(true)
             fail("NullPointerException should be thrown.")
         } catch (ex: NullPointerException) {
         }
@@ -156,9 +161,9 @@ class BaseUserTest : KinveyMockUnitTest<*>() {
     @Throws(IOException::class)
     fun testRetrieve() {
         initializeRequestManager(true)
-        requestManager!!.getClient()!!.activeUser!!.id = "testUser"
-        val ret: Retrieve<*> = requestManager!!.retrieveBlocking()
-        assertEquals(requestManager!!.getClient()!!.activeUser!!.id, ret[USER_ID].toString())
+        requestManager?.getClient()?.activeUser?.id = "testUser"
+        val ret = requestManager?.retrieveBlocking()
+        assertEquals(requestManager?.getClient()?.activeUser?.id, ret!![USER_ID].toString())
         assertEquals("GET", ret.requestMethod)
     }
 
@@ -166,7 +171,7 @@ class BaseUserTest : KinveyMockUnitTest<*>() {
     fun testRetrieveNullUser() {
         initializeRequestManager(false)
         try {
-            val ret: Retrieve<*> = requestManager!!.retrieveBlocking()
+            val ret = requestManager?.retrieveBlocking()
             fail("NullPointerException should be thrown.")
         } catch (ex: NullPointerException) {
         }
@@ -175,9 +180,9 @@ class BaseUserTest : KinveyMockUnitTest<*>() {
     @Throws(IOException::class)
     fun testUpdate() {
         initializeRequestManager(true)
-        requestManager!!.getClient()!!.activeUser!!.id = "testUser"
-        val update: Update<*> = requestManager!!.updateBlocking()
-        assertEquals(requestManager!!.getClient()!!.activeUser!!.id, update[USER_ID].toString())
+        requestManager?.getClient()?.activeUser?.id = "testUser"
+        val update = requestManager?.updateBlocking()
+        assertEquals(requestManager?.getClient()?.activeUser?.id, update!![USER_ID].toString())
         assertEquals("PUT", update.requestMethod)
     }
 
@@ -185,7 +190,7 @@ class BaseUserTest : KinveyMockUnitTest<*>() {
     fun testUpdateNullUser() {
         initializeRequestManager(false)
         try {
-            val update: Update<*> = requestManager!!.updateBlocking()
+            val update = requestManager?.updateBlocking()
             fail("NullPointerException should be thrown.")
         } catch (ex: NullPointerException) {
         }
@@ -194,11 +199,11 @@ class BaseUserTest : KinveyMockUnitTest<*>() {
     @Throws(IOException::class)
     fun testResetPassword() {
         initializeRequestManager(true)
-        val baseUser = requestManager!!.getClient()!!.activeUser
-        baseUser!!.id = "testUser"
-        requestManager!!.getClient()!!.activeUser!!.username = "test"
-        val pwd = requestManager!!.resetPasswordBlocking(requestManager!!.getClient()!!.activeUser!!.username)
-        assertEquals(requestManager!!.getClient()!!.activeUser!!.username, pwd[USER_ID].toString())
+        val baseUser = requestManager?.getClient()?.activeUser
+        baseUser?.id = "testUser"
+        requestManager?.getClient()?.activeUser?.username = "test"
+        val pwd = requestManager?.resetPasswordBlocking(requestManager?.getClient()?.activeUser?.username)
+        assertEquals(requestManager?.getClient()?.activeUser?.username, pwd!![USER_ID].toString())
         assertEquals("POST", pwd.requestMethod)
     }
 
@@ -206,7 +211,7 @@ class BaseUserTest : KinveyMockUnitTest<*>() {
     fun testResetPasswordNullUser() {
         initializeRequestManager(false)
         try {
-            val pwd = requestManager!!.resetPasswordBlocking(null)
+            val pwd = requestManager?.resetPasswordBlocking(null)
             fail("NullPointerException should be thrown.")
         } catch (ex: NullPointerException) {
         }
@@ -215,9 +220,9 @@ class BaseUserTest : KinveyMockUnitTest<*>() {
     @Throws(IOException::class)
     fun testEmailVerification() {
         initializeRequestManager(true)
-        requestManager!!.getClient()!!.activeUser!!.id = "testUser"
-        val email = requestManager!!.sendEmailVerificationBlocking()
-        assertEquals(requestManager!!.getClient()!!.activeUser!!.id, email[USER_ID].toString())
+        requestManager?.getClient()?.activeUser?.id = "testUser"
+        val email = requestManager?.sendEmailVerificationBlocking()
+        assertEquals(requestManager?.getClient()?.activeUser?.id, email!![USER_ID].toString())
         assertEquals("POST", email.requestMethod)
     }
 
@@ -225,7 +230,7 @@ class BaseUserTest : KinveyMockUnitTest<*>() {
     fun testEmailVerificationNullUser() {
         initializeRequestManager(false)
         try {
-            val email = requestManager!!.sendEmailVerificationBlocking()
+            val email = requestManager?.sendEmailVerificationBlocking()
             fail("NullPointerException should be thrown.")
         } catch (ex: NullPointerException) {
         }
@@ -234,73 +239,73 @@ class BaseUserTest : KinveyMockUnitTest<*>() {
     @Throws(IOException::class)
     fun testUserCustomVersion() {
         initializeRequestManager(true)
-        requestManager!!.getClient()!!.activeUser!!.id = "testUser"
-        requestManager!!.getClient()!!.clientAppVersion = "1.2.3"
-        val request: Retrieve<*> = requestManager!!.retrieveBlocking()
-        val header = request.getRequestHeaders()[X_KINVEY_CLIENT_APP_VERSION]
+        requestManager?.getClient()?.activeUser?.id = "testUser"
+        requestManager?.getClient()?.clientAppVersion = "1.2.3"
+        val request = requestManager?.retrieveBlocking()
+        val header = request?.getRequestHeaders()!![X_KINVEY_CLIENT_APP_VERSION]
         assertEquals("1.2.3", header as String?)
     }
 
     @Throws(IOException::class)
     fun testUserCustomVesionAsNumber() {
         initializeRequestManager(true)
-        requestManager!!.getClient()!!.activeUser!!.id = "testUser"
-        requestManager!!.getClient()!!.setClientAppVersion(1, 2, 3)
-        val request: Retrieve<*> = requestManager!!.retrieveBlocking()
-        val header = request.getRequestHeaders()[X_KINVEY_CLIENT_APP_VERSION]
+        requestManager?.getClient()?.activeUser?.id = "testUser"
+        requestManager?.getClient()?.setClientAppVersion(1, 2, 3)
+        val request = requestManager?.retrieveBlocking()
+        val header = request?.getRequestHeaders()!![X_KINVEY_CLIENT_APP_VERSION]
         assertEquals("1.2.3", header as String?)
     }
 
     @Throws(IOException::class)
     fun testUserCustomHeader() {
         initializeRequestManager(true)
-        requestManager!!.getClient()!!.activeUser!!.id = "testUser"
+        requestManager?.getClient()?.activeUser?.id = "testUser"
         val custom = GenericJson()
         custom["First"] = 1
         custom["Second"] = "two"
-        requestManager!!.getClient()!!.setCustomRequestProperties(custom)
-        val request: Retrieve<*> = requestManager!!.retrieveBlocking()
-        val header = request.getRequestHeaders()[X_KINVEY_CUSTOM_REQUEST_PROPERTIES]
+        requestManager!!.getClient()?.setCustomRequestProperties(custom)
+        val request = requestManager?.retrieveBlocking()
+        val header = request?.getRequestHeaders()!![X_KINVEY_CUSTOM_REQUEST_PROPERTIES]
         assertEquals("{\"First\":1,\"Second\":\"two\"}", header as String?)
     }
 
     @Throws(IOException::class)
     fun testUserCustomHeaderOverload() {
         initializeRequestManager(true)
-        requestManager!!.getClient()!!.activeUser!!.id = "testUser"
-        requestManager!!.getClient()!!.setCustomRequestProperty("First", 1)
-        requestManager!!.getClient()!!.setCustomRequestProperty("Second", "two")
-        val request: Retrieve<*> = requestManager!!.retrieveBlocking()
-        val header = request.getRequestHeaders()[X_KINVEY_CUSTOM_REQUEST_PROPERTIES]
+        requestManager?.getClient()?.activeUser?.id = "testUser"
+        requestManager?.getClient()?.setCustomRequestProperty("First", 1)
+        requestManager?.getClient()?.setCustomRequestProperty("Second", "two")
+        val request = requestManager?.retrieveBlocking()
+        val header = request?.getRequestHeaders()!![X_KINVEY_CUSTOM_REQUEST_PROPERTIES]
         assertEquals("{\"First\":1,\"Second\":\"two\"}", header as String?)
     }
 
     @Throws(IOException::class)
     fun testUserCustomVersionNull() {
         initializeRequestManager(true)
-        requestManager!!.getClient()!!.activeUser!!.id = "testUser"
-        requestManager!!.getClient()!!.clientAppVersion = null
-        val request: Retrieve<*> = requestManager!!.retrieveBlocking()
-        val header = request.getRequestHeaders()[X_KINVEY_CLIENT_APP_VERSION]
+        requestManager?.getClient()?.activeUser?.id = "testUser"
+        requestManager?.getClient()?.clientAppVersion = null
+        val request = requestManager?.retrieveBlocking()
+        val header = request?.getRequestHeaders()!![X_KINVEY_CLIENT_APP_VERSION]
         assertEquals(null, header)
     }
 
     @Throws(IOException::class)
     fun testUserCustomHeaderNull() {
         initializeRequestManager(true)
-        requestManager!!.getClient()!!.activeUser!!.id = "testUser"
-        requestManager!!.getClient()!!.clearCustomRequestProperties()
-        val request: Retrieve<*> = requestManager!!.retrieveBlocking()
-        val header = request.getRequestHeaders()[X_KINVEY_CUSTOM_REQUEST_PROPERTIES]
+        requestManager?.getClient()?.activeUser?.id = "testUser"
+        requestManager?.getClient()?.clearCustomRequestProperties()
+        val request = requestManager?.retrieveBlocking()
+        val header = request?.getRequestHeaders()!![X_KINVEY_CUSTOM_REQUEST_PROPERTIES]
         assertEquals(null, header)
     }
 
     @Throws(IOException::class)
     fun testCustomMICBase() {
         initializeRequestManager(false)
-        client!!.micHostName = "https://www.google.com"
+        client?.micHostName = "https://www.google.com"
         try {
-            client!!.micHostName = "http://www.google.com"
+            client?.micHostName = "http://www.google.com"
             fail("Library should throw an exception when setting non https base url for MIC")
         } catch (e: Exception) {
         }
@@ -316,41 +321,41 @@ class BaseUserTest : KinveyMockUnitTest<*>() {
 
     @Throws(IOException::class)
     fun testMICLoginWithAccessToken() {
-        requestManager = UserStoreRequestManager<BaseUser?>(getClient(MockHttpForMIC()), Builder(MockHttpForMIC(),
+        requestManager = UserStoreRequestManager<BaseUser>(getClient(MockHttpForMIC()), Builder(MockHttpForMIC(),
                 GsonFactory(), "https://baas.kinvey.com", "mockAppKey", "mockAppSecret", null))
-        val token = requestManager!!.getMICToken("MyToken", null)
+        val token = requestManager?.getMICToken("MyToken", null)
 
         //check
 /*        if (getClient().isUserLoggedIn()) {
             requestManager.logout().execute();
         }*/
 
-        val ret = requestManager!!.loginMobileIdentityBlocking(token.execute()!!["access_token"].toString()).execute()
-        client!!.activeUser = ret
-        assertEquals(true, client!!.isUserLoggedIn)
+        val ret = requestManager?.loginMobileIdentityBlocking(token?.execute()!!["access_token"].toString())?.execute()
+        client?.activeUser = ret
+        assertEquals(true, client?.isUserLoggedIn)
     }
 
     @Throws(IOException::class)
     fun testMICAPIVersionAppendsV() {
         initializeRequestManager(false)
-        client!!.micApiVersion = "2"
-        assertEquals(client!!.micApiVersion, "v2")
+        client?.micApiVersion = "2"
+        assertEquals(client?.micApiVersion, "v2")
     }
 
     @Throws(IOException::class, NoSuchFieldException::class, IllegalAccessException::class)
     fun testClientAppVersionHeader() {
         val clientAppVersion = "1.2.3"
-        client!!.clientAppVersion = clientAppVersion
-        val user: UserStoreRequestManager<*> = UserStoreRequestManager<Any?>(client, createBuilder(client))
+        client?.clientAppVersion = clientAppVersion
+        val user = UserStoreRequestManager<BaseUser>(client, createBuilder(client))
         assertNotNull(user)
-        val loginRequest: LoginRequest = user.createBlocking("test_name", "test_login").buildAuthRequest()
-        val kinveyAuthRequestField: Field = loginRequest.javaClass.getDeclaredField("request") //NoSuchFieldException
+        val loginRequest = user.createBlocking("test_name", "test_login").buildAuthRequest()
+        val kinveyAuthRequestField = loginRequest.javaClass.getDeclaredField("request") //NoSuchFieldException
 
         kinveyAuthRequestField.isAccessible = true
         val request = kinveyAuthRequestField.get(loginRequest) as KinveyAuthRequest<*>
-        val kinveyHeadersField: Field? = request.javaClass.getDeclaredField("kinveyHeaders") //NoSuchFieldException
+        val kinveyHeadersField = request.javaClass.getDeclaredField("kinveyHeaders") //NoSuchFieldException
 
-        kinveyHeadersField!!.isAccessible = true
+        kinveyHeadersField.isAccessible = true
         val kinveyHeaders = kinveyHeadersField.get(request) as KinveyHeaders
         val clientAppVersionHeader = kinveyHeaders["X-Kinvey-Client-App-Version"] as String?
         assertEquals(clientAppVersion, clientAppVersionHeader)
@@ -358,26 +363,26 @@ class BaseUserTest : KinveyMockUnitTest<*>() {
 
     @Throws(IOException::class, NoSuchFieldException::class, IllegalAccessException::class)
     fun testClientAppVersionHeaderDefault() {
-        val user: UserStoreRequestManager<*> = UserStoreRequestManager<Any?>(client, createBuilder(client))
+        val user = UserStoreRequestManager<BaseUser>(client, createBuilder(client))
         assertNotNull(user)
-        val loginRequest: LoginRequest = user.createBlocking("test_name", "test_login").buildAuthRequest()
-        val kinveyAuthRequestField: Field = loginRequest.javaClass.getDeclaredField("request") //NoSuchFieldException
+        val loginRequest = user.createBlocking("test_name", "test_login").buildAuthRequest()
+        val kinveyAuthRequestField = loginRequest.javaClass.getDeclaredField("request") //NoSuchFieldException
 
         kinveyAuthRequestField.isAccessible = true
         val request = kinveyAuthRequestField.get(loginRequest) as KinveyAuthRequest<*>
-        val kinveyHeadersField: Field? = request.javaClass.getDeclaredField("kinveyHeaders") //NoSuchFieldException
+        val kinveyHeadersField = request.javaClass.getDeclaredField("kinveyHeaders") //NoSuchFieldException
 
-        kinveyHeadersField!!.isAccessible = true
+        kinveyHeadersField.isAccessible = true
         val kinveyHeaders = kinveyHeadersField.get(request) as KinveyHeaders
         val clientAppVersionHeader = kinveyHeaders["X-Kinvey-Client-App-Version"] as String?
         assertNull(clientAppVersionHeader)
     }
 
-    private fun createBuilder(client: AbstractClient<*>?): Builder<*>? {
-        val appKey = (client!!.kinveyRequestInitializer as KinveyClientRequestInitializer?)!!.appKey
-        val appSecret = (client.kinveyRequestInitializer as KinveyClientRequestInitializer?)!!.appSecret
-        return Builder<Any?>(client.requestFactory!!.transport,
-                client.jsonFactory, client.baseUrl, appKey, appSecret, null)
+    private fun createBuilder(client: AbstractClient<*>?): Builder<BaseUser>? {
+        val appKey = (client?.kinveyRequestInitializer as KinveyClientRequestInitializer?)?.appKey
+        val appSecret = (client?.kinveyRequestInitializer as KinveyClientRequestInitializer?)?.appSecret
+        return Builder<BaseUser>(client?.requestFactory?.transport,
+                client?.jsonFactory as JsonFactory, client?.baseUrl, appKey, appSecret, null)
     }
 
     companion object {

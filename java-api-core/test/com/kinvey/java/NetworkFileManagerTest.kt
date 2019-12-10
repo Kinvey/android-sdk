@@ -20,6 +20,7 @@ import com.google.api.client.json.GenericJson
 import com.kinvey.java.core.KinveyMockUnitTest
 import com.kinvey.java.core.MediaHttpUploader
 import com.kinvey.java.core.UploaderProgressListener
+import com.kinvey.java.dto.BaseUser
 import com.kinvey.java.model.FileMetaData
 import com.kinvey.java.network.NetworkFileManager
 import com.kinvey.java.network.NetworkFileManager.UploadMetadataAndFile
@@ -37,9 +38,9 @@ import java.io.IOException
  * @since 2.0
  */
 @RunWith(MockitoJUnitRunner::class)
-class NetworkFileManagerTest : KinveyMockUnitTest<*>() {
+class NetworkFileManagerTest : KinveyMockUnitTest<BaseUser>() {
     @Mock
-    private val mockContent: AbstractInputStreamContent? = null
+    lateinit var mockContent: AbstractInputStreamContent
     private var networkFileManagerApiUnderTest: NetworkFileManager? = null
     @Before
     public override fun setUp() {
@@ -51,15 +52,15 @@ class NetworkFileManagerTest : KinveyMockUnitTest<*>() {
     fun uploadUrlEndpointMatches() {
         val networkFileManagerApi: NetworkFileManager = MockNetworkFileManager(super.client)
         val meta = FileMetaData("testfilename.txt")
-        val upload: UploadMetadataAndFile = networkFileManagerApi.prepUploadBlocking(meta
-                , mockContent, object : UploaderProgressListener {
+        val upload = networkFileManagerApi.prepUploadBlocking(meta, mockContent,
+                object : UploaderProgressListener {
             @Throws(IOException::class)
             override fun progressChanged(uploader: MediaHttpUploader?) {
             }
         })
         val request = upload.buildHttpRequest()
         val expectedPath = HttpTesting.SIMPLE_URL + "/blob//testfilename.txt?tls=true"
-        assertEquals(expectedPath, request!!.url.toString())
+        assertEquals(expectedPath, request?.url.toString())
     }
 
     @Test
@@ -70,14 +71,14 @@ class NetworkFileManagerTest : KinveyMockUnitTest<*>() {
         val download = networkFileManagerApi.prepDownloadBlocking(meta)
         val request = download.buildHttpRequest()
         val expectedPath = HttpTesting.SIMPLE_URL + "/blob//testfilename.txt?tls=true"
-        assertEquals(expectedPath, request!!.url.toString())
+        assertEquals(expectedPath, request?.url.toString())
     }
 
     @Test
     fun testFileUploadInitializer() {
         networkFileManagerApiUnderTest = MockNetworkFileManager(super.client)
         try {
-            networkFileManagerApiUnderTest.prepUploadBlocking(FileMetaData("testfilename.txt"),
+            networkFileManagerApiUnderTest?.prepUploadBlocking(FileMetaData("testfilename.txt"),
                     mockContent, object : UploaderProgressListener {
                 @Throws(IOException::class)
                 override fun progressChanged(uploader: MediaHttpUploader?) {
@@ -92,17 +93,17 @@ class NetworkFileManagerTest : KinveyMockUnitTest<*>() {
     @Throws(IOException::class)
     fun testFileDownloadWithTTL() {
         networkFileManagerApiUnderTest = MockNetworkFileManager(super.client)
-        val download = networkFileManagerApiUnderTest.prepDownloadWithTTLBlocking("testfilename.txt", 120)
-        val req = download.buildHttpRequest()
+        val download = networkFileManagerApiUnderTest?.prepDownloadWithTTLBlocking("testfilename.txt", 120)
+        val req = download?.buildHttpRequest()
         val expectedPath = HttpTesting.SIMPLE_URL + "/blob//testfilename.txt"
-        assertEquals(expectedPath, req!!.url.toString())
+        assertEquals(expectedPath, req?.url.toString())
     }
 
     @Test
     fun testFileDownloadInitializer() {
         networkFileManagerApiUnderTest = MockNetworkFileManager(super.client)
         try {
-            networkFileManagerApiUnderTest.prepDownloadBlocking(FileMetaData("testfilename.txt"))
+            networkFileManagerApiUnderTest?.prepDownloadBlocking(FileMetaData("testfilename.txt"))
         } catch (e: IOException) {
             fail("file api should not throw an exception on download")
         }
@@ -112,13 +113,12 @@ class NetworkFileManagerTest : KinveyMockUnitTest<*>() {
     fun downloadShouldThrowNpeOnNullFilename() {
         networkFileManagerApiUnderTest = MockNetworkFileManager(super.client)
         try {
-            networkFileManagerApiUnderTest.prepDownloadBlocking(FileMetaData(null))
+            networkFileManagerApiUnderTest?.prepDownloadBlocking(FileMetaData(null))
             fail("file api should throw exception on null filename")
         } catch (e: IOException) {
             fail("file api should throw a NullPointerException on null filename")
-        } catch (e: IllegalArgumentException) {
+        } catch (e: NullPointerException) {
             // expected
-
         }
     }
 
@@ -126,7 +126,7 @@ class NetworkFileManagerTest : KinveyMockUnitTest<*>() {
     fun testFileDelete() {
         networkFileManagerApiUnderTest = MockNetworkFileManager(super.client)
         try {
-            networkFileManagerApiUnderTest.deleteBlocking(FileMetaData("testfilename.txt"))
+            networkFileManagerApiUnderTest?.deleteBlocking(FileMetaData("testfilename.txt"))
         } catch (e: IOException) {
             fail("file api should not throw an exception on remove")
         }
@@ -158,7 +158,7 @@ class NetworkFileManagerTest : KinveyMockUnitTest<*>() {
     @Throws(IOException::class)
     fun testFileCustomVersionNull() {
         val networkFileManagerApi: NetworkFileManager = MockNetworkFileManager(super.client)
-        networkFileManagerApi.setClientAppVersion(null)
+        networkFileManagerApi.setClientAppVersion("")
         val meta = FileMetaData("testfilename.txt")
         val request = networkFileManagerApi.prepDownloadBlocking(meta)
         val header = request.getRequestHeaders()["X-Kinvey-Client-App-Version"]
@@ -168,7 +168,7 @@ class NetworkFileManagerTest : KinveyMockUnitTest<*>() {
     @Throws(IOException::class)
     fun testFileCustomHeaderNull() {
         val networkFileManagerApi: NetworkFileManager = MockNetworkFileManager(super.client)
-        networkFileManagerApi.setCustomRequestProperties(null)
+        networkFileManagerApi.setCustomRequestProperties(GenericJson())
         val meta = FileMetaData("testfilename.txt")
         val request = networkFileManagerApi.prepDownloadBlocking(meta)
         val header = request.getRequestHeaders()["X-Kinvey-Custom-Request-Properties"]

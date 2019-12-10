@@ -17,6 +17,7 @@ package com.kinvey.java
 
 import com.google.api.client.json.GenericJson
 import com.kinvey.java.core.KinveyMockUnitTest
+import com.kinvey.java.dto.BaseUser
 import java.io.IOException
 import java.util.*
 
@@ -24,14 +25,15 @@ import java.util.*
  * @author edwardf
  * @since 2.0
  */
-class BaseUserGroupTest : KinveyMockUnitTest<*>() {
+class BaseUserGroupTest : KinveyMockUnitTest<BaseUser>() {
+
     fun testUserGroupUpdate() {
-        val group = UserGroup(client!!, getKinveyRequestInitializer())
+        val group = UserGroup(client, getKinveyRequestInitializer())
         try {
             val update = group.addUserToGroupBlocking("Group1", "user1", "subgroup1")
             assertNotNull(update)
             assertEquals("Group1", update.jsonContent!![ID])
-            assertEquals(1, ((update.jsonContent!![USERS] as GenericJson?)!![LIST] as ArrayList<*>?)!!.size)
+            assertEquals(1, ((update.jsonContent!![USERS] as GenericJson?)!![LIST] as ArrayList<*>?)?.size)
             assertEquals("user1", (((update.jsonContent!![USERS] as GenericJson?)!![LIST] as ArrayList<*>?)!![0] as GenericJson)[ID])
         } catch (io: IOException) {
             fail("IO -> " + io.message)
@@ -39,7 +41,7 @@ class BaseUserGroupTest : KinveyMockUnitTest<*>() {
     }
 
     fun testUserGroupRetrieve() {
-        val group = UserGroup(client!!, getKinveyRequestInitializer())
+        val group = UserGroup(client, getKinveyRequestInitializer())
         try {
             val ret = group.retrieve("Group1")
             assertNotNull(ret)
@@ -50,7 +52,7 @@ class BaseUserGroupTest : KinveyMockUnitTest<*>() {
     }
 
     fun testUserGroupDelete() {
-        val group = UserGroup(client!!, getKinveyRequestInitializer())
+        val group = UserGroup(client, getKinveyRequestInitializer())
         try {
             val delete = group.delete("Group1")
             assertNotNull(delete)

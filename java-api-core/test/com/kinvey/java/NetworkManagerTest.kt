@@ -19,6 +19,7 @@ import com.google.api.client.json.GenericJson
 import com.google.api.client.util.Key
 import com.kinvey.java.core.KinveyMockUnitTest
 import com.kinvey.java.core.KinveyMockUnitTest.MockQueryFilter.MockBuilder
+import com.kinvey.java.dto.BaseUser
 import com.kinvey.java.network.NetworkManager
 import com.kinvey.java.network.NetworkManager.*
 import java.io.IOException
@@ -28,7 +29,7 @@ import java.util.*
  * @author mjsalinger
  * @since 2.0
  */
-class NetworkManagerTest : KinveyMockUnitTest<*>() {
+class NetworkManagerTest : KinveyMockUnitTest<BaseUser>() {
     inner class Entity : GenericJson {
         @Key("_id")
         var title: String? = null
@@ -69,7 +70,7 @@ class NetworkManagerTest : KinveyMockUnitTest<*>() {
 
     // String collectionName, Class<T> myClass, AbstractClient client,KinveyClientRequestInitializer initializer
     fun testAppdataInitialization() {
-        val appData = NetworkManager<Entity?>("testCollection", Entity::class.java,
+        val appData = NetworkManager<Entity>("testCollection", Entity::class.java,
                 client)
         assertEquals("testCollection", appData.collectionName)
         assertEquals(Entity::class.java, appData.currentClass)
@@ -77,14 +78,14 @@ class NetworkManagerTest : KinveyMockUnitTest<*>() {
 
     fun testNullCollectionInitialization() {
         try {
-            val appData = NetworkManager<Entity?>(null, Entity::class.java, client)
+            val appData = NetworkManager<Entity>(null, Entity::class.java, client)
             fail("NullPointerException should be thrown")
         } catch (ex: NullPointerException) {
         }
     }
 
     fun testNullClassInitialization() {
-        val appData = NetworkManager<Entity?>("myCollection", null, client)
+        val appData = NetworkManager<Entity>("myCollection", null, client)
         // Null class types are allowed, should not throw an exception.
 
 
@@ -93,7 +94,7 @@ class NetworkManagerTest : KinveyMockUnitTest<*>() {
 
     fun testNullClientInitialization() {
         try {
-            val appData = NetworkManager<Entity?>("myCollection", Entity::class.java, null)
+            val appData = NetworkManager<Entity>("myCollection", Entity::class.java, null)
             fail("NullPointerException should be thrown")
         } catch (ex: NullPointerException) {
         }
@@ -108,17 +109,17 @@ class NetworkManagerTest : KinveyMockUnitTest<*>() {
 
 
     fun testChangeCollectionName() {
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
-        assertEquals("myCollection", appData!!.collectionName)
-        appData.collectionName = "myNewCollection"
-        assertEquals("myNewCollection", appData.collectionName)
+        val appData = getGenericAppData<Entity>(Entity::class.java)
+        assertEquals("myCollection", appData?.collectionName)
+        appData?.collectionName = "myNewCollection"
+        assertEquals("myNewCollection", appData?.collectionName)
     }
 
     fun testChangeCollectionNameToNull() {
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
-        assertEquals("myCollection", appData!!.collectionName)
+        val appData = getGenericAppData<Entity>(Entity::class.java)
+        assertEquals("myCollection", appData?.collectionName)
         try {
-            appData.collectionName = null
+            appData?.collectionName = null
             fail("NullPointerException should be thrown.")
         } catch (ex: NullPointerException) {
         }
@@ -126,53 +127,53 @@ class NetworkManagerTest : KinveyMockUnitTest<*>() {
 
     @Throws(IOException::class)
     fun testGet() {
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
+        val appData = getGenericAppData<Entity>(Entity::class.java)
         val entityID = "myEntity"
-        val myGet: GetEntity? = appData!!.getEntityBlocking(entityID)
+        val myGet = appData?.getEntityBlocking(entityID)
         assertNotNull(myGet)
-        assertEquals("myEntity", myGet.get("entityID"))
-        assertEquals("myCollection", myGet.get("collectionName"))
-        assertEquals("GET", myGet.requestMethod)
+        assertEquals("myEntity", myGet?.get("entityID"))
+        assertEquals("myCollection", myGet?.get("collectionName"))
+        assertEquals("GET", myGet?.requestMethod)
     }
 
     @Throws(IOException::class)
     fun testGetWithNoEntityID() {
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
-        val myGet: Get? = appData!!.getBlocking()
+        val appData = getGenericAppData<Entity>(Entity::class.java)
+        val myGet = appData?.getBlocking()
         assertNotNull(myGet)
-        assertNull(myGet.get("entityID"))
-        assertEquals("myCollection", myGet.get("collectionName"))
-        assertEquals("GET", myGet.requestMethod)
+        assertNull(myGet?.get("entityID"))
+        assertEquals("myCollection", myGet?.get("collectionName"))
+        assertEquals("GET", myGet?.requestMethod)
     }
 
     @Throws(IOException::class)
     fun testGetWithArrayType() {
-        val entityList = arrayOf<Entity?>()
-        val appData = getGenericAppData<Entity?>(entityList.javaClass)
-        val myGet: Get? = appData!!.getBlocking()
+        val entityList = arrayOf<Entity>()
+        val appData = getGenericAppData<Entity>(entityList.javaClass as Class<Entity>)
+        val myGet = appData?.getBlocking()
         assertNotNull(myGet)
-        assertNull(myGet.get("entityID"))
-        assertEquals("myCollection", myGet.get("collectionName"))
-        assertEquals("GET", myGet.requestMethod)
+        assertNull(myGet?.get("entityID"))
+        assertEquals("myCollection", myGet?.get("collectionName"))
+        assertEquals("GET", myGet?.requestMethod)
     }
 
     @Throws(IOException::class)
     fun testSave() {
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
+        val appData = getGenericAppData<Entity>(Entity::class.java)
         val entity = Entity("myEntity", "My Name")
-        val mySave: Save? = appData!!.saveBlocking(entity)
+        val mySave = appData?.saveBlocking(entity)
         assertNotNull(mySave)
-        assertEquals("myEntity", (mySave.jsonContent as GenericJson)["_id"])
-        assertEquals("My Name", (mySave.jsonContent as GenericJson)["Name"])
-        assertEquals("PUT", mySave.requestMethod)
+        assertEquals("myEntity", (mySave?.jsonContent as GenericJson)["_id"])
+        assertEquals("My Name", (mySave?.jsonContent as GenericJson)["Name"])
+        assertEquals("PUT", mySave?.requestMethod)
     }
 
     @Throws(IOException::class)
     fun testSaveNullEntity() {
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
+        val appData = getGenericAppData<Entity>(Entity::class.java)
         val entity: Entity? = null
         try {
-            val mySave: Save? = appData!!.saveBlocking(entity)
+            val mySave = appData?.saveBlocking(entity)
             fail("NullPointerException should be thrown.")
         } catch (ex: NullPointerException) {
         }
@@ -180,23 +181,23 @@ class NetworkManagerTest : KinveyMockUnitTest<*>() {
 
     @Throws(IOException::class)
     fun testSaveNoID() {
-        val appData = getGenericAppData<EntityNoID?>(EntityNoID::class.java)
+        val appData = getGenericAppData<EntityNoID>(EntityNoID::class.java)
         val entity = EntityNoID("My Name")
-        val mySave: Save? = appData!!.saveBlocking(entity)
-        assertNull((mySave.jsonContent as GenericJson)["_id"])
-        assertEquals("My Name", (mySave.jsonContent as GenericJson)["Name"])
-        assertEquals("POST", mySave.requestMethod)
+        val mySave = appData?.saveBlocking(entity)
+        assertNull((mySave?.jsonContent as GenericJson)["_id"])
+        assertEquals("My Name", (mySave?.jsonContent as GenericJson)["Name"])
+        assertEquals("POST", mySave?.requestMethod)
     }
 
     @Throws(IOException::class)
     fun testDelete() {
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
+        val appData = getGenericAppData<Entity>(Entity::class.java)
         val entityID = "myEntity"
-        val myDelete: Delete? = appData!!.deleteBlocking(entityID)
+        val myDelete = appData?.deleteBlocking(entityID)
         assertNotNull(myDelete)
-        assertEquals("myEntity", myDelete.get("entityID"))
-        assertEquals("myCollection", myDelete.get("collectionName"))
-        assertEquals("DELETE", myDelete.requestMethod)
+        assertEquals("myEntity", myDelete?.get("entityID"))
+        assertEquals("myCollection", myDelete?.get("collectionName"))
+        assertEquals("DELETE", myDelete?.requestMethod)
     }
 
 //    public void testDeleteNullEntityID() throws IOException {
@@ -212,31 +213,31 @@ class NetworkManagerTest : KinveyMockUnitTest<*>() {
 
     @Throws(IOException::class)
     fun testAggregateCountNoCondition() {
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
+        val appData = getGenericAppData<Entity>(Entity::class.java)
         val entity = Entity("myEntity", "My Name")
-        val fields = ArrayList<String?>()
+        val fields = ArrayList<String>()
         fields.add("state")
-        val myAggregate: Aggregate? = appData!!.countBlocking(fields, Array<Entity>::class.java, null)
+        val myAggregate = appData?.countBlocking(fields, Array<Entity>::class.java, null)
         val expectedFields = HashMap<String?, Boolean?>()
         expectedFields["state"] = true
         val expectedInitial = HashMap<String?, Any?>()
         expectedInitial["_result"] = 0
         val expectedReduce = "function(doc,out){ out._result++;}"
         assertNotNull(myAggregate)
-        assertEquals(expectedFields, (myAggregate.jsonContent as GenericJson)["key"])
-        assertEquals("POST", myAggregate.requestMethod)
-        assertEquals(expectedInitial, (myAggregate.jsonContent as GenericJson)["initial"])
-        assertEquals(expectedReduce, (myAggregate.jsonContent as GenericJson)["reduce"])
+        assertEquals(expectedFields, (myAggregate?.jsonContent as GenericJson)["key"])
+        assertEquals("POST", myAggregate?.requestMethod)
+        assertEquals(expectedInitial, (myAggregate?.jsonContent as GenericJson)["initial"])
+        assertEquals(expectedReduce, (myAggregate?.jsonContent as GenericJson)["reduce"])
     }
 
     @Throws(IOException::class)
     fun testAggregateCountCondition() {
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
+        val appData = getGenericAppData<Entity>(Entity::class.java)
         val entity = Entity("myEntity", "My Name")
-        val fields = ArrayList<String?>()
+        val fields = ArrayList<String>()
         fields.add("state")
         val query = MockQuery(MockBuilder())
-        val myAggregate: Aggregate? = appData!!.countBlocking(fields, Array<Entity>::class.java, query)
+        val myAggregate = appData?.countBlocking(fields, Array<Entity>::class.java, query)
         val expectedFields = HashMap<String?, Boolean?>()
         expectedFields["state"] = true
         val expectedInitial = HashMap<String?, Any?>()
@@ -244,40 +245,40 @@ class NetworkManagerTest : KinveyMockUnitTest<*>() {
         val expectedReduce = "function(doc,out){ out._result++;}"
         val expectedCondition = "{city=boston, age={\$gt=18, \$lt=21}}"
         assertNotNull(myAggregate)
-        assertEquals(expectedFields, (myAggregate.jsonContent as GenericJson)["key"])
-        assertEquals("POST", myAggregate.requestMethod)
-        assertEquals(expectedInitial, (myAggregate.jsonContent as GenericJson)["initial"])
-        assertEquals(expectedReduce, (myAggregate.jsonContent as GenericJson)["reduce"])
-        assertEquals(expectedCondition, (myAggregate.jsonContent as GenericJson)["condition"].toString())
+        assertEquals(expectedFields, (myAggregate?.jsonContent as GenericJson)["key"])
+        assertEquals("POST", myAggregate?.requestMethod)
+        assertEquals(expectedInitial, (myAggregate?.jsonContent as GenericJson)["initial"])
+        assertEquals(expectedReduce, (myAggregate?.jsonContent as GenericJson)["reduce"])
+        assertEquals(expectedCondition, (myAggregate?.jsonContent as GenericJson)["condition"].toString())
     }
 
     @Throws(IOException::class)
     fun testAggregateSumNoCondition() {
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
+        val appData = getGenericAppData<Entity>(Entity::class.java)
         val entity = Entity("myEntity", "My Name")
-        val fields = ArrayList<String?>()
+        val fields = ArrayList<String>()
         fields.add("state")
-        val myAggregate: Aggregate? = appData!!.sumBlocking(fields, "total", Array<Entity>::class.java, null)
+        val myAggregate = appData?.sumBlocking(fields, "total", Array<Entity>::class.java, null)
         val expectedFields = HashMap<String?, Boolean?>()
         expectedFields["state"] = true
         val expectedInitial = HashMap<String?, Any?>()
         expectedInitial["_result"] = 0
         val expectedReduce = "function(doc,out){ out._result= out._result + doc.total;}"
         assertNotNull(myAggregate)
-        assertEquals(expectedFields, (myAggregate.jsonContent as GenericJson)["key"])
-        assertEquals("POST", myAggregate.requestMethod)
-        assertEquals(expectedInitial, (myAggregate.jsonContent as GenericJson)["initial"])
-        assertEquals(expectedReduce, (myAggregate.jsonContent as GenericJson)["reduce"])
+        assertEquals(expectedFields, (myAggregate?.jsonContent as GenericJson)["key"])
+        assertEquals("POST", myAggregate?.requestMethod)
+        assertEquals(expectedInitial, (myAggregate?.jsonContent as GenericJson)["initial"])
+        assertEquals(expectedReduce, (myAggregate?.jsonContent as GenericJson)["reduce"])
     }
 
     @Throws(IOException::class)
     fun testAggregateSumCondition() {
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
+        val appData = getGenericAppData<Entity>(Entity::class.java)
         val entity = Entity("myEntity", "My Name")
-        val fields = ArrayList<String?>()
+        val fields = ArrayList<String>()
         fields.add("state")
         val query = MockQuery(MockBuilder())
-        val myAggregate: Aggregate? = appData!!.sumBlocking(fields, "total", Array<Entity>::class.java, query)
+        val myAggregate = appData?.sumBlocking(fields, "total", Array<Entity>::class.java, query)
         val expectedFields = HashMap<String?, Boolean?>()
         expectedFields["state"] = true
         val expectedInitial = HashMap<String?, Any?>()
@@ -285,40 +286,40 @@ class NetworkManagerTest : KinveyMockUnitTest<*>() {
         val expectedReduce = "function(doc,out){ out._result= out._result + doc.total;}"
         val expectedCondition = "{city=boston, age={\$gt=18, \$lt=21}}"
         assertNotNull(myAggregate)
-        assertEquals(expectedFields, (myAggregate.jsonContent as GenericJson)["key"])
-        assertEquals("POST", myAggregate.requestMethod)
-        assertEquals(expectedInitial, (myAggregate.jsonContent as GenericJson)["initial"])
-        assertEquals(expectedReduce, (myAggregate.jsonContent as GenericJson)["reduce"])
-        assertEquals(expectedCondition, (myAggregate.jsonContent as GenericJson)["condition"].toString())
+        assertEquals(expectedFields, (myAggregate?.jsonContent as GenericJson)["key"])
+        assertEquals("POST", myAggregate?.requestMethod)
+        assertEquals(expectedInitial, (myAggregate?.jsonContent as GenericJson)["initial"])
+        assertEquals(expectedReduce, (myAggregate?.jsonContent as GenericJson)["reduce"])
+        assertEquals(expectedCondition, (myAggregate?.jsonContent as GenericJson)["condition"].toString())
     }
 
     @Throws(IOException::class)
     fun testAggregateMaxNoCondition() {
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
+        val appData = getGenericAppData<Entity>(Entity::class.java)
         val entity = Entity("myEntity", "My Name")
-        val fields = ArrayList<String?>()
+        val fields = ArrayList<String>()
         fields.add("state")
-        val myAggregate: Aggregate? = appData!!.maxBlocking(fields, "total", Array<Entity>::class.java, null)
+        val myAggregate = appData?.maxBlocking(fields, "total", Array<Entity>::class.java, null)
         val expectedFields = HashMap<String?, Boolean?>()
         expectedFields["state"] = true
         val expectedInitial = HashMap<String?, Any?>()
         expectedInitial["_result"] = "-Infinity"
         val expectedReduce = "function(doc,out){ out._result = Math.max(out._result, doc.total);}"
         assertNotNull(myAggregate)
-        assertEquals(expectedFields, (myAggregate.jsonContent as GenericJson)["key"])
-        assertEquals("POST", myAggregate.requestMethod)
-        assertEquals(expectedInitial, (myAggregate.jsonContent as GenericJson)["initial"])
-        assertEquals(expectedReduce, (myAggregate.jsonContent as GenericJson)["reduce"])
+        assertEquals(expectedFields, (myAggregate?.jsonContent as GenericJson)["key"])
+        assertEquals("POST", myAggregate?.requestMethod)
+        assertEquals(expectedInitial, (myAggregate?.jsonContent as GenericJson)["initial"])
+        assertEquals(expectedReduce, (myAggregate?.jsonContent as GenericJson)["reduce"])
     }
 
     @Throws(IOException::class)
     fun testAggregateMaxCondition() {
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
+        val appData = getGenericAppData<Entity>(Entity::class.java)
         val entity = Entity("myEntity", "My Name")
-        val fields = ArrayList<String?>()
+        val fields = ArrayList<String>()
         fields.add("state")
         val query = MockQuery(MockBuilder())
-        val myAggregate: Aggregate? = appData!!.maxBlocking(fields, "total", Array<Entity>::class.java, query)
+        val myAggregate = appData?.maxBlocking(fields, "total", Array<Entity>::class.java, query)
         val expectedFields = HashMap<String?, Boolean?>()
         expectedFields["state"] = true
         val expectedInitial = HashMap<String?, Any?>()
@@ -326,40 +327,40 @@ class NetworkManagerTest : KinveyMockUnitTest<*>() {
         val expectedReduce = "function(doc,out){ out._result = Math.max(out._result, doc.total);}"
         val expectedCondition = "{city=boston, age={\$gt=18, \$lt=21}}"
         assertNotNull(myAggregate)
-        assertEquals(expectedFields, (myAggregate.jsonContent as GenericJson)["key"])
-        assertEquals("POST", myAggregate.requestMethod)
-        assertEquals(expectedInitial, (myAggregate.jsonContent as GenericJson)["initial"])
-        assertEquals(expectedReduce, (myAggregate.jsonContent as GenericJson)["reduce"])
-        assertEquals(expectedCondition, (myAggregate.jsonContent as GenericJson)["condition"].toString())
+        assertEquals(expectedFields, (myAggregate?.jsonContent as GenericJson)["key"])
+        assertEquals("POST", myAggregate?.requestMethod)
+        assertEquals(expectedInitial, (myAggregate?.jsonContent as GenericJson)["initial"])
+        assertEquals(expectedReduce, (myAggregate?.jsonContent as GenericJson)["reduce"])
+        assertEquals(expectedCondition, (myAggregate?.jsonContent as GenericJson)["condition"].toString())
     }
 
     @Throws(IOException::class)
     fun testAggregateMinNoCondition() {
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
+        val appData = getGenericAppData<Entity>(Entity::class.java)
         val entity = Entity("myEntity", "My Name")
-        val fields = ArrayList<String?>()
+        val fields = ArrayList<String>()
         fields.add("state")
-        val myAggregate: Aggregate? = appData!!.minBlocking(fields, "total", Array<Entity>::class.java, null)
+        val myAggregate = appData!!.minBlocking(fields, "total", Array<Entity>::class.java, null)
         val expectedFields = HashMap<String?, Boolean?>()
         expectedFields["state"] = true
         val expectedInitial = HashMap<String?, Any?>()
         expectedInitial["_result"] = "Infinity"
         val expectedReduce = "function(doc,out){ out._result = Math.min(out._result, doc.total);}"
         assertNotNull(myAggregate)
-        assertEquals(expectedFields, (myAggregate.jsonContent as GenericJson)["key"])
-        assertEquals("POST", myAggregate.requestMethod)
-        assertEquals(expectedInitial, (myAggregate.jsonContent as GenericJson)["initial"])
-        assertEquals(expectedReduce, (myAggregate.jsonContent as GenericJson)["reduce"])
+        assertEquals(expectedFields, (myAggregate?.jsonContent as GenericJson)["key"])
+        assertEquals("POST", myAggregate?.requestMethod)
+        assertEquals(expectedInitial, (myAggregate?.jsonContent as GenericJson)["initial"])
+        assertEquals(expectedReduce, (myAggregate?.jsonContent as GenericJson)["reduce"])
     }
 
     @Throws(IOException::class)
     fun testAggregateMinCondition() {
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
+        val appData = getGenericAppData<Entity>(Entity::class.java)
         val entity = Entity("myEntity", "My Name")
-        val fields = ArrayList<String?>()
+        val fields = ArrayList<String>()
         fields.add("state")
         val query = MockQuery(MockBuilder())
-        val myAggregate: Aggregate? = appData!!.minBlocking(fields, "total", Array<Entity>::class.java, query)
+        val myAggregate = appData?.minBlocking(fields, "total", Array<Entity>::class.java, query)
         val expectedFields = HashMap<String?, Boolean?>()
         expectedFields["state"] = true
         val expectedInitial = HashMap<String?, Any?>()
@@ -367,20 +368,20 @@ class NetworkManagerTest : KinveyMockUnitTest<*>() {
         val expectedReduce = "function(doc,out){ out._result = Math.min(out._result, doc.total);}"
         val expectedCondition = "{city=boston, age={\$gt=18, \$lt=21}}"
         assertNotNull(myAggregate)
-        assertEquals(expectedFields, (myAggregate.jsonContent as GenericJson)["key"])
-        assertEquals("POST", myAggregate.requestMethod)
-        assertEquals(expectedInitial, (myAggregate.jsonContent as GenericJson)["initial"])
-        assertEquals(expectedReduce, (myAggregate.jsonContent as GenericJson)["reduce"])
-        assertEquals(expectedCondition, (myAggregate.jsonContent as GenericJson)["condition"].toString())
+        assertEquals(expectedFields, (myAggregate?.jsonContent as GenericJson)["key"])
+        assertEquals("POST", myAggregate?.requestMethod)
+        assertEquals(expectedInitial, (myAggregate?.jsonContent as GenericJson)["initial"])
+        assertEquals(expectedReduce, (myAggregate?.jsonContent as GenericJson)["reduce"])
+        assertEquals(expectedCondition, (myAggregate?.jsonContent as GenericJson)["condition"].toString())
     }
 
     @Throws(IOException::class)
     fun testAggregateAverageNoCondition() {
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
+        val appData = getGenericAppData<Entity>(Entity::class.java)
         val entity = Entity("myEntity", "My Name")
-        val fields = ArrayList<String?>()
+        val fields = ArrayList<String>()
         fields.add("state")
-        val myAggregate: Aggregate? = appData!!.averageBlocking(fields, "total", Array<Entity>::class.java, null)
+        val myAggregate = appData?.averageBlocking(fields, "total", Array<Entity>::class.java, null)
         val expectedFields = HashMap<String?, Boolean?>()
         expectedFields["state"] = true
         val expectedInitial = HashMap<String?, Any?>()
@@ -389,20 +390,20 @@ class NetworkManagerTest : KinveyMockUnitTest<*>() {
                 "out._result =(out._result * count + doc.total) " +
                 "/ (count + 1); out._kcs_count = count+1;}"
         assertNotNull(myAggregate)
-        assertEquals(expectedFields, (myAggregate.jsonContent as GenericJson)["key"])
-        assertEquals("POST", myAggregate.requestMethod)
-        assertEquals(expectedInitial, (myAggregate.jsonContent as GenericJson)["initial"])
-        assertEquals(expectedReduce, (myAggregate.jsonContent as GenericJson)["reduce"])
+        assertEquals(expectedFields, (myAggregate?.jsonContent as GenericJson)["key"])
+        assertEquals("POST", myAggregate?.requestMethod)
+        assertEquals(expectedInitial, (myAggregate?.jsonContent as GenericJson)["initial"])
+        assertEquals(expectedReduce, (myAggregate?.jsonContent as GenericJson)["reduce"])
     }
 
     @Throws(IOException::class)
     fun testAggregateAverageCondition() {
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
+        val appData = getGenericAppData<Entity>(Entity::class.java)
         val entity = Entity("myEntity", "My Name")
-        val fields = ArrayList<String?>()
+        val fields = ArrayList<String>()
         fields.add("state")
         val query = MockQuery(MockBuilder())
-        val myAggregate: Aggregate? = appData!!.averageBlocking(fields, "total", Array<Entity>::class.java, query)
+        val myAggregate = appData?.averageBlocking(fields, "total", Array<Entity>::class.java, query)
         val expectedFields = HashMap<String?, Boolean?>()
         expectedFields["state"] = true
         val expectedInitial = HashMap<String?, Any?>()
@@ -412,100 +413,98 @@ class NetworkManagerTest : KinveyMockUnitTest<*>() {
                 "/ (count + 1); out._kcs_count = count+1;}"
         val expectedCondition = "{city=boston, age={\$gt=18, \$lt=21}}"
         assertNotNull(myAggregate)
-        assertEquals(expectedFields, (myAggregate.jsonContent as GenericJson)["key"])
-        assertEquals("POST", myAggregate.requestMethod)
-        assertEquals(expectedInitial, (myAggregate.jsonContent as GenericJson)["initial"])
-        assertEquals(expectedReduce, (myAggregate.jsonContent as GenericJson)["reduce"])
-        assertEquals(expectedCondition, (myAggregate.jsonContent as GenericJson)["condition"].toString())
+        assertEquals(expectedFields, (myAggregate?.jsonContent as GenericJson)["key"])
+        assertEquals("POST", myAggregate?.requestMethod)
+        assertEquals(expectedInitial, (myAggregate?.jsonContent as GenericJson)["initial"])
+        assertEquals(expectedReduce, (myAggregate?.jsonContent as GenericJson)["reduce"])
+        assertEquals(expectedCondition, (myAggregate?.jsonContent as GenericJson)["condition"].toString())
     }
 
     @Throws(IOException::class)
     fun testAppDataCustomVersion() {
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
-        appData!!.clientAppVersion = "1.2.3"
-        val request: GetEntity? = appData.getEntityBlocking("OK")
-        val header: Any = request.getRequestHeaders().get("X-Kinvey-Client-App-Version")
+        val appData = getGenericAppData<Entity>(Entity::class.java)
+        appData?.clientAppVersion = "1.2.3"
+        val request = appData?.getEntityBlocking("OK")
+        val header = request?.getRequestHeaders()?.get("X-Kinvey-Client-App-Version")
         assertEquals("1.2.3", header as String)
     }
 
     @Throws(IOException::class)
     fun testAppDataCustomHeader() {
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
+        val appData = getGenericAppData<Entity>(Entity::class.java)
         val custom = GenericJson()
         custom["First"] = 1
         custom["Second"] = "two"
-        appData!!.setCustomRequestProperties(custom)
-        val request: GetEntity? = appData.getEntityBlocking("OK")
-        val header: Any = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties")
+        appData?.setCustomRequestProperties(custom)
+        val request = appData?.getEntityBlocking("OK")
+        val header = request?.getRequestHeaders()?.get("X-Kinvey-Custom-Request-Properties")
         assertEquals("{\"First\":1,\"Second\":\"two\"}", header as String)
     }
 
     @Throws(IOException::class)
     fun testAppDataCustomVersionNull() {
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
-        appData!!.clientAppVersion = null
-        val request: GetEntity? = appData.getEntityBlocking("OK")
-        val header: Any = request.getRequestHeaders().get("X-Kinvey-Client-App-Version")
+        val appData = getGenericAppData<Entity>(Entity::class.java)
+        appData?.clientAppVersion = null
+        val request = appData?.getEntityBlocking("OK")
+        val header = request?.getRequestHeaders()?.get("X-Kinvey-Client-App-Version")
         assertEquals(null, header)
     }
 
     @Throws(IOException::class)
     fun testAppDataCustomHeaderNull() {
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
-        appData!!.setCustomRequestProperties(null)
-        val request: GetEntity? = appData.getEntityBlocking("OK")
-        val header: Any = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties")
+        val appData = getGenericAppData<Entity>(Entity::class.java)
+        appData?.setCustomRequestProperties(null)
+        val request = appData?.getEntityBlocking("OK")
+        val header = request?.getRequestHeaders()?.get("X-Kinvey-Custom-Request-Properties")
         assertEquals(null, header)
     }
 
     @Throws(IOException::class)
     fun testClientVersion() {
-        client!!.clientAppVersion = "123"
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
-        val request: GetEntity? = appData!!.getEntityBlocking("OK")
-        val header: Any = request.getRequestHeaders().get("X-Kinvey-Client-App-Version")
+        client?.clientAppVersion = "123"
+        val appData = getGenericAppData<Entity>(Entity::class.java)
+        val request = appData!!.getEntityBlocking("OK")
+        val header = request?.getRequestHeaders()?.get("X-Kinvey-Client-App-Version")
         assertEquals("123", header as String)
     }
 
     @Throws(IOException::class)
     fun testClientCustomHeader() {
-        client!!.setCustomRequestProperty("hello", "hey")
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
-        val request: GetEntity? = appData!!.getEntityBlocking("OK")
-        val header: Any = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties")
+        client?.setCustomRequestProperty("hello", "hey")
+        val appData = getGenericAppData<Entity>(Entity::class.java)
+        val request = appData?.getEntityBlocking("OK")
+        val header = request?.getRequestHeaders()?.get("X-Kinvey-Custom-Request-Properties")
         assertEquals("{\"hello\":\"hey\"}", header as String)
     }
 
     @Throws(IOException::class)
     fun testClientAppendCustomHeader() {
-        client!!.setCustomRequestProperty("hello", "hey")
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
-        appData!!.setCustomRequestProperty("bye", "bye")
-        val request: GetEntity? = appData.getEntityBlocking("OK")
-        val header: Any = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties")
+        client?.setCustomRequestProperty("hello", "hey")
+        val appData = getGenericAppData<Entity>(Entity::class.java)
+        appData?.setCustomRequestProperty("bye", "bye")
+        val request = appData?.getEntityBlocking("OK")
+        val header = request?.getRequestHeaders()?.get("X-Kinvey-Custom-Request-Properties")
         assertEquals("{\"hello\":\"hey\",\"bye\":\"bye\"}", header as String)
     }
 
     @Throws(IOException::class)
     fun testLargeCustomHeaders() {
-        for (i in 0..199) {
-            client!!.setCustomRequestProperty("hello$i", "this needs to be rather large")
+        (0..199).forEach { i ->
+            client?.setCustomRequestProperty("hello$i", "this needs to be rather large")
         }
-        val appData = getGenericAppData<Entity?>(Entity::class.java)
-        val request: GetEntity? = appData!!.getEntityBlocking("OK")
-        val header: Any = request.getRequestHeaders().get("X-Kinvey-Custom-Request-Properties")
+        val appData = getGenericAppData<Entity>(Entity::class.java)
+        val request = appData?.getEntityBlocking("OK")
+        val header = request?.getRequestHeaders()?.get("X-Kinvey-Custom-Request-Properties")
         //assertEquals("{\"hello\":\"hey\"}", (String) header);
-
-
         try {
-            request.buildHttpRequest()
+            request?.buildHttpRequest()
             assertFalse("Should have thrown a 2k size exception!", true)
         } catch (e: Exception) {
-            assertTrue(e.message!!.contains("Cannot attach more than 2000 bytes of Custom Request Properties"))
+            assertTrue(e.message?.contains("Cannot attach more than 2000 bytes of Custom Request Properties") == true)
         }
     }
 
-    private fun <T : GenericJson?> getGenericAppData(myClass: Class<out Any?>?): NetworkManager<T?>? {
-        return NetworkManager<Any?>("myCollection", myClass, client)
+    private fun <T : GenericJson> getGenericAppData(myClass: Class<T>): NetworkManager<T>? {
+        return NetworkManager("myCollection", myClass, client)
     }
 }

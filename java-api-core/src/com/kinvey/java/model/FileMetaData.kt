@@ -88,7 +88,7 @@ open class FileMetaData : GenericJson {
      *
      * @param id - the _id of the new file meta data
      */
-    constructor(id: String) {
+    constructor(id: String?) {
         this.id = id
     }
 
