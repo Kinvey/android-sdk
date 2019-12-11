@@ -9,7 +9,7 @@ class EntityForInQueryTest(
     @Key
     var stringVal: String? = null,
     @Key
-    var isBooleanVal: Boolean = false,
+    var booleanVal: Boolean = false,
     @Key
     var intVal: Int = 0,
     @Key

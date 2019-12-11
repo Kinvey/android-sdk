@@ -13,7 +13,7 @@ data class Location(
     @Key
     var address: String? = null,
     @Key("_geoloc")
-    var geo: Array<Double>
+    var geo: Array<Double>? = null
 ) : GenericJson() {
 
     companion object {

@@ -2,7 +2,7 @@ package com.kinvey.androidTest.model
 
 import com.google.api.client.util.Key
 
-data class PersonList(
+class PersonList(
     @Key("list")
     var list: List<PersonList>? = null,
     @Key("personList")

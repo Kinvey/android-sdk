@@ -207,7 +207,7 @@ class AsyncLinkedNetworkManagerTest {
         val looperThread = LooperThread(Runnable {
             netMan.save(entity, callback, object : UploaderProgressListener {
                 @Throws(IOException::class)
-                override fun progressChanged(uploader: MediaHttpUploader) {
+                override fun progressChanged(uploader: MediaHttpUploader?) {
                 }
             }, storeType)
         })
