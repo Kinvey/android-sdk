@@ -2,14 +2,14 @@ package com.kinvey.androidTest.model
 
 import com.google.api.client.util.Key
 
-class PersonArray : Person {
+data class PersonArray(
     @Key
-    var array: Array<PersonArray>
+    var array: Array<PersonArray>? = null,
     @Key
     var personArray: PersonArray? = null
+) : Person() {
 
-    constructor() {}
-    constructor(name: String?) {
+    constructor(name: String?): this() {
         username = name
     }
 

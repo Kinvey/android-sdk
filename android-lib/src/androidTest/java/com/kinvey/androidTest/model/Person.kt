@@ -3,13 +3,13 @@ package com.kinvey.androidTest.model
 import com.google.api.client.json.GenericJson
 import com.google.api.client.util.Key
 
-open class Person : GenericJson {
-    constructor() {}
-    constructor(username: String?) {
+open class Person() : GenericJson() {
+
+    constructor(username: String?): this() {
         this.username = username
     }
 
-    constructor(id: String?, username: String?) {
+    constructor(id: String?, username: String?): this() {
         this.id = id
         this.username = username
     }

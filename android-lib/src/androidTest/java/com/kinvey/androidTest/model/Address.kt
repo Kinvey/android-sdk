@@ -7,16 +7,13 @@ import com.google.api.client.util.Key
  * Created by yuliya on 11/23/17.
  */
 
-class Address : GenericJson {
+data class Address(
     @Key
-    var person: Person? = null
+    var person: Person? = null,
     @Key
-    private var addressField: String? = null
-
-    constructor(addressField: String?) {
+    var addressField: String? = null
+) : GenericJson() {
+    constructor(addressField: String?): this() {
         this.addressField = addressField
     }
-
-    constructor() {}
-
 }

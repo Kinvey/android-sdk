@@ -2,15 +2,13 @@ package com.kinvey.androidTest.model
 
 import com.google.api.client.util.Key
 
-class PersonList : Person {
+data class PersonList(
     @Key("list")
-    var list: List<PersonList>? = null
+    var list: List<PersonList>? = null,
     @Key("personList")
     var personList: PersonList? = null
-
-    constructor() {}
-    constructor(name: String?) {
+) : Person() {
+    constructor(name: String?): this() {
         username = name
     }
-
 }

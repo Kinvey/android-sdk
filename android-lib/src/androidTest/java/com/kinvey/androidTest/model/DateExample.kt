@@ -4,16 +4,16 @@ import com.google.api.client.json.GenericJson
 import com.google.api.client.util.Key
 import java.util.*
 
-class DateExample : GenericJson {
+data class DateExample(
     @Key("_id")
-    var id: String? = null
+    var id: String? = null,
     @Key
-    private var field: String? = null
+    var field: String? = null,
     @Key
     var date: Date? = null
+) : GenericJson() {
 
-    constructor() {}
-    constructor(field: String?, date: Date?) {
+    constructor(field: String?, date: Date?): this() {
         this.field = field
         this.date = date
     }

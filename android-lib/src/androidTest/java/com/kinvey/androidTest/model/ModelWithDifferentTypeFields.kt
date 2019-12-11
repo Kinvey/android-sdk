@@ -4,24 +4,25 @@ import com.google.api.client.json.GenericJson
 import com.google.api.client.util.Key
 import java.util.*
 
-class ModelWithDifferentTypeFields : GenericJson {
+data class ModelWithDifferentTypeFields(
     @Key("_id")
-    var id: String? = null
+    var id: String? = null,
     @Key
-    var username: String? = null
+    var username: String? = null,
     @Key
-    var carNumber = 0
+    var carNumber: Int = 0,
     @Key
-    var isUseAndroid = false
+    var isUseAndroid: Boolean = false,
     @Key
-    var date: Date? = null
+    var date: Date? = null,
     @Key
-    var height = 0f
+    var height: Float = 0f,
     @Key
-    var time = 0.0
+    var time: Double = 0.0
+) : GenericJson() {
 
-    constructor() {}
-    constructor(username: String?, carNumber: Int, isUseAndroid: Boolean, date: Date?, height: Float, time: Double) {
+    constructor(username: String?, carNumber: Int, isUseAndroid: Boolean, date: Date?, height: Float, time: Double)
+        : this(null, username, carNumber, isUseAndroid, date, height, time) {
         this.username = username
         this.carNumber = carNumber
         this.isUseAndroid = isUseAndroid

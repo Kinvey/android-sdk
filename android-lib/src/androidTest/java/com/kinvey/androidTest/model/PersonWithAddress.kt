@@ -3,13 +3,13 @@ package com.kinvey.androidTest.model
 import com.google.api.client.util.Key
 
 /**
- * Created by yuliya on 09/20/17.
+ * Created by yuliya on 11/23/17.
  */
 
-data class IntegerPrimitiveListInPerson(
-    @Key("integerList")
-    var integerList: List<Int>? = null
-): Person() {
+data class PersonWithAddress(
+    @Key
+    var address: Address? = null
+) : Person() {
     constructor(username: String?): this() {
         this.username = username
     }

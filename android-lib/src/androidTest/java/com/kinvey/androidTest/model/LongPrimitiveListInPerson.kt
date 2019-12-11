@@ -2,13 +2,11 @@ package com.kinvey.androidTest.model
 
 import com.google.api.client.util.Key
 
-class LongPrimitiveListInPerson : Person {
+class LongPrimitiveListInPerson(
     @Key("longList")
     var longList: List<Long>? = null
-
-    constructor() {}
-    constructor(username: String?) {
+): Person() {
+    constructor(username: String?): this() {
         this.username = username
     }
-
 }

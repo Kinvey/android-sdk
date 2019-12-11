@@ -6,13 +6,11 @@ import com.google.api.client.util.Key
  * Created by yuliya on 09/20/17.
  */
 
-class ObjectListInPerson : Person {
+class ObjectListInPerson(
     @Key("stringGenericJsons")
     var stringGenericJsons: List<StringGenericJson>? = null
-
-    constructor() {}
-    constructor(username: String?) {
+) : Person() {
+    constructor(username: String?): this() {
         this.username = username
     }
-
 }
