@@ -624,7 +624,7 @@ open class BaseDataStoreTest {
         val pushCallback = push(personStore, LONG_TIMEOUT)
         Assert.assertNotNull(pushCallback.result)
         Assert.assertEquals(pushCallback.result?.successCount, personsList.count())
-        Assert.assertTrue(netManager.useMultiInsertSave())
+        Assert.assertTrue(netManager.useMultiInsertSave)
 
         val syncItems = pendingSyncEntities(Person.COLLECTION)
         Assert.assertTrue(syncItems == null || syncItems.isEmpty())

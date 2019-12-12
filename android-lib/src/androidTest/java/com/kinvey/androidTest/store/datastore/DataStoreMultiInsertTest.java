@@ -713,7 +713,7 @@ public class DataStoreMultiInsertTest {
         DefaultKinveyPushCallback pushCallback = push(personStore, LONG_TIMEOUT);
         assertNotNull(pushCallback.result);
         assertEquals(pushCallback.result.getSuccessCount(), personsList.size());
-        assertTrue(netManager.useMultiInsertSave());
+        assertTrue(netManager.getUseMultiInsertSave());
 
         List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
         assertTrue(syncItems == null || syncItems.isEmpty());
@@ -1268,7 +1268,7 @@ public class DataStoreMultiInsertTest {
         DefaultKinveyPushCallback pushCallback = push(storeSync, LONG_TIMEOUT);
         assertNotNull(pushCallback.result);
         assertEquals(personsList.size(), pushCallback.result.getSuccessCount());
-        assertTrue(mockNetManager.useMultiInsertSave());
+        assertTrue(mockNetManager.getUseMultiInsertSave());
 
         List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
         assertTrue(syncItems == null || syncItems.isEmpty());
@@ -1618,7 +1618,7 @@ public class DataStoreMultiInsertTest {
         assertNull(saveCallback.error);
         assertNotNull(saveCallback.result);
         assertTrue(checkPersonIfSameObjects(personList, saveCallback.result));
-        assertTrue(mockNetManager.useMultiInsertSave());
+        assertTrue(mockNetManager.getUseMultiInsertSave());
 
         DefaultKinveyReadCallback findCallbackSync = find(syncStore, LONG_TIMEOUT);
         assertNotNull(findCallbackSync.result);
@@ -1885,7 +1885,7 @@ public class DataStoreMultiInsertTest {
         DefaultKinveyPushCallback pushCallback = push(autoSync, LONG_TIMEOUT);
         assertNotNull(pushCallback.result);
         assertEquals(personsList.size(), pushCallback.result.getSuccessCount());
-        assertTrue(mockNetManager.useMultiInsertSave());
+        assertTrue(mockNetManager.getUseMultiInsertSave());
 
         List<SyncItem> syncItems = pendingSyncEntities(Person.COLLECTION);
         assertTrue(syncItems == null || syncItems.isEmpty());

@@ -542,7 +542,7 @@ class DataStoreMultiInsertTestKotlin : BaseDataStoreTest() {
         val pushCallback = push(storeSync, LONG_TIMEOUT)
         assertNotNull(pushCallback.result)
         assertEquals(personsList.count(), pushCallback.result?.successCount)
-        assertTrue(mockNetManager.useMultiInsertSave())
+        assertTrue(mockNetManager.useMultiInsertSave)
 
         val syncItems = pendingSyncEntities(Person.COLLECTION)
         assertTrue(syncItems == null || syncItems.isEmpty())
@@ -902,7 +902,7 @@ class DataStoreMultiInsertTestKotlin : BaseDataStoreTest() {
         assertNull(saveCallback.error)
         assertNotNull(saveCallback.result)
         assertTrue(checkPersonIfSameObjects(personList, saveCallback.result))
-        assertTrue(mockNetManager.useMultiInsertSave())
+        assertTrue(mockNetManager.useMultiInsertSave)
 
         val findCallbackSync = find(syncStore, LONG_TIMEOUT)
         assertNotNull(findCallbackSync.result)
@@ -1178,7 +1178,7 @@ class DataStoreMultiInsertTestKotlin : BaseDataStoreTest() {
         val pushCallback = push(autoSync, LONG_TIMEOUT)
         assertNotNull(pushCallback.result)
         assertEquals(personsList.count(), pushCallback.result?.successCount)
-        assertTrue(mockNetManager.useMultiInsertSave())
+        assertTrue(mockNetManager.useMultiInsertSave)
 
         val syncItems = pendingSyncEntities(Person.COLLECTION)
         assertTrue(syncItems.isNullOrEmpty())
