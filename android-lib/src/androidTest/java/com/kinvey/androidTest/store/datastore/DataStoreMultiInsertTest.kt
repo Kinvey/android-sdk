@@ -26,7 +26,7 @@ import org.junit.Assert.assertTrue
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class DataStoreMultiInsertTestKotlin : BaseDataStoreTest() {
+class DataStoreMultiInsertTest : BaseDataStoreTest() {
 
     // NETWORK STORE
     @Test

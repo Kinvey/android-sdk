@@ -18,7 +18,7 @@ import org.junit.Ignore
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class DataStoreMultipleMultiInsertTestKotlin : BaseDataStoreTest() {
+class DataStoreMultipleMultiInsertTest : BaseDataStoreTest() {
 
     @Test
     @Throws(InterruptedException::class)

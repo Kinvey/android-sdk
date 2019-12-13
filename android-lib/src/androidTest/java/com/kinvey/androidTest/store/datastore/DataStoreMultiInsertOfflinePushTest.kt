@@ -12,7 +12,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class DataStoreMultiInsertOfflinePushTestKotlin : BaseDataStoreTest() {
+class DataStoreMultiInsertOfflinePushTest : BaseDataStoreTest() {
 
     @Test
     @Throws(InterruptedException::class)
