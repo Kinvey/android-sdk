@@ -15,7 +15,7 @@ import org.junit.Assert.assertTrue
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class DataStoreMultiInsertItemsOrderTest : BaseDataStoreTest() {
+class DataStoreMultiInsertItemsOrderTest : BaseDataStoreMultiInsertTest() {
 
     @Test
     @Throws(InterruptedException::class)

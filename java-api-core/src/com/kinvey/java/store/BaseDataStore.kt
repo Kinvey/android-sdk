@@ -165,14 +165,14 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      */
     @Throws(IOException::class)
     @JvmOverloads
-    fun find(query: Query, cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>>? = null): KinveyReadResponse<T>? {
+    fun find(query: Query?, cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>>? = null): KinveyReadResponse<T>? {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         Preconditions.checkNotNull(query, "query must not be null.")
         Preconditions.checkArgument(cachedCallback == null || storeType == StoreType.CACHE, "KinveyCachedClientCallback can only be used with StoreType.CACHE")
         // perform request based on policy
         if (storeType == StoreType.CACHE) {
-            val result = ReadQueryRequest(cache, networkManager, ReadPolicy.FORCE_LOCAL, query).execute()
+            val result = ReadQueryRequest(cache, networkManager, ReadPolicy.FORCE_LOCAL, query!!).execute()
             result?.run { cachedCallback?.onSuccess(this) }
             return if (isDeltaSetCachingEnabled && !isQueryContainSkipLimit(query)) {
                 findBlockingDeltaSync(query)
@@ -183,7 +183,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
             return if (storeType == StoreType.AUTO && isDeltaSetCachingEnabled && !isQueryContainSkipLimit(query)) {
                 findBlockingDeltaSync(query)
             } else {
-                ReadQueryRequest(cache, networkManager, this.storeType.readPolicy, query).execute()
+                ReadQueryRequest(cache, networkManager, this.storeType.readPolicy, query!!).execute()
             }
         }
     }
@@ -347,11 +347,11 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
     /**
      * Clear the local cache storage
      */
-    fun clear(query: Query) {
+    fun clear(query: Query?) {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType")
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
-        purge(query)
+        purge(query!!)
         client?.cacheManager?.getCache(collectionName, currentClass, java.lang.Long.MAX_VALUE)?.delete(query)
     }
 
