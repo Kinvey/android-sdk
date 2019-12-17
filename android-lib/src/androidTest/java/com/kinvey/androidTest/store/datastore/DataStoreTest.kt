@@ -129,7 +129,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertNotNull(readResponse)
         val people = readResponse?.result
         assertNotNull(people)
-        assertEquals(1, people?.size?.toLong())
+        assertEquals(1, people?.size)
         val permID = people?.get(0)?.id
         assertNotNull(permID)
         assertNotEquals(tempID, permID)
@@ -217,7 +217,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertNotNull(result)
         result = store.find(client?.query()?.equals(ID, result?.id))?.result?.get(0)
         assertNotNull(result)
-        assertEquals(1, store.delete(result?.id ?: "")?.toLong())
+        assertEquals(1, store.delete(result?.id ?: ""))
     }
 
     @Test
@@ -277,12 +277,12 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertNull(saveCallback.error)
         assertNotNull(saveCallback.result?.id)
         val personId = saveCallback.result?.id
-        val findCallback = find(store, personId, LONG_TIMEOUT, object : KinveyCachedClientCallback<Person> {
-            override fun onSuccess(result: Person) {
-                Log.d("testFindById: username ", result.username)
+        val findCallback = find(store, personId, LONG_TIMEOUT, object : KinveyCachedClientCallback<Person?> {
+            override fun onSuccess(result: Person?) {
+                Log.d("testFindById: username ", result?.username)
             }
-            override fun onFailure(error: Throwable) {
-                Log.d("testFindById: ", error.message)
+            override fun onFailure(error: Throwable?) {
+                Log.d("testFindById: ", error?.message)
             }
         })
         assertNotNull(findCallback.result)
@@ -323,7 +323,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertNull(saveSecondCallback.error)
         val findCallback = find(store, LONG_TIMEOUT)
         assertNotNull(findCallback.result)
-        assertEquals(findCallback.result?.result?.size?.toLong(), 2)
+        assertEquals(findCallback.result?.result?.size, 2)
         clearBackend(store)
     }
 
@@ -338,17 +338,17 @@ class DataStoreTest() : BaseDataStoreTest() {
         createAndSavePerson(storeNetwork, TEST_USERNAME_2)
         val findCallbackAuto = find(storeAuto, LONG_TIMEOUT)
         assertNotNull(findCallbackAuto.result)
-        assertEquals(findCallbackAuto.result?.result?.size?.toLong(), 2)
+        assertEquals(findCallbackAuto.result?.result?.size, 2)
         val findCallbackSync = find(storeSync, LONG_TIMEOUT)
         assertNotNull(findCallbackSync.result)
-        assertEquals(findCallbackSync.result?.result?.size?.toLong(), 2)
+        assertEquals(findCallbackSync.result?.result?.size, 2)
         createAndSavePerson(storeNetwork, TEST_TEMP_USERNAME)
         val findCallbackAutoSec = find(storeAuto, LONG_TIMEOUT)
         assertNotNull(findCallbackAutoSec.result)
-        assertEquals(findCallbackAutoSec.result?.result?.size?.toLong(), 3)
+        assertEquals(findCallbackAutoSec.result?.result?.size, 3)
         val findCallbackSyncSec = find(storeSync, LONG_TIMEOUT)
         assertNotNull(findCallbackSyncSec.result)
-        assertEquals(findCallbackSyncSec.result?.result?.size?.toLong(), 3)
+        assertEquals(findCallbackSyncSec.result?.result?.size, 3)
         clearBackend(storeNetwork)
     }
 
@@ -399,10 +399,10 @@ class DataStoreTest() : BaseDataStoreTest() {
         query = query?.equals("weight", 2)
         val findCallbackAuto = find(storeAuto, query, DEFAULT_TIMEOUT)
         assertNotNull(findCallbackAuto.result)
-        assertEquals(findCallbackAuto.result?.result?.size?.toLong(), 2)
+        assertEquals(findCallbackAuto.result?.result?.size, 2)
         val findCallbackSync = find(storeSync, query, DEFAULT_TIMEOUT)
         assertNotNull(findCallbackSync.result)
-        assertEquals(findCallbackSync.result?.result?.size?.toLong(), 2)
+        assertEquals(findCallbackSync.result?.result?.size, 2)
         clearBackend(storeNetwork)
     }
 
@@ -432,7 +432,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         query = query?.addSort("weight", SortOrder.DESC)
         val findCallbackAuto = find(storeAuto, query, DEFAULT_TIMEOUT)
         assertNotNull(findCallbackAuto.result)
-        assertEquals(findCallbackAuto.result?.result?.size?.toLong(), 3)
+        assertEquals(findCallbackAuto.result?.result?.size, 3)
         assertTrue(findCallbackAuto.result?.result?.get(0)?.weight == 3L && findCallbackAuto.result?.result?.get(2)?.weight == 1L)
     }
 
@@ -458,11 +458,11 @@ class DataStoreTest() : BaseDataStoreTest() {
         val saveThirdCallback = save(storeNetwork, personThird)
         assertNotNull(saveThirdCallback.result)
         assertNull(saveThirdCallback.error)
-        var query = client!!.query()
-        query = query.addSort("weight", SortOrder.ASC)
+        var query = client?.query()
+        query = query?.addSort("weight", SortOrder.ASC)
         val findCallbackAuto = find(storeAuto, query, DEFAULT_TIMEOUT)
         assertNotNull(findCallbackAuto.result)
-        assertEquals(findCallbackAuto.result?.result?.size?.toLong(), 3)
+        assertEquals(findCallbackAuto.result?.result?.size, 3)
         assertTrue(findCallbackAuto.result?.result?.get(0)?.weight == 1L && findCallbackAuto.result?.result?.get(2)?.weight == 3L)
     }
 
@@ -485,11 +485,11 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertNotNull(deleteCallback.result)
         val findCallbackAuto = find(storeAuto, DEFAULT_TIMEOUT)
         assertNotNull(findCallbackAuto.result)
-        assertEquals(findCallbackAuto.result?.result?.size?.toLong(), 1)
+        assertEquals(findCallbackAuto.result?.result?.size, 1)
         assertEquals(findCallbackAuto.result?.result?.get(0)?.username, TEST_USERNAME_2)
         val findCallbackSync = find(storeSync, DEFAULT_TIMEOUT)
         assertNotNull(findCallbackSync.result)
-        assertEquals(findCallbackSync.result?.result?.size?.toLong(), 1)
+        assertEquals(findCallbackSync.result?.result?.size, 1)
         assertEquals(findCallbackSync.result?.result?.get(0)?.username, TEST_USERNAME_2)
         clearBackend(storeNetwork)
     }
@@ -509,11 +509,11 @@ class DataStoreTest() : BaseDataStoreTest() {
         query?.setSkip(1)?.setLimit(1)
         val findCallbackAuto = find(storeAuto, query, DEFAULT_TIMEOUT)
         assertNotNull(findCallbackAuto.result)
-        assertEquals(findCallbackAuto.result?.result?.size?.toLong(), 1)
+        assertEquals(findCallbackAuto.result?.result?.size, 1)
         assertEquals(findCallbackAuto.result?.result?.get(0)?.username, TEST_USERNAME_2)
         val findCallbackSync = find(storeSync, DEFAULT_TIMEOUT)
         assertNotNull(findCallbackSync.result)
-        assertEquals(findCallbackSync.result?.result?.size?.toLong(), 1)
+        assertEquals(findCallbackSync.result?.result?.size, 1)
         assertEquals(findCallbackSync.result?.result?.get(0)?.username, TEST_USERNAME_2)
         clearBackend(storeNetwork)
     }
@@ -543,12 +543,12 @@ class DataStoreTest() : BaseDataStoreTest() {
         createAndSavePerson(storeNetwork, TEST_USERNAME_2)
         val findCallbackAuto = find(storeAuto, LONG_TIMEOUT)
         assertNotNull(findCallbackAuto.result)
-        assertEquals(findCallbackAuto.result?.result?.size?.toLong(), 2)
+        assertEquals(findCallbackAuto.result?.result?.size, 2)
         createAndSavePerson(storeNetwork, TEST_TEMP_USERNAME)
         mockInvalidConnection()
         val findCallbackSecondAuto = find(storeAuto, LONG_TIMEOUT)
         assertNotNull(findCallbackSecondAuto.result)
-        assertEquals(findCallbackSecondAuto.result?.result?.size?.toLong(), 2)
+        assertEquals(findCallbackSecondAuto.result?.result?.size, 2)
         cancelMockInvalidConnection()
     }
 
@@ -578,13 +578,13 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertNull(saveThirdCallback.error)
         val findCallbackAuto = find(storeAuto, LONG_TIMEOUT)
         assertNotNull(findCallbackAuto.result)
-        assertEquals(findCallbackAuto.result?.result?.size?.toLong(), 3)
+        assertEquals(findCallbackAuto.result?.result?.size, 3)
         mockInvalidConnection()
         var query = client?.query()
         query = query?.addSort("weight", SortOrder.ASC)
         val findCallbackAutoSecond = find(storeAuto, query, DEFAULT_TIMEOUT)
         assertNotNull(findCallbackAutoSecond.result)
-        assertEquals(findCallbackAutoSecond.result?.result?.size?.toLong(), 3)
+        assertEquals(findCallbackAutoSecond.result?.result?.size, 3)
         assertTrue(findCallbackAutoSecond.result?.result?.get(0)?.weight == 1L
                 && findCallbackAutoSecond.result?.result?.get(2)?.weight == 3L)
         cancelMockInvalidConnection()
@@ -613,13 +613,13 @@ class DataStoreTest() : BaseDataStoreTest() {
         createAndSavePerson(storeNetwork, USERNAME)
         val findCallbackAuto = find(storeAuto, LONG_TIMEOUT)
         assertNotNull(findCallbackAuto.result)
-        assertEquals(findCallbackAuto.result?.result?.size?.toLong(), 3)
+        assertEquals(findCallbackAuto.result?.result?.size, 3)
         mockInvalidConnection()
         val query = client?.query()
         query?.setSkip(1)?.setLimit(1)
         val findCallbackAutoSecond = find(storeAuto, query, DEFAULT_TIMEOUT)
         assertNotNull(findCallbackAutoSecond.result)
-        assertEquals(findCallbackAutoSecond.result?.result?.size?.toLong(), 1)
+        assertEquals(findCallbackAutoSecond.result?.result?.size, 1)
         assertEquals(findCallbackAutoSecond.result?.result?.get(0)?.username, TEST_USERNAME_2)
         cancelMockInvalidConnection()
     }
@@ -637,17 +637,17 @@ class DataStoreTest() : BaseDataStoreTest() {
         createAndSavePerson(storeNetwork, TEST_USERNAME_2)
         val findCallbackAuto = find(storeAuto, LONG_TIMEOUT)
         assertNotNull(findCallbackAuto.result)
-        assertEquals(findCallbackAuto.result?.result?.size?.toLong(), 2)
+        assertEquals(findCallbackAuto.result?.result?.size, 2)
         createAndSavePerson(storeNetwork, TEST_TEMP_USERNAME)
         mockInvalidConnection()
         val findCallbackSecondAuto = find(storeAuto, LONG_TIMEOUT)
         assertNotNull(findCallbackSecondAuto.result)
-        assertEquals(findCallbackSecondAuto.result?.result?.size?.toLong(), 2)
+        assertEquals(findCallbackSecondAuto.result?.result?.size, 2)
         cancelMockInvalidConnection()
         createAndSavePerson(storeNetwork, TEST_USERNAME)
         val findCallbackAutoThird = find(storeAuto, LONG_TIMEOUT)
         assertNotNull(findCallbackAutoThird.result)
-        assertEquals(findCallbackAutoThird.result?.result?.size?.toLong(), 4)
+        assertEquals(findCallbackAutoThird.result?.result?.size, 4)
     }
 
     @Test
@@ -701,13 +701,13 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertNull(saveThirdCallback.error)
         val findCallbackAuto = find(storeAuto, LONG_TIMEOUT)
         assertNotNull(findCallbackAuto.result)
-        assertEquals(findCallbackAuto.result?.result?.size?.toLong(), 3)
+        assertEquals(findCallbackAuto.result?.result?.size, 3)
         var query = client?.query()
         query = query?.equals("weight", 2)
         mockInvalidConnection()
         val findCallbackAutoQuery = find(storeAuto, query, LONG_TIMEOUT)
         assertNotNull(findCallbackAutoQuery.result)
-        assertEquals(findCallbackAutoQuery.result?.result?.size?.toLong(), 2)
+        assertEquals(findCallbackAutoQuery.result?.result?.size, 2)
         cancelMockInvalidConnection()
     }
 
@@ -724,21 +724,21 @@ class DataStoreTest() : BaseDataStoreTest() {
         createAndSavePerson(storeNetwork, TEST_USERNAME_2)
         val findCallbackAuto = find(storeAuto, LONG_TIMEOUT)
         assertNotNull(findCallbackAuto.result)
-        assertEquals(findCallbackAuto.result?.result?.size?.toLong(), 2)
+        assertEquals(findCallbackAuto.result?.result?.size, 2)
         createAndSavePerson(storeNetwork, TEST_TEMP_USERNAME)
         val findCallbackSecondAuto = find(storeAuto, LONG_TIMEOUT)
         assertNotNull(findCallbackSecondAuto.result)
-        assertEquals(findCallbackSecondAuto.result?.result?.size?.toLong(), 3)
+        assertEquals(findCallbackSecondAuto.result?.result?.size, 3)
         createAndSavePerson(storeNetwork, TEST_USERNAME)
         val findCallbackThirdAuto = find(storeAuto, LONG_TIMEOUT)
         assertNotNull(findCallbackThirdAuto.result)
-        assertEquals(findCallbackThirdAuto.result?.result?.size?.toLong(), 4)
+        assertEquals(findCallbackThirdAuto.result?.result?.size, 4)
         val findCallbackFourthAuto = find(storeAuto, LONG_TIMEOUT)
         assertNotNull(findCallbackFourthAuto.result)
-        assertEquals(findCallbackFourthAuto.result?.result?.size?.toLong(), 4)
+        assertEquals(findCallbackFourthAuto.result?.result?.size, 4)
         val findCallbackSync = find(storeSync, LONG_TIMEOUT)
         assertNotNull(findCallbackSync.result)
-        assertEquals(findCallbackSync.result?.result?.size?.toLong(), 4)
+        assertEquals(findCallbackSync.result?.result?.size, 4)
     }
 
     @Test
@@ -904,10 +904,10 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertNotNull(deleteCallback.result)
         val findCallback = find(storeAuto, LONG_TIMEOUT)
         assertNotNull(findCallback.result)
-        assertEquals(findCallback.result?.result?.size?.toLong(), 1)
+        assertEquals(findCallback.result?.result?.size, 1)
         val findCallbackSync = find(storeSync, LONG_TIMEOUT)
         assertNotNull(findCallbackSync.result)
-        assertEquals(findCallbackSync.result?.result?.size?.toLong(), 1)
+        assertEquals(findCallbackSync.result?.result?.size, 1)
     }
 
     @Test
@@ -1024,7 +1024,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         createAndSavePerson(storeSync, TEST_USERNAME_2)
         createAndSavePerson(storeSync, TEST_USERNAME_2)
         assertNotNull(pendingSyncEntities(COLLECTION))
-        assertEquals(pendingSyncEntities(COLLECTION)?.size?.toLong(), 3)
+        assertEquals(pendingSyncEntities(COLLECTION)?.size, 3)
     }
 
     @Test
@@ -1073,7 +1073,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         query = query?.equals("weight", 2) as Query
         storeAuto.clear(query)
         assertNotNull(pendingSyncEntities(COLLECTION))
-        assertEquals(pendingSyncEntities(COLLECTION)?.size?.toLong(), 1)
+        assertEquals(pendingSyncEntities(COLLECTION)?.size, 1)
     }
 
     @Test
@@ -1152,10 +1152,10 @@ class DataStoreTest() : BaseDataStoreTest() {
         storeAuto.clear(query)
         val findCallbackNetwork = find(storeNetwork, LONG_TIMEOUT)
         assertNotNull(findCallbackNetwork.result)
-        assertEquals(findCallbackNetwork.result?.result?.size?.toLong(), 3)
+        assertEquals(findCallbackNetwork.result?.result?.size, 3)
         val findCallbackSync = find(storeSync, LONG_TIMEOUT)
         assertNotNull(findCallbackSync.result)
-        assertEquals(findCallbackSync.result?.result?.size?.toLong(), 1)
+        assertEquals(findCallbackSync.result?.result?.size, 1)
         assertTrue(findCallbackSync.result?.result?.get(0)?.weight != 2L)
     }
 
@@ -1172,7 +1172,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         storeAuto.clear()
         val findCallbackNetwork = find(storeNetwork, LONG_TIMEOUT)
         assertNotNull(findCallbackNetwork.result)
-        assertEquals(findCallbackNetwork.result?.result?.size?.toLong(), 2)
+        assertEquals(findCallbackNetwork.result?.result?.size, 2)
     }
 
     @Test
@@ -1192,13 +1192,13 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertNotNull(syncCallback.kinveyPushResponse)
         assertEquals(syncCallback.kinveyPushResponse?.successCount, 3)
         assertNotNull(syncCallback.kinveyPullResponse)
-        assertEquals(syncCallback.kinveyPullResponse?.count?.toLong(), 5)
+        assertEquals(syncCallback.kinveyPullResponse?.count, 5)
         val findCallbackSync = find(storeSync, LONG_TIMEOUT)
         assertNotNull(findCallbackSync.result)
-        assertEquals(findCallbackSync.result?.result?.size?.toLong(), 5)
+        assertEquals(findCallbackSync.result?.result?.size, 5)
         val findCallbackNetwork = find(storeNetwork, LONG_TIMEOUT)
         assertNotNull(findCallbackNetwork.result)
-        assertEquals(findCallbackNetwork.result?.result?.size?.toLong(), 5)
+        assertEquals(findCallbackNetwork.result?.result?.size, 5)
     }
 
     @Test
@@ -1232,7 +1232,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertNotNull(syncCallback.kinveyPushResponse)
         assertEquals(syncCallback.kinveyPushResponse?.successCount, 3)
         assertNotNull(syncCallback.kinveyPullResponse)
-        assertEquals(syncCallback.kinveyPullResponse?.count?.toLong(), 3)
+        assertEquals(syncCallback.kinveyPullResponse?.count, 3)
     }
 
     @Test
@@ -1278,7 +1278,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         createAndSavePerson(storeNetwork, TEST_USERNAME_2)
         val pullCallback = pull(storeAuto, null)
         assertNotNull(pullCallback.result)
-        assertEquals(pullCallback.result?.count?.toLong(), 4)
+        assertEquals(pullCallback.result?.count, 4)
         val deleteCallback = delete(storeNetwork, userId, DEFAULT_TIMEOUT)
         assertNull(deleteCallback.error)
         assertNotNull(deleteCallback.result)
@@ -1287,10 +1287,10 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertNotNull(deleteCallbackSecond.result)
         val pullCallbackSecond = pull(storeAuto, null)
         assertNotNull(pullCallbackSecond.result)
-        assertEquals(pullCallbackSecond.result?.count?.toLong(), 2)
+        assertEquals(pullCallbackSecond.result?.count, 2)
         val findCallback = find(storeSync, LONG_TIMEOUT)
         assertNotNull(findCallback.result)
-        assertEquals(findCallback.result?.result?.size?.toLong(), 2)
+        assertEquals(findCallback.result?.result?.size, 2)
     }
 
     @Test
@@ -1320,10 +1320,10 @@ class DataStoreTest() : BaseDataStoreTest() {
         createAndSavePerson(storeNetwork, TEST_USERNAME_2)
         val pullCallback = pull(storeAuto, null)
         assertNotNull(pullCallback.result)
-        assertEquals(pullCallback.result?.count?.toLong(), 2)
+        assertEquals(pullCallback.result?.count, 2)
         val findCallback = find(storeSync, LONG_TIMEOUT)
         assertNotNull(findCallback.result)
-        assertEquals(findCallback.result?.result?.size?.toLong(), 2)
+        assertEquals(findCallback.result?.result?.size, 2)
     }
 
     @Test
@@ -1357,7 +1357,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         createAndSavePerson(storeNetwork, TEST_USERNAME_2)
         val pullCallback = pull(storeAuto, null)
         assertNotNull(pullCallback.result)
-        assertEquals(pullCallback.result?.count?.toLong(), 3)
+        assertEquals(pullCallback.result?.count, 3)
         val kinveyReadCallback = find(storeSync, LONG_TIMEOUT)
         val personFirst = kinveyReadCallback.result?.result?.get(1)
         personFirst?.weight = 15
@@ -1369,10 +1369,10 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertNotNull(deleteCallback.result)
         val pullCallbackSecond = pull(storeAuto, null)
         assertNotNull(pullCallbackSecond.result)
-        assertEquals(pullCallbackSecond.result?.count?.toLong(), 2)
+        assertEquals(pullCallbackSecond.result?.count, 2)
         val findCallback = find(storeSync, LONG_TIMEOUT)
         assertNotNull(findCallback.result)
-        assertEquals(findCallback.result?.result?.size?.toLong(), 2)
+        assertEquals(findCallback.result?.result?.size, 2)
         findCallback.result?.result?.forEach { personFollowing ->
             if (personFollowing.weight == 15L) {
                 countUpdatedItems++
@@ -1397,7 +1397,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         createAndSavePerson(storeNetwork, TEST_USERNAME)
         val pullCallback = pull(storeAuto, null)
         assertNotNull(pullCallback.result)
-        assertEquals(pullCallback.result?.count?.toLong(), 4)
+        assertEquals(pullCallback.result?.count, 4)
         val kinveyReadCallback = find(storeSync, LONG_TIMEOUT)
         val personFirst = kinveyReadCallback.result?.result?.get(0)
         personFirst?.weight = 15
@@ -1411,7 +1411,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertNull(saveSecond.error)
         val pullCallbackSecond = pull(storeAuto, null)
         assertNotNull(pullCallbackSecond.result)
-        assertEquals(pullCallbackSecond.result!!.count.toLong(), 4)
+        assertEquals(pullCallbackSecond.result?.count, 4)
         val kinveyReadCallbackSecond = find(storeSync, LONG_TIMEOUT)
         kinveyReadCallbackSecond.result?.result?.forEach { person ->
             if (person.weight == 15L) { countUpdatedItems++ }
@@ -1433,10 +1433,10 @@ class DataStoreTest() : BaseDataStoreTest() {
         createAndSavePerson(storeNetwork, TEST_USERNAME)
         val pullCallback = pull(storeAuto, null, 2)
         assertNotNull(pullCallback.result)
-        assertEquals(pullCallback.result?.count?.toLong(), 4)
+        assertEquals(pullCallback.result?.count, 4)
         val findCallback = find(storeSync, LONG_TIMEOUT)
         assertNotNull(findCallback.result)
-        assertEquals(findCallback.result?.result?.size?.toLong(), 4)
+        assertEquals(findCallback.result?.result?.size, 4)
     }
 
     @Test
@@ -1462,10 +1462,10 @@ class DataStoreTest() : BaseDataStoreTest() {
         query = query.equals("weight", 2)
         val pullCallback = pull(storeAuto, query)
         assertNotNull(pullCallback.result)
-        assertEquals(pullCallback.result?.count?.toLong(), 2)
+        assertEquals(pullCallback.result?.count, 2)
         val findCallback = find(storeSync, LONG_TIMEOUT)
         assertNotNull(findCallback.result)
-        assertEquals(findCallback.result?.result?.size?.toLong(), 2)
+        assertEquals(findCallback.result?.result?.size, 2)
     }
 
     @Test
@@ -1524,7 +1524,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertEquals(pushCallback.result?.successCount, 2)
         val findCallback = find(storeNetwork, LONG_TIMEOUT)
         assertNotNull(findCallback.result)
-        assertEquals(findCallback.result?.result?.size?.toLong(), 2)
+        assertEquals(findCallback.result?.result?.size, 2)
         assertEquals(pendingSyncEntities(COLLECTION), null)
     }
 
@@ -1540,7 +1540,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         createAndSavePerson(storeNetwork, TEST_USERNAME_2)
         val pullCallback = pull(storeAuto, null)
         assertNotNull(pullCallback.result)
-        assertEquals(pullCallback.result?.count?.toLong(), 2)
+        assertEquals(pullCallback.result?.count, 2)
         val kinveyReadCallback = find(storeSync, LONG_TIMEOUT)
         val personFirst = kinveyReadCallback.result?.result?.get(0)
         personFirst?.weight = 15
@@ -1552,7 +1552,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertEquals(pushCallback.result?.successCount, 1)
         val findCallback = find(storeNetwork, LONG_TIMEOUT)
         assertNotNull(findCallback.result)
-        assertEquals(findCallback.result?.result?.size?.toLong(), 2)
+        assertEquals(findCallback.result?.result?.size, 2)
         assertEquals(pendingSyncEntities(COLLECTION), null)
     }
 
@@ -1577,7 +1577,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         createAndSavePerson(storeNetwork, TEST_USERNAME)
         val pullCallback = pull(storeAuto, null)
         assertNotNull(pullCallback.result)
-        assertEquals(pullCallback.result?.count?.toLong(), 3)
+        assertEquals(pullCallback.result?.count, 3)
         val deleteCallback = delete(storeSync, userId, DEFAULT_TIMEOUT)
         assertNull(deleteCallback.error)
         assertNotNull(deleteCallback.result)
@@ -1589,7 +1589,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertEquals(pushCallback.result?.successCount, 2)
         val findCallback = find(storeNetwork, LONG_TIMEOUT)
         assertNotNull(findCallback.result)
-        assertEquals(findCallback.result?.result?.size?.toLong(), 1)
+        assertEquals(findCallback.result?.result?.size, 1)
         assertEquals(pendingSyncEntities(COLLECTION), null)
     }
 
@@ -1738,7 +1738,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         createAndSavePerson(storeNetwork, TEST_USERNAME_2)
         val findCallbackAuto = find(storeAuto, LONG_TIMEOUT)
         assertNotNull(findCallbackAuto.result)
-        assertEquals(findCallbackAuto.result?.result?.size?.toLong(), 2)
+        assertEquals(findCallbackAuto.result?.result?.size, 2)
         createAndSavePerson(storeNetwork, TEST_TEMP_USERNAME)
         mockInvalidConnection()
         assertTrue(storeAuto.count() == 2)
@@ -2251,7 +2251,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         }
 
         val cachedObjects = client?.cacheManager?.getCache(COLLECTION, Person::class.java, StoreType.SYNC.ttl)?.get(ids)
-        assertEquals(100, cachedObjects?.size?.toLong())
+        assertEquals(100, cachedObjects?.size)
         cachedObjects?.indices?.forEach { i ->
             val res = cachedObjects[i]
             assertEquals(res.id, i.toString())
@@ -2475,10 +2475,10 @@ class DataStoreTest() : BaseDataStoreTest() {
         query?.setLimit(1)
         (0..4).forEach { i ->
             query?.setSkip(i)
-            assertEquals(1, pull(store, query).result?.count?.toLong())
+            assertEquals(1, pull(store, query).result?.count)
             assertEquals(i + 1.toLong(), getCacheSize(StoreType.SYNC))
         }
-        assertEquals(5, getCacheSize(StoreType.SYNC))
+        assertEquals(5L, getCacheSize(StoreType.SYNC))
     }
 
     @Test
@@ -2589,7 +2589,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         }
         sync(store, DEFAULT_TIMEOUT)
         var findResult = find(store, client?.query(), DEFAULT_TIMEOUT).result?.result
-        assertEquals(5, findResult?.size?.toLong())
+        assertEquals(5, findResult?.size)
         client?.cacheManager?.getCache(COLLECTION, Person::class.java, StoreType.SYNC.ttl)?.clear()
         var pullResults: List<Person?>
         var resultCount: Int
@@ -2602,7 +2602,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         }
         assertEquals(5, getCacheSize(StoreType.SYNC))
         findResult = find(store, client?.query(), DEFAULT_TIMEOUT).result?.result
-        assertEquals(5, findResult?.size?.toLong())
+        assertEquals(5, findResult?.size)
         assertEquals(5, getCacheSize(StoreType.SYNC))
         client?.cacheManager?.getCache(COLLECTION, Person::class.java, StoreType.SYNC.ttl)?.clear()
         query = client?.query()?.addSort(ID, SortOrder.ASC)
@@ -2617,7 +2617,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         }
         assertEquals(5, getCacheSize(StoreType.SYNC))
         findResult = find(store, client?.query(), DEFAULT_TIMEOUT).result?.result
-        assertEquals(5, findResult?.size?.toLong())
+        assertEquals(5, findResult?.size)
         assertEquals(5, getCacheSize(StoreType.SYNC))
     }
 
@@ -2746,12 +2746,14 @@ class DataStoreTest() : BaseDataStoreTest() {
         cleanBackendDataStore(store)
         sync(store, 120)
         val user = client?.activeUser
+
         (0..9).forEach { i ->
             val person = createPerson("Person_$i")
             val saveCallback = save(store, person)
             assertNull(saveCallback.error)
             assertNotNull(saveCallback.result)
         }
+
         var skip = 0
         val limit = 2
         var kinveyListCallback: DefaultKinveyReadCallback
@@ -2762,47 +2764,64 @@ class DataStoreTest() : BaseDataStoreTest() {
             kinveyListCallback = find(store, query, DEFAULT_TIMEOUT)
             assertNull(kinveyListCallback.error)
             assertNotNull(kinveyListCallback.result)
-            assertEquals(kinveyListCallback.result?.result?.get(0)?.username, "Person_$skip")
-            assertEquals(kinveyListCallback.result?.result?.get(1)?.username, "Person_" + (skip + 1))
+            val resultList = kinveyListCallback.result?.result
+            assertEquals(resultList?.get(0)?.username, "Person_$skip")
+            assertEquals(resultList?.get(1)?.username, "Person_" + (skip + 1))
             skip += limit
         }
+
         query = client?.query()
         query?.setLimit(5)
         kinveyListCallback = find(store, query, DEFAULT_TIMEOUT)
+        var resultList = kinveyListCallback.result?.result
+        var size = resultList?.size ?: 0
         assertNull(kinveyListCallback.error)
         assertNotNull(kinveyListCallback.result)
-        assertTrue(kinveyListCallback.result?.result?.size == 5)
-        assertEquals(kinveyListCallback.result?.result?.get(0)?.username, "Person_0")
-        assertEquals(kinveyListCallback.result?.result?.get(kinveyListCallback.result?.result?.size ?: 0 - 1)?.username, "Person_4")
+        assertTrue(size == 5)
+        assertEquals(resultList?.get(0)?.username, "Person_0")
+        assertEquals(resultList?.get(size - 1)?.username, "Person_4")
+
         query = client?.query()
         query?.setSkip(5)
         kinveyListCallback = find(store, query, DEFAULT_TIMEOUT)
         assertNull(kinveyListCallback.error)
         assertNotNull(kinveyListCallback.result)
-        assertTrue(kinveyListCallback.result?.result?.size == 5)
-        assertEquals(kinveyListCallback.result?.result?.get(0)?.username, "Person_5")
-        assertEquals(kinveyListCallback.result?.result?.get(kinveyListCallback.result?.result?.size ?: 0 - 1)?.username, "Person_9")
+        resultList = kinveyListCallback.result?.result
+        size = resultList?.size ?: 0
+        assertTrue(size == 5)
+        assertEquals(resultList?.get(0)?.username, "Person_5")
+        assertEquals(resultList?.get(size - 1)?.username, "Person_9")
+
         query = client?.query()
         query?.setLimit(6)
         query?.setSkip(6)
         kinveyListCallback = find(store, query, DEFAULT_TIMEOUT)
         assertNull(kinveyListCallback.error)
         assertNotNull(kinveyListCallback.result)
-        assertTrue(kinveyListCallback.result?.result?.size == 4)
-        assertEquals(kinveyListCallback.result?.result?.get(0)?.username, "Person_6")
-        assertEquals(kinveyListCallback.result?.result?.get(kinveyListCallback.result?.result?.size ?: 0 - 1)?.username, "Person_9")
+        resultList = kinveyListCallback.result?.result
+        size = resultList?.size ?: 0
+        assertTrue(size == 4)
+        assertEquals(resultList?.get(0)?.username, "Person_6")
+        assertEquals(resultList?.get(size - 1)?.username, "Person_9")
+
         query = client?.query()
         query?.setSkip(10)
         kinveyListCallback = find(store, query, DEFAULT_TIMEOUT)
         assertNull(kinveyListCallback.error)
         assertNotNull(kinveyListCallback.result)
-        assertTrue(kinveyListCallback.result?.result?.size == 0)
+        resultList = kinveyListCallback.result?.result
+        size = resultList?.size ?: 0
+        assertTrue(size == 0)
+
         query = client?.query()
         query?.setSkip(11)
         kinveyListCallback = find(store, query, DEFAULT_TIMEOUT)
         assertNull(kinveyListCallback.error)
         assertNotNull(kinveyListCallback.result)
-        assertTrue(kinveyListCallback.result?.result?.size == 0)
+        resultList = kinveyListCallback.result?.result
+        size = resultList?.size ?: 0
+        assertTrue(size == 0)
+
         val pushCallback = push(store, DEFAULT_TIMEOUT)
         assertNull(pushCallback.error)
         assertNotNull(pushCallback.result)
@@ -2858,7 +2877,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertNotNull(findCallback.result)
         val people = findCallback.result?.result
         assertNotNull(people)
-        assertEquals(1, people?.size?.toLong())
+        assertEquals(1, people?.size)
         val savedPerson = people?.get(0)
         assertNotNull(savedPerson?.get(KMD))
         assertNotNull((savedPerson?.get(KMD) as GenericJson)[LMT])
@@ -2881,7 +2900,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertNotNull(findCallback)
         assertNotNull(findCallback.result)
         val people = findCallback.result?.result
-        assertEquals(1, people?.size?.toLong())
+        assertEquals(1, people?.size)
         var syncedPerson = people?.get(0)
         assertNotNull(syncedPerson?.get(KMD))
         val savedLmd = (syncedPerson?.get(KMD) as GenericJson)[LMT] as String
@@ -2928,9 +2947,9 @@ class DataStoreTest() : BaseDataStoreTest() {
         persons.add(Person(TEST_TEMP_USERNAME))
         val saveCallback = testManager.saveCustomList(store, persons)
         assertNotNull(saveCallback.getResult())
-        assertEquals(3, saveCallback.getResult()?.size?.toLong())
+        assertEquals(3, saveCallback.getResult()?.size)
         val cachedItems = client?.cacheManager?.getCache(COLLECTION, Person::class.java, StoreType.CACHE.ttl)?.get()
-        assertEquals(3, cachedItems?.size?.toLong())
+        assertEquals(3, cachedItems?.size)
     }
 
     @Test
@@ -2984,9 +3003,9 @@ class DataStoreTest() : BaseDataStoreTest() {
         persons.add(Person(TEST_TEMP_USERNAME))
         val saveCallback = testManager.saveCustomList(store, persons)
         assertNotNull(saveCallback.getResult())
-        assertEquals(3, saveCallback.getResult()?.size?.toLong())
+        assertEquals(3, saveCallback.getResult()?.size)
         val cachedItems = client?.cacheManager?.getCache(COLLECTION, Person::class.java, StoreType.AUTO.ttl)?.get()
-        assertEquals(3, cachedItems?.size?.toLong())
+        assertEquals(3, cachedItems?.size)
     }
 
     @Test
@@ -3905,7 +3924,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         val updatedPersonWithoutList = store.find(client?.query()?.equals("username", "updated_person_name"))?.result?.get(0)
         assertNotNull(updatedPersonWithoutList)
         assertEquals("updated_person_name", updatedPersonWithoutList?.username)
-        assertEquals(0, updatedPersonWithoutList?.list?.size?.toLong())
+        assertEquals(0, updatedPersonWithoutList?.list?.size)
     }
 
     @Test
@@ -3929,9 +3948,10 @@ class DataStoreTest() : BaseDataStoreTest() {
         val deleteCallback = delete(store, callback.result?.id, DEFAULT_TIMEOUT)
         assertNotNull(deleteCallback.result)
         sync(store, DEFAULT_TIMEOUT)
-        assertEquals(0, find(store, client?.query()?.equals(Constants._ID,
-                callback.result?.id), DEFAULT_TIMEOUT).result?.result?.size?.toLong())
-        assertEquals(0, client?.syncManager?.getCount(COLLECTION))
+        val findQuery = client?.query()?.equals(Constants._ID, callback.result?.id)
+        val findByIdResult = find(store, findQuery, DEFAULT_TIMEOUT).result?.result?.size
+        assertEquals(0, findByIdResult)
+        assertEquals(0L, client?.syncManager?.getCount(COLLECTION))
     }
 
     @Test
@@ -3946,8 +3966,8 @@ class DataStoreTest() : BaseDataStoreTest() {
         val deleteCallback = delete(store, callback.result?.id, DEFAULT_TIMEOUT)
         assertNotNull(deleteCallback.result)
         sync(store, DEFAULT_TIMEOUT)
-        assertEquals(0, find(store, client?.query()?.equals(Constants._ID, callback.result?.id), DEFAULT_TIMEOUT).result?.result?.size?.toLong())
-        assertEquals(0, client?.syncManager?.getCount(COLLECTION))
+        assertEquals(0, find(store, client?.query()?.equals(Constants._ID, callback.result?.id), DEFAULT_TIMEOUT).result?.result?.size)
+        assertEquals(0L, client?.syncManager?.getCount(COLLECTION))
     }
 
     @Test
@@ -3981,7 +4001,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         val kinveyListCallback = find(store, ids, DEFAULT_TIMEOUT, null)
         assertNull(kinveyListCallback.error)
         assertNotNull(kinveyListCallback.result)
-        assertEquals(2, kinveyListCallback.result?.result?.size?.toLong())
+        assertEquals(2, kinveyListCallback.result?.result?.size)
         store.clear()
     }
 
@@ -4001,16 +4021,16 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertNotNull(saveCallback.result?.id)
         ids.add(saveCallback.result?.id ?: "")
 
-        val cachedCallback = CustomKinveyCachedCallback<KinveyReadResponse<Person>>()
+        val cachedCallback = CustomKinveyCachedCallback<KinveyReadResponse<Person>?>()
         val kinveyListCallback = find(store, ids, DEFAULT_TIMEOUT, cachedCallback)
         assertNull(kinveyListCallback.error)
         assertNotNull(kinveyListCallback.result)
-        assertEquals(2, kinveyListCallback.result?.result?.size?.toLong())
+        assertEquals(2, kinveyListCallback.result?.result?.size)
         assertNotNull(cachedCallback.result)
         assertNull(cachedCallback.error)
         assertNotNull(cachedCallback.result)
         assertNotNull(cachedCallback.result?.result)
-        assertEquals(2, cachedCallback.result?.result?.size?.toLong())
+        assertEquals(2, cachedCallback.result?.result?.size)
         testManager.cleanBackend(store, StoreType.CACHE)
     }
 
@@ -4033,7 +4053,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         val kinveyListCallback = find(store, ids, DEFAULT_TIMEOUT, null)
         assertNull(kinveyListCallback.error)
         assertNotNull(kinveyListCallback.result)
-        assertEquals(2, kinveyListCallback.result?.result?.size?.toLong())
+        assertEquals(2, kinveyListCallback.result?.result?.size)
         testManager.cleanBackend(store, StoreType.AUTO)
     }
 
@@ -4051,7 +4071,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertNotNull(saveCallback.result?.id)
 
         val count = findCount(store, DEFAULT_TIMEOUT, null).result
-        assertEquals(2, count?.toLong())
+        assertEquals(2, count)
         store.clear()
     }
 
