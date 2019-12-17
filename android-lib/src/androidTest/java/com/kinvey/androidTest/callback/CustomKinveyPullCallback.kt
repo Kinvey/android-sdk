@@ -14,12 +14,12 @@ class CustomKinveyPullCallback(private val latch: CountDownLatch) : KinveyPullCa
     var error: Throwable? = null
         private set
 
-    override fun onSuccess(result: KinveyPullResponse) {
+    override fun onSuccess(result: KinveyPullResponse?) {
         this.result = result
         finish()
     }
 
-    override fun onFailure(error: Throwable) {
+    override fun onFailure(error: Throwable?) {
         this.error = error
         finish()
     }

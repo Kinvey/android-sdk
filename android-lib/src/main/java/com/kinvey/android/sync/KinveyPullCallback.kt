@@ -28,10 +28,10 @@ interface KinveyPullCallback : KinveyClientCallback<KinveyPullResponse> {
     /**
      * Used to indicate successful execution of a request by the background service.
      */
-    override fun onSuccess(result: KinveyPullResponse)
+    override fun onSuccess(result: KinveyPullResponse?)
 
     /**
      * Used to indicate the failed execution of a request by the background service.
      */
-    override fun onFailure(error: Throwable)
+    override fun onFailure(error: Throwable?)
 }

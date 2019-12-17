@@ -14,12 +14,12 @@ class DefaultKinveyAggregateCallback(private val latch: CountDownLatch) : Kinvey
     var error: Throwable? = null
         private set
 
-    override fun onFailure(error: Throwable) {
+    override fun onFailure(error: Throwable?) {
         this.error = error
         finish()
     }
 
-    override fun onSuccess(response: Aggregation) {
+    override fun onSuccess(response: Aggregation?) {
         result = response
         finish()
     }

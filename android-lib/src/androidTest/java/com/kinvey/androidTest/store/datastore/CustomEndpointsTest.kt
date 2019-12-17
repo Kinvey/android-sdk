@@ -44,12 +44,12 @@ class CustomEndpointsTest {
                 Looper.prepare()
                 try {
                     login<User>(TestManager.USERNAME, TestManager.PASSWORD, client as AbstractClient<User>, object : KinveyClientCallback<User> {
-                        override fun onSuccess(result: User) {
+                        override fun onSuccess(result: User?) {
                             assertNotNull(result)
                             latch.countDown()
                         }
 
-                        override fun onFailure(error: Throwable) {
+                        override fun onFailure(error: Throwable?) {
                             assertNull(error)
                             latch.countDown()
                         }
@@ -256,12 +256,12 @@ class CustomEndpointsTest {
     private class DefaultKinveyClientCallback<T>(private val latch: CountDownLatch) : KinveyClientCallback<T> {
         var result: T? = null
         var error: Throwable? = null
-        override fun onSuccess(result: T) {
+        override fun onSuccess(result: T?) {
             this.result = result
             finish()
         }
 
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -275,7 +275,7 @@ class CustomEndpointsTest {
     private class DefaultKinveyListCallback<T>(private val latch: CountDownLatch) : KinveyListCallback<T> {
         var result: List<*>? = null
         var error: Throwable? = null
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -284,7 +284,7 @@ class CustomEndpointsTest {
             latch.countDown()
         }
 
-        override fun onSuccess(result: List<T>) {
+        override fun onSuccess(result: List<T>?) {
             this.result = result
             finish()
         }

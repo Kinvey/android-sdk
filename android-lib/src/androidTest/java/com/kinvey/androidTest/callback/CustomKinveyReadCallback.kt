@@ -19,7 +19,7 @@ class CustomKinveyReadCallback<T>(private val latch: CountDownLatch) : KinveyRea
         finish()
     }
 
-    override fun onFailure(error: Throwable) {
+    override fun onFailure(error: Throwable?) {
         this.error = error
         finish()
     }

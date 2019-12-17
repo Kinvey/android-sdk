@@ -7,11 +7,11 @@ import com.kinvey.java.core.KinveyClientCallback
 
 open class KinveyCallbackHandler<T> : Handler() {
 
-    fun onResult(t: T, callback: KinveyClientCallback<T>?) {
+    fun onResult(t: T?, callback: KinveyClientCallback<T>?) {
         this.post { callback?.onSuccess(t) }
     }
 
-    fun onFailure(error: Throwable, callback: KinveyClientCallback<T>?) {
+    fun onFailure(error: Throwable?, callback: KinveyClientCallback<T>?) {
         this.post { callback?.onFailure(error) }
     }
 

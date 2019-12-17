@@ -80,11 +80,11 @@ class AsyncPushRequestTest {
     }
 
     protected class KinveyPushCallbackAdapter(private val latch: CountDownLatch) : KinveyPushCallback {
-        override fun onSuccess(result: KinveyPushResponse) {
+        override fun onSuccess(result: KinveyPushResponse?) {
             latch.countDown()
         }
 
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             latch.countDown()
         }
 
@@ -120,11 +120,11 @@ class AsyncPushRequestTest {
     protected class DefaultKinveyPushCallback internal constructor(private val latch: CountDownLatch) : KinveyPushCallback {
         internal var result: KinveyPushResponse? = null
         internal var error: Throwable? = null
-        override fun onSuccess(result: KinveyPushResponse) {
+        override fun onSuccess(result: KinveyPushResponse?) {
             this.result = result
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }

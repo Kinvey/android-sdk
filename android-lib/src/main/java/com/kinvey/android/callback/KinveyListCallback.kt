@@ -18,6 +18,6 @@ package com.kinvey.android.callback
 import com.kinvey.java.core.KinveyClientCallback
 
 interface KinveyListCallback<T> : KinveyClientCallback<List<T>> {
-    override fun onSuccess(result: List<T>)
-    override fun onFailure(error: Throwable)
+    override fun onSuccess(result: List<T>?)
+    override fun onFailure(error: Throwable?)
 }

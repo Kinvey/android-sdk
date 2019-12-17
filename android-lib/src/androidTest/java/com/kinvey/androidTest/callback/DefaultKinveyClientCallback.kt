@@ -14,12 +14,12 @@ class DefaultKinveyClientCallback(private val latch: CountDownLatch) : KinveyCli
     var error: Throwable? = null
         private set
 
-    override fun onSuccess(result: Person) {
+    override fun onSuccess(result: Person?) {
         this.result = result
         finish()
     }
 
-    override fun onFailure(error: Throwable) {
+    override fun onFailure(error: Throwable?) {
         this.error = error
         finish()
     }

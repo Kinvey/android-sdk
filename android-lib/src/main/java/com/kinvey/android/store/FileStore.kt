@@ -149,11 +149,11 @@ class FileStore(networkFileManager: NetworkFileManager,
             handler = KinveyCallbackHandler()
         }
 
-        override fun onSuccess(result: T) {
+        override fun onSuccess(result: T?) {
             handler.onResult(result, callback)
         }
 
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             handler.onFailure(error, callback)
 
         }

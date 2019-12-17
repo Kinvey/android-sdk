@@ -13,12 +13,12 @@ class CustomKinveyListCallback<T>(private val latch: CountDownLatch) : KinveyLis
     var error: Throwable? = null
         private set
 
-    override fun onSuccess(result: List<T>) {
+    override fun onSuccess(result: List<T>?) {
         this.result = result
         finish()
     }
 
-    override fun onFailure(error: Throwable) {
+    override fun onFailure(error: Throwable?) {
         this.error = error
         finish()
     }

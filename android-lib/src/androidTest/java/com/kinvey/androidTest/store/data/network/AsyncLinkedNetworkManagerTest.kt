@@ -52,12 +52,12 @@ class AsyncLinkedNetworkManagerTest {
             looperThread = LooperThread(Runnable {
                 try {
                     login(USERNAME, PASSWORD, client as Client<User>, object : KinveyClientCallback<User> {
-                        override fun onSuccess(result: User) {
+                        override fun onSuccess(result: User?) {
                             Assert.assertNotNull(result)
                             latch.countDown()
                         }
 
-                        override fun onFailure(error: Throwable) {
+                        override fun onFailure(error: Throwable?) {
                             Assert.assertNull(error)
                             latch.countDown()
                         }
@@ -77,12 +77,12 @@ class AsyncLinkedNetworkManagerTest {
     private class DefaultKinveyClientCallback<T>(private val latch: CountDownLatch) : KinveyClientCallback<T> {
         var result: T? = null
         var error: Throwable? = null
-        override fun onSuccess(result: T) {
+        override fun onSuccess(result: T?) {
             this.result = result
             finish()
         }
 
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -149,7 +149,7 @@ class AsyncLinkedNetworkManagerTest {
             finish()
         }
 
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }

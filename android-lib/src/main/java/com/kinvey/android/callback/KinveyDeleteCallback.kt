@@ -22,7 +22,7 @@ import com.kinvey.java.core.KinveyClientCallback
  * @author edwardf
  * @since 2.0
  */
-interface KinveyDeleteCallback : KinveyClientCallback<Int?> {
+interface KinveyDeleteCallback : KinveyClientCallback<Int> {
     /**
      * Used to indicate successful execution of a request by the background service.
      *
@@ -35,5 +35,5 @@ interface KinveyDeleteCallback : KinveyClientCallback<Int?> {
      *
      * @param error error
      */
-    override fun onFailure(error: Throwable)
+    override fun onFailure(error: Throwable?)
 }

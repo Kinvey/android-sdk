@@ -40,11 +40,11 @@ class ClientTest {
     private class KinveyPingCallbackAdapter(private val latch: CountDownLatch) : KinveyPingCallback {
         var result: Boolean? = null
         var error: Throwable? = null
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             latch.countDown()
         }
-        override fun onSuccess(result: Boolean) {
+        override fun onSuccess(result: Boolean?) {
             this.result = result
             latch.countDown()
         }

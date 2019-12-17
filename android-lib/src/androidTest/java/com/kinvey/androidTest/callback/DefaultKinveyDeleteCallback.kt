@@ -18,7 +18,7 @@ class DefaultKinveyDeleteCallback(private val latch: CountDownLatch) : KinveyDel
         finish()
     }
 
-    override fun onFailure(error: Throwable) {
+    override fun onFailure(error: Throwable?) {
         this.error = error
         finish()
     }

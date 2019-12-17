@@ -52,12 +52,12 @@ class QueryNetworkTest {
                 try {
                     login<User>(TestManager.USERNAME, TestManager.PASSWORD, client as AbstractClient<User>,
                     object : KinveyClientCallback<User> {
-                        override fun onSuccess(result: User) {
+                        override fun onSuccess(result: User?) {
                             assertNotNull(result)
                             latch.countDown()
                         }
 
-                        override fun onFailure(error: Throwable) {
+                        override fun onFailure(error: Throwable?) {
                             assertNull(error)
                             latch.countDown()
                         }
@@ -118,14 +118,14 @@ class QueryNetworkTest {
         return Person(name)
     }
 
-    private class DefaultKinveyClientCallback(val latch: CountDownLatch) : KinveyClientCallback<Person> {
+    private class DefaultKinveyClientCallback(val latch: CountDownLatch) : KinveyClientCallback<Person?> {
         var result: Person? = null
         var error: Throwable? = null
-        override fun onSuccess(result: Person) {
+        override fun onSuccess(result: Person?) {
             this.result = result
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -134,14 +134,14 @@ class QueryNetworkTest {
         }
     }
 
-    private class DefaultKinveyLocationCallback(val latch: CountDownLatch) : KinveyClientCallback<Location> {
+    private class DefaultKinveyLocationCallback(val latch: CountDownLatch) : KinveyClientCallback<Location?> {
         var result: Location? = null
         var error: Throwable? = null
-        override fun onSuccess(result: Location) {
+        override fun onSuccess(result: Location?) {
             this.result = result
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -157,7 +157,7 @@ class QueryNetworkTest {
             this.result = result
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -173,7 +173,7 @@ class QueryNetworkTest {
             this.result = result
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }

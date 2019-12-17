@@ -49,7 +49,7 @@ class QueryWithRealDataTest {
             finish()
         }
 
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -69,7 +69,7 @@ class QueryWithRealDataTest {
             finish()
         }
 
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -90,12 +90,12 @@ class QueryWithRealDataTest {
             looperThread = LooperThread(Runnable {
                 try {
                     login(TestManager.USERNAME, TestManager.PASSWORD, client as AbstractClient<User>, object : KinveyClientCallback<User> {
-                        override fun onSuccess(result: User) {
+                        override fun onSuccess(result: User?) {
                             assertNotNull(result)
                             latch.countDown()
                         }
 
-                        override fun onFailure(error: Throwable) {
+                        override fun onFailure(error: Throwable?) {
                             assertNull(error)
                             latch.countDown()
                         }

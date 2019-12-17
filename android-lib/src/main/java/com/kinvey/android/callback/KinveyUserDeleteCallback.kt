@@ -24,7 +24,7 @@ import com.kinvey.java.core.KinveyClientCallback
  * @since 2.0
  */
 interface KinveyUserDeleteCallback : KinveyClientCallback<Void> {
-    override fun onSuccess(result: Void)
+    override fun onSuccess(result: Void?)
 
-    override fun onFailure(error: Throwable)
+    override fun onFailure(error: Throwable?)
 }

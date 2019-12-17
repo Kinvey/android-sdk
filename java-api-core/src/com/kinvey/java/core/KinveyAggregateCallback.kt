@@ -21,10 +21,10 @@ import com.kinvey.java.model.Aggregation
 /**
  * @author edwardf
  */
-abstract class KinveyAggregateCallback : KinveyClientCallback<Aggregation> {
+abstract class KinveyAggregateCallback : KinveyClientCallback<Aggregation?> {
 
-    abstract override fun onFailure(error: Throwable)
+    abstract override fun onFailure(error: Throwable?)
 
-    abstract override fun onSuccess(response: Aggregation)
+    abstract override fun onSuccess(response: Aggregation?)
 
 }

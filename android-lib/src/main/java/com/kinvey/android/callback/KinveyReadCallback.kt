@@ -23,7 +23,7 @@ import com.kinvey.java.model.KinveyReadResponse
  * @author edwardf
  * @since 2.0
  */
-interface KinveyReadCallback<T> : KinveyClientCallback<KinveyReadResponse<T>?> {
+interface KinveyReadCallback<T> : KinveyClientCallback<KinveyReadResponse<T>> {
     override fun onSuccess(result: KinveyReadResponse<T>?)
-    override fun onFailure(error: Throwable)
+    override fun onFailure(error: Throwable?)
 }

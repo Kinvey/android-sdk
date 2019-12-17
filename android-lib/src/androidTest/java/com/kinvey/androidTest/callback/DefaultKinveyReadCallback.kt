@@ -20,7 +20,7 @@ class DefaultKinveyReadCallback(private val latch: CountDownLatch) : KinveyReadC
         finish()
     }
 
-    override fun onFailure(error: Throwable) {
+    override fun onFailure(error: Throwable?) {
         this.error = error
         finish()
     }

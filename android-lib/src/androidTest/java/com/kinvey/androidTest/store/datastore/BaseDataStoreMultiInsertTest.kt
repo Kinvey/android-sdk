@@ -65,12 +65,12 @@ open class BaseDataStoreMultiInsertTest {
             looperThread = LooperThread(Runnable {
                 try {
                     UserStore.login(TestManager.USERNAME, TestManager.PASSWORD, client as Client<User>, object : KinveyClientCallback<User> {
-                        override fun onSuccess(result: User) {
+                        override fun onSuccess(result: User?) {
                             Assert.assertNotNull(result)
                             latch.countDown()
                         }
 
-                        override fun onFailure(error: Throwable) {
+                        override fun onFailure(error: Throwable?) {
                             Assert.assertNull(error)
                             latch.countDown()
                         }
@@ -87,16 +87,16 @@ open class BaseDataStoreMultiInsertTest {
         looperThread?.mHandler?.sendMessage(Message())
     }
 
-    protected class DefaultKinveyClientCallback<T : GenericJson> (private val latch: CountDownLatch) : KinveyClientCallback<T> {
+    protected class DefaultKinveyClientCallback<T : GenericJson> (private val latch: CountDownLatch) : KinveyClientCallback<T?> {
         var result: T? = null
         var error: Throwable? = null
 
-        override fun onSuccess(result: T) {
+        override fun onSuccess(result: T?) {
             this.result = result
             finish()
         }
 
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -110,12 +110,12 @@ open class BaseDataStoreMultiInsertTest {
         var result: List<T>? = null
         var error: Throwable? = null
 
-        override fun onSuccess(result: List<T>) {
+        override fun onSuccess(result: List<T>?) {
             this.result = result
             finish()
         }
 
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -134,7 +134,7 @@ open class BaseDataStoreMultiInsertTest {
             finish()
         }
 
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -153,7 +153,7 @@ open class BaseDataStoreMultiInsertTest {
             finish()
         }
 
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -167,12 +167,12 @@ open class BaseDataStoreMultiInsertTest {
         var result: KinveyPushResponse? = null
         var error: Throwable? = null
 
-        override fun onSuccess(result: KinveyPushResponse) {
+        override fun onSuccess(result: KinveyPushResponse?) {
             this.result = result
             finish()
         }
 
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }

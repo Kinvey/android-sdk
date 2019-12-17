@@ -48,10 +48,10 @@ class AsyncTaskTest {
             Looper.prepare()
             currentLooper = Looper.myLooper()
             AsyncTest(1, object: KinveyClientCallback<Int> {
-                override fun onSuccess(result: Int) {
+                override fun onSuccess(result: Int?) {
                     finish()
                 }
-                override fun onFailure(error: Throwable) {
+                override fun onFailure(error: Throwable?) {
                     finish()
                 }
                 fun finish() {

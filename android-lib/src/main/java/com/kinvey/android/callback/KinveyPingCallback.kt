@@ -25,6 +25,6 @@ import com.kinvey.java.core.KinveyClientCallback
  * @since 2.0
  */
 interface KinveyPingCallback : KinveyClientCallback<Boolean> {
-    override fun onSuccess(result: Boolean)
-    override fun onFailure(error: Throwable)
+    override fun onSuccess(result: Boolean?)
+    override fun onFailure(error: Throwable?)
 }

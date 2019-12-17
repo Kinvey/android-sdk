@@ -66,12 +66,12 @@ open class BaseDataStoreTest {
             looperThread = LooperThread(Runnable {
                 try {
                     login<User>(TestManager.USERNAME, TestManager.PASSWORD, client as AbstractClient<User>, object : KinveyClientCallback<User> {
-                        override fun onSuccess(result: User) {
+                        override fun onSuccess(result: User?) {
                             assertNotNull(result)
                             latch.countDown()
                         }
 
-                        override fun onFailure(error: Throwable) {
+                        override fun onFailure(error: Throwable?) {
                             assertNull(error)
                             latch.countDown()
                         }
@@ -88,14 +88,14 @@ open class BaseDataStoreTest {
         looperThread?.mHandler?.sendMessage(Message())
     }
 
-    class DefaultKinveyClientCallback (private val latch: CountDownLatch) : KinveyClientCallback<Person> {
+    class DefaultKinveyClientCallback (private val latch: CountDownLatch) : KinveyClientCallback<Person?> {
         var result: Person? = null
         var error: Throwable? = null
-        override fun onSuccess(result: Person) {
+        override fun onSuccess(result: Person?) {
             this.result = result
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -104,14 +104,14 @@ open class BaseDataStoreTest {
         }
     }
 
-    class DefaultKinveyEntityCallback (private val latch: CountDownLatch) : KinveyClientCallback<EntitySet> {
+    class DefaultKinveyEntityCallback (private val latch: CountDownLatch) : KinveyClientCallback<EntitySet?> {
         var result: EntitySet? = null
         var error: Throwable? = null
-        override fun onSuccess(result: EntitySet) {
+        override fun onSuccess(result: EntitySet?) {
             this.result = result
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -125,7 +125,7 @@ open class BaseDataStoreTest {
         override fun onSuccess(result: Void?) {
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -134,14 +134,14 @@ open class BaseDataStoreTest {
         }
     }
 
-    class DefaultKinveyClientArrayCallback (private val latch: CountDownLatch) : KinveyClientCallback<PersonArray> {
+    class DefaultKinveyClientArrayCallback (private val latch: CountDownLatch) : KinveyClientCallback<PersonArray?> {
         var result: PersonArray? = null
         var error: Throwable? = null
-        override fun onSuccess(result: PersonArray) {
+        override fun onSuccess(result: PersonArray?) {
             this.result = result
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -179,11 +179,11 @@ open class BaseDataStoreTest {
     class DefaultKinveyPushCallback internal constructor(private val latch: CountDownLatch) : KinveyPushCallback {
         var result: KinveyPushResponse? = null
         var error: Throwable? = null
-        override fun onSuccess(result: KinveyPushResponse) {
+        override fun onSuccess(result: KinveyPushResponse?) {
             this.result = result
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -196,11 +196,11 @@ open class BaseDataStoreTest {
     class DefaultKinveyPullCallback internal constructor(private val latch: CountDownLatch) : KinveyPullCallback {
         var result: KinveyPullResponse? = null
         var error: Throwable? = null
-        override fun onSuccess(result: KinveyPullResponse) {
+        override fun onSuccess(result: KinveyPullResponse?) {
             this.result = result
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -216,7 +216,7 @@ open class BaseDataStoreTest {
             this.result = result
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -232,11 +232,11 @@ open class BaseDataStoreTest {
         constructor(latch: CountDownLatch?): this() {
             this.latch = latch
         }
-        override fun onSuccess(result: Int) {
+        override fun onSuccess(result: Int?) {
             this.result = result
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -252,11 +252,11 @@ open class BaseDataStoreTest {
         constructor(latch: CountDownLatch?): this() {
             this.latch = latch
         }
-        override fun onSuccess(result: T) {
+        override fun onSuccess(result: T?) {
             this.result = result
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -272,7 +272,7 @@ open class BaseDataStoreTest {
             this.result = result
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -288,7 +288,7 @@ open class BaseDataStoreTest {
             this.result = result
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -304,7 +304,7 @@ open class BaseDataStoreTest {
             this.result = result
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -313,14 +313,14 @@ open class BaseDataStoreTest {
         }
     }
 
-    class DefaultKinveyClientEntitySetCallback(private val latch: CountDownLatch) : KinveyClientCallback<EntitySet> {
+    class DefaultKinveyClientEntitySetCallback(private val latch: CountDownLatch) : KinveyClientCallback<EntitySet?> {
         var result: EntitySet? = null
         var error: Throwable? = null
-        override fun onSuccess(result: EntitySet) {
+        override fun onSuccess(result: EntitySet?) {
             this.result = result
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -336,7 +336,7 @@ open class BaseDataStoreTest {
             this.result = result
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -345,14 +345,14 @@ open class BaseDataStoreTest {
         }
     }
 
-    class DefaultKinveyDateCallback(private val latch: CountDownLatch) : KinveyClientCallback<DateExample> {
+    class DefaultKinveyDateCallback(private val latch: CountDownLatch) : KinveyClientCallback<DateExample?> {
         var result: DateExample? = null
         var error: Throwable? = null
-        override fun onSuccess(result: DateExample) {
+        override fun onSuccess(result: DateExample?) {
             this.result = result
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -468,7 +468,7 @@ open class BaseDataStoreTest {
     }
 
     @Throws(InterruptedException::class)
-    fun find(store: DataStore<Person>, id: String?, seconds: Int, cachedClientCallback: KinveyCachedClientCallback<Person>?): DefaultKinveyClientCallback {
+    fun find(store: DataStore<Person>, id: String?, seconds: Int, cachedClientCallback: KinveyCachedClientCallback<Person?>?): DefaultKinveyClientCallback {
         val latch = CountDownLatch(1)
         val callback = DefaultKinveyClientCallback(latch)
         val looperThread = LooperThread(Runnable { store.find(id!!, callback, cachedClientCallback) })
@@ -936,7 +936,7 @@ open class BaseDataStoreTest {
 
     @Throws(InterruptedException::class)
     fun find(store: DataStore<Person>, ids: Iterable<String>, seconds: Int,
-                     cachedClientCallback: CustomKinveyCachedCallback<KinveyReadResponse<Person>>?): DefaultKinveyReadCallback {
+                     cachedClientCallback: CustomKinveyCachedCallback<KinveyReadResponse<Person>?>?): DefaultKinveyReadCallback {
         val latch = CountDownLatch(if (cachedClientCallback != null) 2 else 1)
         if (cachedClientCallback != null) {
             cachedClientCallback.latch = latch

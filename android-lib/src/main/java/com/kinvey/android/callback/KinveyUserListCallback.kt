@@ -31,13 +31,13 @@ interface KinveyUserListCallback : KinveyClientCallback<Array<User>> {
      *
      * @param result - the modified users
      */
-    override fun onSuccess(result: Array<User>)
+    override fun onSuccess(result: Array<User>?)
 
     /**
      * Method invoked after a failed request against a set of Users
      *
      * @param error - details about the error
      */
-    override fun onFailure(error: Throwable)
+    override fun onFailure(error: Throwable?)
 
 }

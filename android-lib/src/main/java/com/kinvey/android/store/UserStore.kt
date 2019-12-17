@@ -1279,11 +1279,11 @@ class UserStore {
                     client.context?.startActivity(i)
                 }
 
-                override fun onSuccess(result: User) {
+                override fun onSuccess(result: User?) {
                     callback.onSuccess(result)
                 }
 
-                override fun onFailure(error: Throwable) {
+                override fun onFailure(error: Throwable?) {
                     callback.onFailure(error)
                 }
             })

@@ -17,7 +17,7 @@ package com.kinvey.android.callback
 
 import com.kinvey.java.core.KinveyClientCallback
 
-interface KinveyCountCallback : KinveyClientCallback<Int?> {
+interface KinveyCountCallback : KinveyClientCallback<Int> {
     /**
      * Used to indicate successful execution of a request by the background service.
      *
@@ -30,5 +30,5 @@ interface KinveyCountCallback : KinveyClientCallback<Int?> {
      *
      * @param error error
      */
-    override fun onFailure(error: Throwable)
+    override fun onFailure(error: Throwable?)
 }
