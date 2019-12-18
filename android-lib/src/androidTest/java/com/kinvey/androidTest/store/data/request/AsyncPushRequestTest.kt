@@ -79,7 +79,7 @@ class AsyncPushRequestTest {
         verify(mockPushCallback, times(1)).onProgress(any(Long::class.javaPrimitiveType)!!, any(Long::class.javaPrimitiveType)!!)
     }
 
-    protected class KinveyPushCallbackAdapter(private val latch: CountDownLatch) : KinveyPushCallback {
+    protected open class KinveyPushCallbackAdapter(val latch: CountDownLatch) : KinveyPushCallback {
         override fun onSuccess(result: KinveyPushResponse?) {
             latch.countDown()
         }
@@ -117,9 +117,9 @@ class AsyncPushRequestTest {
         verify(mockPushCallback, times(1)).onFailure(any(Throwable::class.java))
     }
 
-    protected class DefaultKinveyPushCallback internal constructor(private val latch: CountDownLatch) : KinveyPushCallback {
-        internal var result: KinveyPushResponse? = null
-        internal var error: Throwable? = null
+    protected open class DefaultKinveyPushCallback(val latch: CountDownLatch) : KinveyPushCallback {
+        var result: KinveyPushResponse? = null
+        var error: Throwable? = null
         override fun onSuccess(result: KinveyPushResponse?) {
             this.result = result
             finish()
@@ -129,7 +129,7 @@ class AsyncPushRequestTest {
             finish()
         }
         override fun onProgress(current: Long, all: Long) {}
-        internal fun finish() {
+        fun finish() {
             latch.countDown()
         }
     }

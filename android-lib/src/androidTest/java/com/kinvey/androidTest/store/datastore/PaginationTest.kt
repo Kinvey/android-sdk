@@ -1,6 +1,5 @@
 package com.kinvey.androidTest.store.datastore
 
-import android.content.Context
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
@@ -12,7 +11,6 @@ import com.kinvey.android.store.DataStore.Companion.collection
 import com.kinvey.androidTest.TestManager
 import com.kinvey.androidTest.TestManager.*
 import com.kinvey.androidTest.callback.CustomKinveyPullCallback
-import com.kinvey.androidTest.callback.CustomKinveySyncCallback
 import com.kinvey.androidTest.model.Person
 import com.kinvey.java.store.StoreType
 import org.junit.After
@@ -74,13 +72,13 @@ class PaginationTest {
         assertTrue(cacheSizeBetween == 0L)
 
         // Act
-        val pullCallback: CustomKinveyPullCallback = testManager!!.pullCustom(store, null, 2)
+        val pullCallback = testManager?.pullCustom(store, null, 2)
 
         // Assert
-        assertNull(pullCallback.error)
-        assertNotNull(pullCallback.result)
-        assertTrue(pullCallback.result!!.count == 3)
-        assertTrue(pullCallback.result!!.count.toLong() == testManager!!.getCacheSize(StoreType.CACHE, client))
+        assertNull(pullCallback?.error)
+        assertNotNull(pullCallback?.result)
+        assertTrue(pullCallback?.result?.count == 3)
+        assertTrue(pullCallback?.result?.count?.toLong() == testManager?.getCacheSize(StoreType.CACHE, client))
     }
 
     @Test
@@ -145,11 +143,11 @@ class PaginationTest {
         assertNotNull(syncCallback?.kinveyPushResponse?.successCount)
         assertEquals(10, syncCallback?.kinveyPushResponse?.successCount)
         assertNotNull(syncCallback?.result)
-        assertEquals(0, syncCallback?.result?.listOfExceptions?.size?.toLong())
-        assertEquals(10, syncCallback?.result?.count?.toLong())
+        assertEquals(0, syncCallback?.result?.listOfExceptions?.size)
+        assertEquals(10, syncCallback?.result?.count)
 
         assertTrue(client?.syncManager?.getCount(COLLECTION) == 0L)
-        assertEquals(10, store.find()?.result?.size?.toLong())
+        assertEquals(10, store.find()?.result?.size)
     }
 
     @Test
@@ -169,11 +167,11 @@ class PaginationTest {
         assertNotNull(syncCallback?.kinveyPushResponse?.successCount)
         assertEquals(10, syncCallback?.kinveyPushResponse?.successCount)
         assertNotNull(syncCallback?.result)
-        assertEquals(0, syncCallback?.result?.listOfExceptions?.size?.toLong())
-        assertEquals(2, syncCallback?.result?.count?.toLong())
+        assertEquals(0, syncCallback?.result?.listOfExceptions?.size)
+        assertEquals(2, syncCallback?.result?.count)
 
         assertTrue(client?.syncManager?.getCount(COLLECTION) == 0L)
-        assertEquals(10, store.find()?.result?.size?.toLong())
+        assertEquals(10, store.find()?.result?.size)
     }
 
     @Test
@@ -202,11 +200,11 @@ class PaginationTest {
         assertNotNull(syncCallback?.kinveyPushResponse?.successCount)
         assertEquals(10, syncCallback?.kinveyPushResponse?.successCount)
         assertNotNull(syncCallback?.result)
-        assertEquals(0, syncCallback?.result?.listOfExceptions?.size?.toLong())
-        assertEquals(10, syncCallback?.result?.count?.toLong())
+        assertEquals(0, syncCallback?.result?.listOfExceptions?.size)
+        assertEquals(10, syncCallback?.result?.count)
 
         assertTrue(client?.syncManager?.getCount(COLLECTION) == 0L)
-        assertEquals(10, store.find()?.result?.size?.toLong())
+        assertEquals(10, store.find()?.result?.size)
     }
 
     @Test
@@ -229,8 +227,8 @@ class PaginationTest {
         testManager?.push(store)
 
         client?.cacheManager?.getCache(COLLECTION, Person::class.java, StoreType.SYNC.ttl)?.clear()
-        assertEquals(5, store.pullBlocking(client?.query(), true)?.count?.toLong())
-        assertEquals(5, testManager?.getCacheSize(StoreType.SYNC, client))
+        assertEquals(5, store.pullBlocking(client?.query(), true)?.count)
+        assertEquals(5L, testManager?.getCacheSize(StoreType.SYNC, client))
     }
 
     @Test
@@ -244,8 +242,8 @@ class PaginationTest {
         testManager?.push(store)
         client?.cacheManager?.getCache(COLLECTION, Person::class.java, StoreType.SYNC.ttl)?.clear()
 
-        assertEquals(5, store.pullBlocking(client?.query(), false).count.toLong())
-        assertEquals(5, testManager?.getCacheSize(StoreType.SYNC, client))
+        assertEquals(5, store.pullBlocking(client?.query(), false).count)
+        assertEquals(5L, testManager?.getCacheSize(StoreType.SYNC, client))
     }
 
     @Test
@@ -268,11 +266,11 @@ class PaginationTest {
         testManager?.createPersons(store, 5)
         testManager?.push(store)
         client?.cacheManager?.getCache(COLLECTION, Person::class.java, StoreType.SYNC.ttl)?.clear()
-        assertEquals(5, testManager?.pullCustom(store, client?.query(), isAutoPagination)?.result?.count?.toLong())
-        assertEquals(5, testManager?.getCacheSize(StoreType.SYNC, client))
+        assertEquals(5, testManager?.pullCustom(store, client?.query(), isAutoPagination)?.result?.count)
+        assertEquals(5L, testManager?.getCacheSize(StoreType.SYNC, client))
         client?.cacheManager?.getCache(COLLECTION, Person::class.java, StoreType.SYNC.ttl)?.clear()
-        assertEquals(5, testManager?.pullCustom(store, null, isAutoPagination)?.result?.count?.toLong())
-        assertEquals(5, testManager?.getCacheSize(StoreType.SYNC, client))
+        assertEquals(5, testManager?.pullCustom(store, null, isAutoPagination)?.result?.count)
+        assertEquals(5L, testManager?.getCacheSize(StoreType.SYNC, client))
     }
 
     @Test
@@ -311,12 +309,12 @@ class PaginationTest {
         (0..4).forEach { i ->
             testManager?.save(networkStore, Person(TEST_USERNAME))
         }
-        assertEquals(35, testManager?.pullCustom(store, client?.query(), 10)?.result?.count?.toLong())
-        assertEquals(35, store.count()?.toLong())
+        assertEquals(35, testManager?.pullCustom(store, client?.query(), 10)?.result?.count)
+        assertEquals(35, store.count())
 
         testManager?.delete(networkStore, client?.query()?.equals("username", TEST_USERNAME_2))
-        assertEquals(5, testManager?.pullCustom(store, client?.query(), 10)?.result?.count?.toLong())
-        assertEquals(5, store.count()?.toLong())
+        assertEquals(5, testManager?.pullCustom(store, client?.query(), 10)?.result?.count)
+        assertEquals(5, store.count())
     }
 
     companion object {

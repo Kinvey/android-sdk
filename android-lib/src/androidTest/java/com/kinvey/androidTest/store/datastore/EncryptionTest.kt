@@ -51,11 +51,11 @@ class EncryptionTest {
     private class UserKinveyClientCallback(private val latch: CountDownLatch) : KinveyClientCallback<User> {
         var result: User? = null
         var error: Throwable? = null
-        override fun onSuccess(user: User) {
+        override fun onSuccess(user: User?) {
             result = user
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -64,14 +64,14 @@ class EncryptionTest {
         }
     }
 
-    private class PersonKinveyClientCallback(private val latch: CountDownLatch) : KinveyClientCallback<Person> {
+    private class PersonKinveyClientCallback(private val latch: CountDownLatch) : KinveyClientCallback<Person?> {
         var result: Person? = null
         var error: Throwable? = null
-        override fun onSuccess(result: Person) {
+        override fun onSuccess(result: Person?) {
             this.result = result
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -94,11 +94,11 @@ class EncryptionTest {
             onCancelled = true
             finish()
         }
-        override fun onSuccess(result: FileMetaData) {
+        override fun onSuccess(result: FileMetaData?) {
             fileMetaDataResult = result
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -121,11 +121,11 @@ class EncryptionTest {
             onCancelled = true
             finish()
         }
-        override fun onSuccess(result: FileMetaData) {
+        override fun onSuccess(result: FileMetaData?) {
             fileMetaDataResult = result
             finish()
         }
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
