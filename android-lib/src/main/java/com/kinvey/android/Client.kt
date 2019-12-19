@@ -729,7 +729,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
             return super.setHttpRequestInitializer(httpRequestInitializer) as Builder<*>
         }
 
-        open fun setUserClass(userClass: Class<T>): Builder<*> {
+        open fun setUserClass(userClass: Class<T>): Builder<T> {
             this.userClass = userClass
             return this
         }
