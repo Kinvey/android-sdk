@@ -12,5 +12,5 @@ interface AsyncUploaderProgressListener<T> : UploaderProgressListener, KinveyCan
     override fun progressChanged(uploader: MediaHttpUploader?)
 
     override fun onCancelled()
-    abstract override val isCancelled: Boolean
+    override var isCancelled: Boolean
 }

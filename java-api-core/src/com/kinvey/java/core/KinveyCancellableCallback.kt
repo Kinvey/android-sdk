@@ -34,7 +34,7 @@ interface KinveyCancellableCallback<T> : KinveyClientCallback<T> {
      *
      * @return true if request should be cancelled, false if it should not
      */
-    val isCancelled: Boolean
+    var isCancelled: Boolean
 
     /**
      * Called on the UI thread after a request has been cancelled.

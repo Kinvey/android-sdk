@@ -12,5 +12,5 @@ interface AsyncDownloaderProgressListener<T> : DownloaderProgressListener, Kinve
     override fun progressChanged(uploader: MediaHttpDownloader)
 
     override fun onCancelled()
-    abstract override val isCancelled: Boolean
+    override var isCancelled: Boolean
 }
