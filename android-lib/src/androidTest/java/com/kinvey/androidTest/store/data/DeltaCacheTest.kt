@@ -11,6 +11,10 @@ import com.kinvey.android.store.DataStore
 import com.kinvey.android.store.DataStore.Companion.collection
 import com.kinvey.androidTest.TestManager
 import com.kinvey.androidTest.TestManager.*
+import com.kinvey.androidTest.TestManager.Companion.PASSWORD
+import com.kinvey.androidTest.TestManager.Companion.TEST_USERNAME
+import com.kinvey.androidTest.TestManager.Companion.TEST_USERNAME_2
+import com.kinvey.androidTest.TestManager.Companion.USERNAME
 import com.kinvey.androidTest.callback.CustomKinveyPullCallback
 import com.kinvey.androidTest.callback.CustomKinveySyncCallback
 import com.kinvey.androidTest.callback.DefaultKinveyClientCallback
@@ -60,7 +64,7 @@ class DeltaCacheTest {
         val mMockContext: Context? = InstrumentationRegistry.getInstrumentation().targetContext
         client = Builder<User>(mMockContext).build()
         testManager = TestManager()
-        testManager?.login(USERNAME, PASSWORD, client)
+        testManager?.login(USERNAME, PASSWORD, client as Client<*>)
     }
 
     @After

@@ -59,7 +59,7 @@ import java.util.*
  * @author edwardf
  * @since 3.0
  */
-class FCMPush(client: Client<*>?, inProduction: Boolean, vararg senderIDs: String?) : AbstractPush(client) {
+class FCMPush(client: Client<*>?, inProduction: Boolean, senderIDs: Array<String>?) : AbstractPush(client) {
     /**
      * Initialize FCM by registering the current user with both FCM as well as your backend at Kinvey.
      *
@@ -209,7 +209,7 @@ class FCMPush(client: Client<*>?, inProduction: Boolean, vararg senderIDs: Strin
      *
      * @return an array of sender IDs
      */
-    override var senderIDs: Array<String>? = senderIDs as Array<String>?
+    override var senderIDs: Array<String>? = senderIDs
 
     /**
      * This class is used to maintain metadata about the current GCM push configuration in the User collection.

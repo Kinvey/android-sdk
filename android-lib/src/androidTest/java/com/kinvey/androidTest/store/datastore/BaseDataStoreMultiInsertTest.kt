@@ -87,7 +87,7 @@ open class BaseDataStoreMultiInsertTest {
         looperThread?.mHandler?.sendMessage(Message())
     }
 
-    protected class DefaultKinveyClientCallback<T : GenericJson> (private val latch: CountDownLatch) : KinveyClientCallback<T?> {
+    protected class DefaultKinveyClientCallback<T : GenericJson> (private val latch: CountDownLatch) : KinveyClientCallback<T> {
         var result: T? = null
         var error: Throwable? = null
 
@@ -234,7 +234,7 @@ open class BaseDataStoreMultiInsertTest {
         val looperThread = LooperThread(Runnable { store.delete(query, callback) })
         looperThread.start()
         latch.await(120, TimeUnit.SECONDS)
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -245,7 +245,7 @@ open class BaseDataStoreMultiInsertTest {
         val looperThread = LooperThread(Runnable { store.find(callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -256,7 +256,7 @@ open class BaseDataStoreMultiInsertTest {
         val looperThread = LooperThread(Runnable { store.sync(callback) })
         looperThread.start()
         latch.await(seconds.toLong(), TimeUnit.SECONDS)
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -289,7 +289,7 @@ open class BaseDataStoreMultiInsertTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -300,7 +300,7 @@ open class BaseDataStoreMultiInsertTest {
         val looperThread = LooperThread(Runnable { store.save(item, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -311,7 +311,7 @@ open class BaseDataStoreMultiInsertTest {
         val looperThread = LooperThread(Runnable { store.push(callback) })
         looperThread.start()
         latch.await(seconds.toLong(), TimeUnit.SECONDS)
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 

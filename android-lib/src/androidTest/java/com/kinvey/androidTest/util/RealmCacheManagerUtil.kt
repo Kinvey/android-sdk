@@ -13,21 +13,22 @@ import java.lang.reflect.Method
 object RealmCacheManagerUtil {
 
     fun getRealm(client: Client<*>?): DynamicRealm? {
-        var method: Method? = null
-        try {
-            method = RealmCacheManager::class.java.getDeclaredMethod("getDynamicRealm", null)
-        } catch (e: NoSuchMethodException) {
-            e.printStackTrace()
-        }
-        method?.isAccessible = true
-        var realm: DynamicRealm? = null
-        try {
-            realm = method?.invoke(RealmCacheManager(client!!), null) as DynamicRealm
-        } catch (e: IllegalAccessException) {
-            e.printStackTrace()
-        } catch (e: InvocationTargetException) {
-            e.printStackTrace()
-        }
+        //var method: Method? = null
+        //try {
+        //    method = RealmCacheManager::class.java.getDeclaredMethod("getDynamicRealm", null)
+        //} catch (e: NoSuchMethodException) {
+        //    e.printStackTrace()
+        //}
+        //method?.isAccessible = true
+        //var realm: DynamicRealm? = null
+        //try {
+        //    realm = method?.invoke(RealmCacheManager(client!!), null) as DynamicRealm?
+        //} catch (e: IllegalAccessException) {
+        //    e.printStackTrace()
+        //} catch (e: InvocationTargetException) {
+        //    e.printStackTrace()
+        //}
+        val realm = RealmCacheManager(client!!).dynamicRealm
         return realm
     }
 

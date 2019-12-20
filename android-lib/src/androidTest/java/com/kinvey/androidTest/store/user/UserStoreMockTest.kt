@@ -11,10 +11,10 @@ import com.kinvey.android.model.User
 import com.kinvey.android.store.UserStore.Companion.login
 import com.kinvey.android.store.UserStore.Companion.logout
 import com.kinvey.androidTest.LooperThread
-import com.kinvey.androidTest.TestManager.PASSWORD
-import com.kinvey.androidTest.TestManager.USERNAME
-import com.kinvey.androidTest.store.user.MockHttpErrorTransport.DESCRIPTION_500
-import com.kinvey.androidTest.store.user.MockHttpErrorTransport.ERROR_500
+import com.kinvey.androidTest.TestManager.Companion.PASSWORD
+import com.kinvey.androidTest.TestManager.Companion.USERNAME
+import com.kinvey.androidTest.store.user.MockHttpErrorTransport.Companion.DESCRIPTION_500
+import com.kinvey.androidTest.store.user.MockHttpErrorTransport.Companion.ERROR_500
 import com.kinvey.java.AbstractClient
 import com.kinvey.java.core.KinveyJsonResponseException
 import com.kinvey.java.dto.BaseUser
@@ -137,7 +137,7 @@ class UserStoreMockTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -154,7 +154,7 @@ class UserStoreMockTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -165,7 +165,7 @@ class UserStoreMockTest {
         val looperThread = LooperThread(Runnable { logout(client as AbstractClient<BaseUser>, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 }

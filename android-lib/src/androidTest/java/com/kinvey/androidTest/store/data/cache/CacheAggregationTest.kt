@@ -11,7 +11,7 @@ import com.kinvey.android.Client.Companion.sharedInstance
 import com.kinvey.android.model.User
 import com.kinvey.android.store.DataStore.Companion.collection
 import com.kinvey.androidTest.TestManager
-import com.kinvey.androidTest.TestManager.TEST_USERNAME
+import com.kinvey.androidTest.TestManager.Companion.TEST_USERNAME
 import com.kinvey.androidTest.model.ModelWithDifferentTypeFields
 import com.kinvey.androidTest.model.Person
 import com.kinvey.java.Query

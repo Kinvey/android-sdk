@@ -64,7 +64,7 @@ class EncryptionTest {
         }
     }
 
-    private class PersonKinveyClientCallback(private val latch: CountDownLatch) : KinveyClientCallback<Person?> {
+    private class PersonKinveyClientCallback(private val latch: CountDownLatch) : KinveyClientCallback<Person> {
         var result: Person? = null
         var error: Throwable? = null
         override fun onSuccess(result: Person?) {
@@ -83,7 +83,7 @@ class EncryptionTest {
     private class DefaultUploadProgressListener(private val latch: CountDownLatch) : AsyncUploaderProgressListener<FileMetaData> {
         var fileMetaDataResult: FileMetaData? = null
         var error: Throwable? = null
-        override val isCancelled = false
+        override var isCancelled = false
         private var onCancelled = false
         private var progressChangedCounter = 0
         @Throws(IOException::class)
@@ -110,11 +110,11 @@ class EncryptionTest {
     private class DefaultDownloadProgressListener(private val latch: CountDownLatch) : AsyncDownloaderProgressListener<FileMetaData> {
         var fileMetaDataResult: FileMetaData? = null
         var error: Throwable? = null
-        override val isCancelled = false
+        override var isCancelled = false
         private var onCancelled = false
         private var progressChangedCounter = 0
         @Throws(IOException::class)
-        override fun progressChanged(downloader: MediaHttpDownloader) {
+        override fun progressChanged(downloader: MediaHttpDownloader?) {
             progressChangedCounter++
         }
         override fun onCancelled() {
@@ -360,7 +360,7 @@ class EncryptionTest {
         })
         looperThread.start()
         downloadLatch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return listener
     }
 
@@ -378,7 +378,7 @@ class EncryptionTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return listener
     }
 
@@ -399,7 +399,7 @@ class EncryptionTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -410,7 +410,7 @@ class EncryptionTest {
         val looperThread = LooperThread(Runnable { store.save(person, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -421,7 +421,7 @@ class EncryptionTest {
         val looperThread = LooperThread(Runnable { store.find(id ?: "", callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 

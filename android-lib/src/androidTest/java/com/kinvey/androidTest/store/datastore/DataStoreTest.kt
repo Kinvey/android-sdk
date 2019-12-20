@@ -277,7 +277,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertNull(saveCallback.error)
         assertNotNull(saveCallback.result?.id)
         val personId = saveCallback.result?.id
-        val findCallback = find(store, personId, LONG_TIMEOUT, object : KinveyCachedClientCallback<Person?> {
+        val findCallback = find(store, personId, LONG_TIMEOUT, object : KinveyCachedClientCallback<Person> {
             override fun onSuccess(result: Person?) {
                 Log.d("testFindById: username ", result?.username)
             }
@@ -3356,19 +3356,19 @@ class DataStoreTest() : BaseDataStoreTest() {
         val callback = testManager.saveCustom(store, person)
         assertNotNull(callback.result)
         assertNull(callback.error)
-        val realm: DynamicRealm = RealmCacheManagerUtil.getRealm(client)
+        val realm = RealmCacheManagerUtil.getRealm(client)
         try {
-            realm.beginTransaction()
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(COLLECTION, realm)).count(), 1)
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "__kmd", realm)).count(), 1)
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "__acl", realm)).count(), 1)
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_person", realm)).count(), 1)
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_list", realm)).count(), 1)
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_list", realm) + "_person", realm)).count(), 0)
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_person", realm) + "_list", realm)).count(), 0)
-            realm.commitTransaction()
+            realm?.beginTransaction()
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName(COLLECTION, realm))?.count(), 1L)
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "__kmd", realm))?.count(), 1L)
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "__acl", realm))?.count(), 1L)
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_person", realm))?.count(), 1L)
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_list", realm))?.count(), 1L)
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_list", realm) + "_person", realm))?.count(), 0L)
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_person", realm) + "_list", realm))?.count(), 0L)
+            realm?.commitTransaction()
         } finally {
-            realm.close()
+            realm?.close()
         }
     }
 
@@ -3578,27 +3578,27 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertNull(saveCallback.error)
         assertTrue(store.syncCount() == 1L)
         assertTrue(store.count() == 1)
-        var realm: DynamicRealm = RealmCacheManagerUtil.getRealm(client)
+        var realm = RealmCacheManagerUtil.getRealm(client)
         var resSize: Int
         try {
-            realm.beginTransaction()
-            resSize = realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm)).findAll().size
-            realm.commitTransaction()
+            realm?.beginTransaction()
+            resSize = realm?.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm))?.findAll()?.size ?: 0
+            realm?.commitTransaction()
         } finally {
-            realm.close()
+            realm?.close()
         }
-        assertEquals(1, resSize.toLong()) // check that item in sub table was created
+        assertEquals(1, resSize) // check that item in sub table was created
 
         testManager.delete(store, saveCallback.result?.id)
         realm = RealmCacheManagerUtil.getRealm(client)
         try {
-            realm.beginTransaction()
-            resSize = realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm)).findAll().size
-            realm.commitTransaction()
+            realm?.beginTransaction()
+            resSize = realm?.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm))?.findAll()?.size ?: 0
+            realm?.commitTransaction()
         } finally {
-            realm.close()
+            realm?.close()
         }
-        assertEquals(0, resSize.toLong()) // check that item in sub table was deleted after call 'clear'
+        assertEquals(0, resSize) // check that item in sub table was deleted after call 'clear'
         assertTrue(store.count() == 0)
     }
 
@@ -3617,27 +3617,27 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertNull(saveCallback.error)
         assertTrue(store.syncCount() == 1L)
         assertTrue(store.count() == 1)
-        var realm: DynamicRealm = RealmCacheManagerUtil.getRealm(client)
+        var realm = RealmCacheManagerUtil.getRealm(client)
         var resSize: Int
         try {
-            realm.beginTransaction()
-            resSize = realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm)).findAll().size
-            realm.commitTransaction()
+            realm?.beginTransaction()
+            resSize = realm?.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm))?.findAll()?.size ?: 0
+            realm?.commitTransaction()
         } finally {
-            realm.close()
+            realm?.close()
         }
-        assertEquals(1, resSize.toLong()) // check that item in sub table was created
+        assertEquals(1, resSize) // check that item in sub table was created
 
         store.clear()
         realm = RealmCacheManagerUtil.getRealm(client)
         try {
-            realm.beginTransaction()
-            resSize = realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm)).findAll().size
-            realm.commitTransaction()
+            realm?.beginTransaction()
+            resSize = realm?.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm))?.findAll()?.size ?: 0
+            realm?.commitTransaction()
         } finally {
-            realm.close()
+            realm?.close()
         }
-        assertEquals(0, resSize.toLong()) // check that item in sub table was deleted after call 'clear'
+        assertEquals(0, resSize) // check that item in sub table was deleted after call 'clear'
         assertTrue(store.count() == 0)
     }
 
@@ -3662,13 +3662,13 @@ class DataStoreTest() : BaseDataStoreTest() {
         store = collection(COLLECTION, Person::class.java, StoreType.SYNC, client)
         assertTrue(store.syncCount() == 1L)
         assertTrue(store.count() == 1)
-        var realm: DynamicRealm = RealmCacheManagerUtil.getRealm(client)
+        var realm = RealmCacheManagerUtil.getRealm(client)
         try {
-            realm.beginTransaction()
+            realm?.beginTransaction()
             RealmCacheManagerUtil.setTableHash(client, COLLECTION, "hashTest", realm)
-            realm.commitTransaction()
+            realm?.commitTransaction()
         } finally {
-            realm.close()
+            realm?.close()
         }
 
         mockContext = InstrumentationRegistry.getInstrumentation().targetContext
@@ -3676,7 +3676,6 @@ class DataStoreTest() : BaseDataStoreTest() {
         store = collection(COLLECTION, Person::class.java, StoreType.SYNC, client)
         assertTrue(store.syncCount() == 0L)
         assertTrue(store.count() == 0)
-        saveCallback = null
         person = Person(TEST_USERNAME)
 
         saveCallback = testManager.save(store, person)
@@ -3688,11 +3687,11 @@ class DataStoreTest() : BaseDataStoreTest() {
 
         realm = RealmCacheManagerUtil.getRealm(client)
         try {
-            realm.beginTransaction()
+            realm?.beginTransaction()
             isOneTable = isCollectionHasOneTable(COLLECTION, realm)
-            realm.commitTransaction()
+            realm?.commitTransaction()
         } finally {
-            realm.close()
+            realm?.close()
         }
         assertTrue(isOneTable)
     }
@@ -3718,24 +3717,24 @@ class DataStoreTest() : BaseDataStoreTest() {
             assertTrue(store.count() == i + 1)
         }
         testManager.push(store)
-        var realm: DynamicRealm = RealmCacheManagerUtil.getRealm(client)
+        var realm = RealmCacheManagerUtil.getRealm(client)
         try {
-            realm.beginTransaction()
+            realm?.beginTransaction()
             checkInternalTablesHasItems(3, COLLECTION, realm)
-            realm.commitTransaction()
+            realm?.commitTransaction()
         } finally {
-            realm.close()
+            realm?.close()
         }
-        testManager.pullCustom(store, client!!.query())
-        testManager.pullCustom(store, client!!.query())
-        testManager.pullCustom(store, client!!.query())
+        testManager.pullCustom(store, client?.query())
+        testManager.pullCustom(store, client?.query())
+        testManager.pullCustom(store, client?.query())
         realm = RealmCacheManagerUtil.getRealm(client)
         try {
-            realm.beginTransaction()
+            realm?.beginTransaction()
             checkInternalTablesHasItems(3, COLLECTION, realm)
-            realm.commitTransaction()
+            realm?.commitTransaction()
         } finally {
-            realm.close()
+            realm?.close()
         }
     }
 
@@ -3755,18 +3754,18 @@ class DataStoreTest() : BaseDataStoreTest() {
         assertNull(saveCallback.error)
         assertTrue(store.syncCount() == 1L)
         assertTrue(store.count() == 1)
-        val realm: DynamicRealm = RealmCacheManagerUtil.getRealm(client)
+        val realm = RealmCacheManagerUtil.getRealm(client)
         try {
-            realm.beginTransaction()
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(COLLECTION, realm)).count(), 1)
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "__kmd", realm)).count(), 1)
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "__acl", realm)).count(), 1)
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm)).count(), 1)
+            realm?.beginTransaction()
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName(COLLECTION, realm))?.count(), 1L)
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "__kmd", realm))?.count(), 1L)
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "__acl", realm))?.count(), 1L)
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm))?.count(), 1L)
             assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm) + "__kmd", realm))
             assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm) + "__acl", realm))
-            realm.commitTransaction()
+            realm?.commitTransaction()
         } finally {
-            realm.close()
+            realm?.close()
         }
     }
 
@@ -3778,30 +3777,30 @@ class DataStoreTest() : BaseDataStoreTest() {
         val store = collection(COLLECTION, Person::class.java, StoreType.SYNC, client)
         assertTrue(store.syncCount() == 0L)
         assertTrue(store.count() == 0)
-        val realm: DynamicRealm = RealmCacheManagerUtil.getRealm(client)
+        val realm = RealmCacheManagerUtil.getRealm(client)
         try {
-            realm.beginTransaction()
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(COLLECTION, realm)).count(), 0)
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "__kmd", realm)).count(), 0)
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "__acl", realm)).count(), 0)
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm)).count(), 0)
+            realm?.beginTransaction()
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName(COLLECTION, realm))?.count() ?: 0L, 0L)
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "__kmd", realm))?.count(), 0L)
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "__acl", realm))?.count(), 0L)
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm))?.count(), 0L)
             assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm) + "__kmd", realm))
             assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(COLLECTION, realm) + "_author", realm) + "__acl", realm))
-            assertEquals(realm.where(TableNameManagerUtil.getShortName("sync", realm)).count(), 0)
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "_meta", realm)).count(), 0)
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName("sync", realm))?.count(), 0L)
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "_meta", realm))?.count(), 0L)
             assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "_meta", realm) + "__kmd", realm))
             assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "_meta", realm) + "__acl", realm))
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "__kmd", realm)).count(), 0)
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "__acl", realm)).count(), 0)
-            assertEquals(realm.where(TableNameManagerUtil.getShortName("syncitems", realm)).count(), 0)
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "_meta", realm)).count(), 0)
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "__kmd", realm))?.count(), 0L)
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("sync", realm) + "__acl", realm))?.count(), 0L)
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName("syncitems", realm))?.count(), 0L)
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "_meta", realm))?.count(), 0L)
             assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "_meta", realm) + "__kmd", realm))
             assertNull(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "_meta", realm) + "__acl", realm))
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "__kmd", realm)).count(), 0)
-            assertEquals(realm.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "__acl", realm)).count(), 0)
-            realm.commitTransaction()
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "__kmd", realm))?.count(), 0L)
+            assertEquals(realm?.where(TableNameManagerUtil.getShortName(TableNameManagerUtil.getShortName("syncitems", realm) + "__acl", realm))?.count(), 0L)
+            realm?.commitTransaction()
         } finally {
-            realm.close()
+            realm?.close()
         }
     }
 
@@ -3982,7 +3981,7 @@ class DataStoreTest() : BaseDataStoreTest() {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
     }
 
     @Test

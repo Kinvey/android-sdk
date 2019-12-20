@@ -10,6 +10,10 @@ import com.kinvey.android.model.User
 import com.kinvey.android.store.DataStore.Companion.collection
 import com.kinvey.androidTest.TestManager
 import com.kinvey.androidTest.TestManager.*
+import com.kinvey.androidTest.TestManager.Companion.PASSWORD
+import com.kinvey.androidTest.TestManager.Companion.TEST_USERNAME
+import com.kinvey.androidTest.TestManager.Companion.TEST_USERNAME_2
+import com.kinvey.androidTest.TestManager.Companion.USERNAME
 import com.kinvey.androidTest.callback.CustomKinveyPullCallback
 import com.kinvey.androidTest.model.Person
 import com.kinvey.java.store.StoreType

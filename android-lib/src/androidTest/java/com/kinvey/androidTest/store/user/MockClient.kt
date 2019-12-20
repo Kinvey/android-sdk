@@ -12,9 +12,9 @@ import com.kinvey.java.core.AbstractKinveyClientRequest
 import com.kinvey.java.core.KinveyClientRequestInitializer
 import com.kinvey.java.core.KinveyHeaders
 
-class MockClient<T : User> private constructor(transport: HttpTransport,
-                                                httpRequestInitializer: HttpRequestInitializer, rootUrl: String, servicePath: String,
-                                                objectParser: JsonObjectParser, kinveyRequestInitializer: KinveyClientRequestInitializer,
+class MockClient<T : User> private constructor(transport: HttpTransport?,
+                                                httpRequestInitializer: HttpRequestInitializer?, rootUrl: String?, servicePath: String?,
+                                                objectParser: JsonObjectParser, kinveyRequestInitializer: KinveyClientRequestInitializer?,
                                                 store: CredentialStore?, requestPolicy: BackOffPolicy?, encryptionKey: ByteArray?, context: Context)
     : Client<T>(transport, httpRequestInitializer, rootUrl, servicePath, objectParser, kinveyRequestInitializer, store, requestPolicy, encryptionKey, context) {
     class Builder<T : User>(internal var context: Context) : Client.Builder<T>(context) {
@@ -25,14 +25,14 @@ class MockClient<T : User> private constructor(transport: HttpTransport,
         }
 
         override fun build(): MockClient<T> {
-            val client = MockClient<T>(MockHttpTransport(), httpRequestInitializer!!, baseUrl!!, servicePath!!,
+            val client = MockClient<T>(MockHttpTransport(), httpRequestInitializer, baseUrl, servicePath,
                     objectParser!!, MockKinveyClientRequestInitializer(), null, null, null, context)
             client.userClass = if (userClass != null) userClass  as Class<T> else User::class.java as Class<T>
             return client
         }
 
         fun build(transport: HttpTransport): MockClient<T> {
-            val client = MockClient<T>(transport, httpRequestInitializer!!, baseUrl!!, servicePath!!,
+            val client = MockClient<T>(transport, httpRequestInitializer, baseUrl, servicePath,
                     objectParser!!, MockKinveyClientRequestInitializer(), null, null, null, context)
             client.userClass = if (userClass != null) userClass  as Class<T> else User::class.java as Class<T>
             initUserFromCredentialStore(client)

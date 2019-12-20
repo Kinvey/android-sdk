@@ -43,8 +43,8 @@ import com.kinvey.android.store.UserStore.Companion.retrieve
 import com.kinvey.android.store.UserStore.Companion.sendEmailConfirmation
 import com.kinvey.android.store.UserStore.Companion.signUp
 import com.kinvey.androidTest.LooperThread
-import com.kinvey.androidTest.TestManager.PASSWORD
-import com.kinvey.androidTest.TestManager.USERNAME
+import com.kinvey.androidTest.TestManager.Companion.PASSWORD
+import com.kinvey.androidTest.TestManager.Companion.USERNAME
 import com.kinvey.androidTest.model.EntitySet
 import com.kinvey.androidTest.model.InternalUserEntity
 import com.kinvey.androidTest.model.Person
@@ -281,7 +281,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { store.find(id, callback, null) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -355,7 +355,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { get<User>(userName!!, client!!, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -416,7 +416,7 @@ class UserStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -427,7 +427,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { signUp(createRandomUserName(USERNAME), PASSWORD, client as AbstractClient<User>, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -438,7 +438,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { signUp(createRandomUserName(USERNAME), PASSWORD, user, client as AbstractClient<User>, callback as KinveyClientCallback<User>) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -449,7 +449,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { destroy(true, client as AbstractClient<BaseUser>, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -475,7 +475,7 @@ class UserStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -486,7 +486,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { logout(client as AbstractClient<BaseUser>, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -495,7 +495,7 @@ class UserStoreTest {
     fun testSharedClientLoginAsync() {
         val userCallback = login(sharedInstance())
         assertNotNull(userCallback.result)
-        assertTrue(client!!.isUserLoggedIn)
+        assertTrue(client?.isUserLoggedIn == true)
         assertNull(logout(client).error)
     }
 
@@ -560,7 +560,7 @@ class UserStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -597,7 +597,7 @@ class UserStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -640,7 +640,7 @@ class UserStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -687,7 +687,7 @@ class UserStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -720,7 +720,7 @@ class UserStoreTest {
         val ID = "wrongID"
         val userCallback = loginSalesforce(accessToken, refreshToken, clientID, ID, client)
         assertNotNull(userCallback.error)
-        assertFalse(client!!.isUserLoggedIn)
+        assertFalse(client?.isUserLoggedIn == true)
     }
 
     @Throws(InterruptedException::class)
@@ -736,7 +736,7 @@ class UserStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -756,7 +756,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { asyncUserGroup?.addAllUsersToGroup("group", "group", callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -780,6 +780,7 @@ class UserStoreTest {
     }
 
     @Test
+    @Ignore("Ignored in case of server issue")
     @Throws(InterruptedException::class, IOException::class)
     fun testMICRefreshTokenAfterRetrieve() {
         val redirectURI = "kinveyAuthDemo://"
@@ -808,7 +809,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { loginWithAuthorizationCodeAPI(client as AbstractClient<User>, USERNAME, PASSWORD, redirectUrl, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -819,7 +820,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { UserStore.retrieve(client as AbstractClient<User>, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -900,7 +901,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { loginWithAuthorizationCodeLoginPage(client!!, redirectUrl, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -929,7 +930,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { loginWithAuthorizationCodeAPI(client as AbstractClient<User>, username!!, password!!, clientId, redirectUrl, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -957,7 +958,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { store.save(person, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -1009,7 +1010,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { signUp(user!!, password, client as AbstractClient<User>, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -1026,7 +1027,7 @@ class UserStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -1052,7 +1053,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { exists(username!!, client!!, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -1075,7 +1076,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { forgotUsername(client!!, username!!, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -1096,7 +1097,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { destroy(isHard, client as AbstractClient<BaseUser>, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -1127,7 +1128,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { sendEmailConfirmation(client!!, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -1150,7 +1151,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { resetPassword(username!!, client!!, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -1305,7 +1306,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { asyncUserDiscovery?.lookupByFullName(firstname, lastname, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -1326,7 +1327,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { asyncUserDiscovery!!.lookupByUserName(name!!, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -1347,7 +1348,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { asyncUserDiscovery?.lookupByFacebookID(id, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -1507,7 +1508,7 @@ class UserStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -1562,7 +1563,7 @@ class UserStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -1597,7 +1598,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { changePassword(password, client!!, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -1609,7 +1610,7 @@ class UserStoreTest {
         assertNotNull(callback.error)
         assertNull(callback.result)
         assertEquals("This user does not exist for this app backend.",
-                (callback.error as KinveyJsonResponseException?)!!.details!!.description)
+                (callback.error as KinveyJsonResponseException?)?.details?.description)
     }
 
     @Throws(InterruptedException::class)
@@ -1619,7 +1620,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { get<User>(userId, client!!, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -1650,7 +1651,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { convenience<User>(client as AbstractClient<User>, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -1681,7 +1682,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { retrieve<User>(resolves, client as AbstractClient<User>, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -1703,7 +1704,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable { loginWithAuthorizationCodeAPI(client as AbstractClient<User>, username!!, password!!, clientId, redirectURI, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 

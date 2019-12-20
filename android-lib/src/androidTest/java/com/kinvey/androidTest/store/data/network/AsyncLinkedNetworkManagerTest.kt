@@ -11,11 +11,10 @@ import com.kinvey.android.Client.Builder
 import com.kinvey.android.callback.KinveyDeleteCallback
 import com.kinvey.android.model.User
 import com.kinvey.android.network.AsyncLinkedNetworkManager
-import com.kinvey.android.store.UserStore
 import com.kinvey.android.store.UserStore.Companion.login
 import com.kinvey.androidTest.LooperThread
-import com.kinvey.androidTest.TestManager.PASSWORD
-import com.kinvey.androidTest.TestManager.USERNAME
+import com.kinvey.androidTest.TestManager.Companion.PASSWORD
+import com.kinvey.androidTest.TestManager.Companion.USERNAME
 import com.kinvey.java.Query
 import com.kinvey.java.core.*
 import com.kinvey.java.linkedResources.LinkedFile
@@ -190,13 +189,13 @@ class AsyncLinkedNetworkManagerTest {
         val looperThread = LooperThread(Runnable {
             netMan.getEntity(entityId, callback, object : DownloaderProgressListener {
                 @Throws(IOException::class)
-                override fun progressChanged(downloader: MediaHttpDownloader) {
+                override fun progressChanged(downloader: MediaHttpDownloader?) {
                 }
             }, storeType)
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -213,7 +212,7 @@ class AsyncLinkedNetworkManagerTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 

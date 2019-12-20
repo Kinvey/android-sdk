@@ -88,7 +88,7 @@ class QueryNetworkTest {
         val looperThread = LooperThread(Runnable { store.delete(query, callback) })
         looperThread.start()
         latch.await(120, TimeUnit.SECONDS)
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -99,7 +99,7 @@ class QueryNetworkTest {
         val looperThread = LooperThread(Runnable { store?.find(query, callback, null) })
         looperThread.start()
         latch.await(seconds.toLong(), TimeUnit.SECONDS)
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -110,7 +110,7 @@ class QueryNetworkTest {
         val looperThread = LooperThread(Runnable { store.find(query, callback, null) })
         looperThread.start()
         latch.await(seconds.toLong(), TimeUnit.SECONDS)
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -118,7 +118,7 @@ class QueryNetworkTest {
         return Person(name)
     }
 
-    private class DefaultKinveyClientCallback(val latch: CountDownLatch) : KinveyClientCallback<Person?> {
+    private class DefaultKinveyClientCallback(val latch: CountDownLatch) : KinveyClientCallback<Person> {
         var result: Person? = null
         var error: Throwable? = null
         override fun onSuccess(result: Person?) {
@@ -134,7 +134,7 @@ class QueryNetworkTest {
         }
     }
 
-    private class DefaultKinveyLocationCallback(val latch: CountDownLatch) : KinveyClientCallback<Location?> {
+    private class DefaultKinveyLocationCallback(val latch: CountDownLatch) : KinveyClientCallback<Location> {
         var result: Location? = null
         var error: Throwable? = null
         override fun onSuccess(result: Location?) {
@@ -186,10 +186,10 @@ class QueryNetworkTest {
     private fun save(store: DataStore<Person>, person: Person): DefaultKinveyClientCallback {
         val latch = CountDownLatch(1)
         val callback = DefaultKinveyClientCallback(latch)
-        val looperThread = LooperThread(Runnable { store.save(person, callback) })
+        val looperThread = LooperThread(Runnable { store?.save(person, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -200,7 +200,7 @@ class QueryNetworkTest {
         val looperThread = LooperThread(Runnable { store.save(location, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 

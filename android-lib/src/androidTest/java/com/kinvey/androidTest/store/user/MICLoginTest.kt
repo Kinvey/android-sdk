@@ -11,8 +11,8 @@ import com.kinvey.android.Client.Builder
 import com.kinvey.android.callback.KinveyMICCallback
 import com.kinvey.android.model.User
 import com.kinvey.android.store.UserStore.Companion.loginWithAuthorizationCodeLoginPage
-import com.kinvey.androidTest.TestManager.PASSWORD
-import com.kinvey.androidTest.TestManager.USERNAME
+import com.kinvey.androidTest.TestManager.Companion.PASSWORD
+import com.kinvey.androidTest.TestManager.Companion.USERNAME
 import com.kinvey.androidTest.model.TestUser
 import com.kinvey.java.AbstractClient
 import com.kinvey.java.auth.Credential

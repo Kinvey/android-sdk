@@ -367,7 +367,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
             //NOTE:  pushProvider is defined as a FCMPush in the ClientBuilder#build() method, if the user has set it in the property file.
             //ONCE Urban Airship has been officially deprecated we can remove the below lines completely (or create FCMPush inline here)
             if (pushProvider == null) {
-                pushProvider = FCMPush(this, true, "")
+                pushProvider = FCMPush(this, true, arrayOf(""))
             }
             if (pushProvider?.pushServiceClass == null) {
                 pushProvider?.pushServiceClass = pushServiceClass
@@ -775,7 +775,7 @@ protected constructor(transport: HttpTransport?, httpRequestInitializer: HttpReq
 
             //FCM explicitly enabled
             if (this.FCM_Enabled) {
-                client.pushProvider = FCMPush(client, this.GCM_InProduction, this.FCM_SenderID)
+                client.pushProvider = FCMPush(client, this.GCM_InProduction, arrayOf(this.FCM_SenderID ?: ""))
             }
 
             if (this.debugMode) {

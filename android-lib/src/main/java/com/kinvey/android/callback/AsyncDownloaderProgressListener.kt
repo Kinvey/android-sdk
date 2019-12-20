@@ -9,7 +9,7 @@ interface AsyncDownloaderProgressListener<T> : DownloaderProgressListener, Kinve
     override fun onSuccess(result: T?)
     override fun onFailure(error: Throwable?)
     @Throws(IOException::class)
-    override fun progressChanged(uploader: MediaHttpDownloader)
+    override fun progressChanged(uploader: MediaHttpDownloader?)
 
     override fun onCancelled()
     override var isCancelled: Boolean

@@ -14,8 +14,8 @@ import com.kinvey.android.callback.KinveyDeleteCallback
 import com.kinvey.android.model.User
 import com.kinvey.android.store.UserStore.Companion.login
 import com.kinvey.androidTest.LooperThread
-import com.kinvey.androidTest.TestManager.PASSWORD
-import com.kinvey.androidTest.TestManager.USERNAME
+import com.kinvey.androidTest.TestManager.Companion.PASSWORD
+import com.kinvey.androidTest.TestManager.Companion.USERNAME
 import com.kinvey.java.AbstractClient
 import com.kinvey.java.Query
 import com.kinvey.java.cache.KinveyCachedClientCallback
@@ -44,7 +44,7 @@ class FileStoreTest {
     private var success = false
     private var storeTypeResult: StoreType? = null
 
-    class DefaultUploadProgressListener(private val latch: CountDownLatch) : AsyncUploaderProgressListener<FileMetaData> {
+    open class DefaultUploadProgressListener(private val latch: CountDownLatch) : AsyncUploaderProgressListener<FileMetaData> {
 
         var fileMetaDataResult: FileMetaData? = null
         var error: Throwable? = null
@@ -100,7 +100,7 @@ class FileStoreTest {
         }
     }
 
-    protected class DefaultDownloadProgressListener(private val latch: CountDownLatch) : AsyncDownloaderProgressListener<FileMetaData> {
+    protected open class DefaultDownloadProgressListener(private val latch: CountDownLatch) : AsyncDownloaderProgressListener<FileMetaData> {
 
         var fileMetaDataResult: FileMetaData? = null
         var error: Throwable? = null
@@ -109,7 +109,7 @@ class FileStoreTest {
         var progressChangedCounter = 0
 
         @Throws(IOException::class)
-        override fun progressChanged(downloader: MediaHttpDownloader) {
+        override fun progressChanged(downloader: MediaHttpDownloader?) {
             progressChangedCounter++
 //          Log.d("DOWNLOAD TAG: ", String.valueOf(downloader.getProgress()));
         }
@@ -249,7 +249,8 @@ class FileStoreTest {
     private fun nullFileUpload(storeType: StoreType) {
         val listener = uploadFileWithMetadata(storeType, null, null)
         assertNotNull(listener.error)
-        assertEquals(listener.error?.message, "Parameter specified as non-null is null: method kotlin.jvm.internal.Intrinsics.checkParameterIsNotNull, parameter file")
+        assertEquals(listener.error?.message, "file must not be null")
+                //"Parameter specified as non-null is null: method kotlin.jvm.internal.Intrinsics.checkParameterIsNotNull, parameter file")
     }
 
     @Throws(IOException::class, InterruptedException::class)
@@ -257,7 +258,8 @@ class FileStoreTest {
         val file = createFile(DEFAULT_FILE_SIZE_MB)
         val listener = uploadFileWithMetadata(storeType, file, null)
         assertNotNull(listener.error)
-        assertEquals(listener.error?.message, "Parameter specified as non-null is null: method kotlin.jvm.internal.Intrinsics.checkParameterIsNotNull, parameter metadata")
+        assertEquals(listener.error?.message, "metadata must not be null")
+                //"Parameter specified as non-null is null: method kotlin.jvm.internal.Intrinsics.checkParameterIsNotNull, parameter metadata")
     }
 
     @Throws(IOException::class, InterruptedException::class)
@@ -304,7 +306,7 @@ class FileStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return listener
     }
 
@@ -312,7 +314,7 @@ class FileStoreTest {
     private fun nullDownload(storeType: StoreType) {
         val listener = downloadFile(storeType, null)
         assertNotNull(listener.error)
-        assertEquals(listener.error!!.message, "Parameter specified as non-null is null: method kotlin.jvm.internal.Intrinsics.checkParameterIsNotNull, parameter metadata")
+        assertEquals(listener.error?.message, "Parameter specified as non-null is null: method kotlin.jvm.internal.Intrinsics.checkParameterIsNotNull, parameter metadata")
     }
 
     @Test
@@ -509,7 +511,7 @@ class FileStoreTest {
         })
         looperThread.start()
         downloadLatch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return listener
     }
 
@@ -531,7 +533,7 @@ class FileStoreTest {
         })
         looperThread.start()
         downloadLatch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return listener
     }
 
@@ -562,7 +564,7 @@ class FileStoreTest {
         })
         looperThread.start()
         downloadLatch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return listener
     }
 
@@ -614,7 +616,7 @@ class FileStoreTest {
         })
         looperThread.start()
         deleteLatch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return deleteListener
     }
 
@@ -671,7 +673,7 @@ class FileStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         assertNotNull(callback.result)
     }
 
@@ -772,7 +774,7 @@ class FileStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         assertTrue(success)
         storeTypeResult = if (!isCacheCleaning) {
             storeType
@@ -837,7 +839,7 @@ class FileStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         assertTrue(success)
     }
 
@@ -1029,7 +1031,7 @@ class FileStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return listener
     }
 
@@ -1081,7 +1083,7 @@ class FileStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return listener
     }
 
@@ -1133,7 +1135,7 @@ class FileStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return listener
     }
 
@@ -1203,7 +1205,7 @@ class FileStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return listener
     }
 
@@ -1228,7 +1230,7 @@ class FileStoreTest {
         looperThread.start()
         latchCancelListener.await()
         latchUploadListener.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return uploadListener
     }
 
@@ -1286,7 +1288,7 @@ class FileStoreTest {
         })
         looperThread.start()
         downloadLatch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return listener
     }
 
@@ -1503,7 +1505,7 @@ class FileStoreTest {
         })
         looperThread.start()
         downloadLatch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         assertNotNull(downloadProgressListener.error)
         val deleteListener = removeFile(StoreType.NETWORK, listener.fileMetaDataResult)
         assertNotNull(deleteListener.result)
@@ -1526,7 +1528,7 @@ class FileStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         assertTrue(file.delete())
         assertNotNull(listener.error)
     }

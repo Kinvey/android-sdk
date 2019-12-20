@@ -191,7 +191,7 @@ class QueryWithRealDataTest {
         val looperThread = LooperThread(Runnable { store.find(query, callback, null) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -202,7 +202,7 @@ class QueryWithRealDataTest {
         val looperThread = LooperThread(Runnable { store.delete(query, callback) })
         looperThread.start()
         latch.await(120, TimeUnit.SECONDS)
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 

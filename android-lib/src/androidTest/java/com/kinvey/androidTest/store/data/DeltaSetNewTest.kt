@@ -10,7 +10,10 @@ import com.kinvey.android.model.User
 import com.kinvey.android.store.DataStore
 import com.kinvey.android.store.DataStore.Companion.collection
 import com.kinvey.androidTest.TestManager
-import com.kinvey.androidTest.TestManager.*
+import com.kinvey.androidTest.TestManager.Companion.PASSWORD
+import com.kinvey.androidTest.TestManager.Companion.TEST_USERNAME
+import com.kinvey.androidTest.TestManager.Companion.TEST_USERNAME_2
+import com.kinvey.androidTest.TestManager.Companion.USERNAME
 import com.kinvey.androidTest.model.Person
 import com.kinvey.java.Constants
 import com.kinvey.java.Query
@@ -24,8 +27,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.junit.MockitoJUnit
-import org.mockito.junit.MockitoRule
 import java.io.IOException
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method

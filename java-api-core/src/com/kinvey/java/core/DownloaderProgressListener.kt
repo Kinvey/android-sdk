@@ -68,5 +68,5 @@ interface DownloaderProgressListener {
      * @param downloader Media HTTP downloader
      */
     @Throws(IOException::class)
-    fun progressChanged(downloader: MediaHttpDownloader)
+    fun progressChanged(downloader: MediaHttpDownloader?)
 }

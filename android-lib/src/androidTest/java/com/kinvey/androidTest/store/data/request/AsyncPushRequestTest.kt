@@ -75,7 +75,7 @@ class AsyncPushRequestTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         verify(mockPushCallback, times(1)).onProgress(any(Long::class.javaPrimitiveType)!!, any(Long::class.javaPrimitiveType)!!)
     }
 
@@ -113,7 +113,7 @@ class AsyncPushRequestTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         verify(mockPushCallback, times(1)).onFailure(any(Throwable::class.java))
     }
 
@@ -156,7 +156,7 @@ class AsyncPushRequestTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         verify(callback, times(0)).onFailure(any(Throwable::class.java))
         verify(callback, times(1)).onProgress(any(Long::class.javaPrimitiveType), any(Long::class.javaPrimitiveType))
         verify(callback, times(1)).onSuccess(any(KinveyPushResponse::class.java))
@@ -185,7 +185,7 @@ class AsyncPushRequestTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         verify(callback, times(0)).onFailure(any(Throwable::class.java))
         verify(callback, times(1)).onProgress(any(Long::class.javaPrimitiveType), any(Long::class.javaPrimitiveType))
         verify(callback, times(1)).onSuccess(any(KinveyPushResponse::class.java))

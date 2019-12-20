@@ -21,7 +21,7 @@ object TableNameManagerUtil {
         method?.isAccessible = true
         var s: String? = null
         try {
-            s = method?.invoke(null, originalName, realm) as String
+            s = method?.invoke(null, originalName, realm) as String?
         } catch (e: IllegalAccessException) {
             e.printStackTrace()
         } catch (e: InvocationTargetException) {
@@ -40,7 +40,7 @@ object TableNameManagerUtil {
         method?.isAccessible = true
         var s: String? = null
         try {
-            s = method?.invoke(null, shortName, realm) as String
+            s = method?.invoke(null, shortName, realm) as String?
         } catch (e: IllegalAccessException) {
             e.printStackTrace()
         } catch (e: InvocationTargetException) {

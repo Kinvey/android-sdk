@@ -30,7 +30,7 @@ class HeaderTest {
     fun setUp() {
         val mMockContext: Context? = InstrumentationRegistry.getInstrumentation().targetContext
         client = Builder<User>(mMockContext).build()
-        testManager = TestManager<GenericJson?>()
+        testManager = TestManager<GenericJson>()
         if (client?.isUserLoggedIn == true) {
             testManager?.logout(client)
         }

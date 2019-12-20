@@ -11,6 +11,9 @@ import com.kinvey.android.store.DataStore
 import com.kinvey.android.store.DataStore.Companion.collection
 import com.kinvey.androidTest.TestManager
 import com.kinvey.androidTest.TestManager.*
+import com.kinvey.androidTest.TestManager.Companion.PASSWORD
+import com.kinvey.androidTest.TestManager.Companion.TEST_USERNAME
+import com.kinvey.androidTest.TestManager.Companion.USERNAME
 import com.kinvey.androidTest.callback.*
 import com.kinvey.androidTest.model.*
 import com.kinvey.java.Query

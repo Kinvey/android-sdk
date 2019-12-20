@@ -88,7 +88,7 @@ open class BaseDataStoreTest {
         looperThread?.mHandler?.sendMessage(Message())
     }
 
-    class DefaultKinveyClientCallback (private val latch: CountDownLatch) : KinveyClientCallback<Person?> {
+    class DefaultKinveyClientCallback (private val latch: CountDownLatch) : KinveyClientCallback<Person> {
         var result: Person? = null
         var error: Throwable? = null
         override fun onSuccess(result: Person?) {
@@ -104,7 +104,7 @@ open class BaseDataStoreTest {
         }
     }
 
-    class DefaultKinveyEntityCallback (private val latch: CountDownLatch) : KinveyClientCallback<EntitySet?> {
+    class DefaultKinveyEntityCallback (private val latch: CountDownLatch) : KinveyClientCallback<EntitySet> {
         var result: EntitySet? = null
         var error: Throwable? = null
         override fun onSuccess(result: EntitySet?) {
@@ -134,7 +134,7 @@ open class BaseDataStoreTest {
         }
     }
 
-    class DefaultKinveyClientArrayCallback (private val latch: CountDownLatch) : KinveyClientCallback<PersonArray?> {
+    class DefaultKinveyClientArrayCallback (private val latch: CountDownLatch) : KinveyClientCallback<PersonArray> {
         var result: PersonArray? = null
         var error: Throwable? = null
         override fun onSuccess(result: PersonArray?) {
@@ -313,7 +313,7 @@ open class BaseDataStoreTest {
         }
     }
 
-    class DefaultKinveyClientEntitySetCallback(private val latch: CountDownLatch) : KinveyClientCallback<EntitySet?> {
+    class DefaultKinveyClientEntitySetCallback(private val latch: CountDownLatch) : KinveyClientCallback<EntitySet> {
         var result: EntitySet? = null
         var error: Throwable? = null
         override fun onSuccess(result: EntitySet?) {
@@ -345,7 +345,7 @@ open class BaseDataStoreTest {
         }
     }
 
-    class DefaultKinveyDateCallback(private val latch: CountDownLatch) : KinveyClientCallback<DateExample?> {
+    class DefaultKinveyDateCallback(private val latch: CountDownLatch) : KinveyClientCallback<DateExample> {
         var result: DateExample? = null
         var error: Throwable? = null
         override fun onSuccess(result: DateExample?) {
@@ -379,7 +379,7 @@ open class BaseDataStoreTest {
         val looperThread = LooperThread(Runnable { store.save(person, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -419,7 +419,7 @@ open class BaseDataStoreTest {
         val looperThread = LooperThread(Runnable { store.save(`object`, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -430,7 +430,7 @@ open class BaseDataStoreTest {
         val looperThread = LooperThread(Runnable { store.save(`object`, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -441,7 +441,7 @@ open class BaseDataStoreTest {
         val looperThread = LooperThread(Runnable { store.find(query!!, callback, null) })
         looperThread.start()
         latch.await(seconds.toLong(), TimeUnit.SECONDS)
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -452,7 +452,7 @@ open class BaseDataStoreTest {
         val looperThread = LooperThread(Runnable { store.delete(query!!, callback) })
         looperThread.start()
         latch.await(120, TimeUnit.SECONDS)
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -463,18 +463,18 @@ open class BaseDataStoreTest {
         val looperThread = LooperThread(Runnable { store.save(person, callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
     @Throws(InterruptedException::class)
-    fun find(store: DataStore<Person>, id: String?, seconds: Int, cachedClientCallback: KinveyCachedClientCallback<Person?>?): DefaultKinveyClientCallback {
+    fun find(store: DataStore<Person>, id: String?, seconds: Int, cachedClientCallback: KinveyCachedClientCallback<Person>?): DefaultKinveyClientCallback {
         val latch = CountDownLatch(1)
         val callback = DefaultKinveyClientCallback(latch)
         val looperThread = LooperThread(Runnable { store.find(id!!, callback, cachedClientCallback) })
         looperThread.start()
         latch.await(seconds.toLong(), TimeUnit.SECONDS)
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -503,7 +503,7 @@ open class BaseDataStoreTest {
         val looperThread = LooperThread(Runnable { store.find(query!!, callback, null) })
         looperThread.start()
         latch.await(seconds.toLong(), TimeUnit.SECONDS)
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -514,7 +514,7 @@ open class BaseDataStoreTest {
         val looperThread = LooperThread(Runnable { store.find(callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -577,7 +577,7 @@ open class BaseDataStoreTest {
         val looperThread = LooperThread(Runnable { store.find(callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -588,7 +588,7 @@ open class BaseDataStoreTest {
         val looperThread = LooperThread(Runnable { store.find(id, callback, null) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -647,7 +647,7 @@ open class BaseDataStoreTest {
         })
         looperThread.start()
         latch.await(seconds.toLong(), TimeUnit.SECONDS)
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -658,7 +658,7 @@ open class BaseDataStoreTest {
         val looperThread = LooperThread(Runnable { store.delete(id, callback) })
         looperThread.start()
         latch.await(seconds.toLong(), TimeUnit.SECONDS)
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -699,7 +699,7 @@ open class BaseDataStoreTest {
         val looperThread = LooperThread(Runnable { store.delete(entityIDs, callback) })
         looperThread.start()
         latch.await(120, TimeUnit.SECONDS)
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -755,7 +755,7 @@ open class BaseDataStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -766,7 +766,7 @@ open class BaseDataStoreTest {
         val looperThread = LooperThread(Runnable { store.sync(callback) })
         looperThread.start()
         latch.await(seconds.toLong(), TimeUnit.SECONDS)
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -777,7 +777,7 @@ open class BaseDataStoreTest {
         val looperThread = LooperThread(Runnable { store.sync(query, callback) })
         looperThread.start()
         latch.await(seconds.toLong(), TimeUnit.SECONDS)
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -788,7 +788,7 @@ open class BaseDataStoreTest {
         val looperThread = LooperThread(Runnable { store.push(callback) })
         looperThread.start()
         latch.await(seconds.toLong(), TimeUnit.SECONDS)
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -805,7 +805,7 @@ open class BaseDataStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -822,7 +822,7 @@ open class BaseDataStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -839,7 +839,7 @@ open class BaseDataStoreTest {
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -850,7 +850,7 @@ open class BaseDataStoreTest {
         val looperThread = LooperThread(Runnable { store.delete(query!!, callback) })
         looperThread.start()
         latch.await(120, TimeUnit.SECONDS)
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -881,11 +881,11 @@ open class BaseDataStoreTest {
         return client?.cacheManager?.getCache(COLLECTION, Person::class.java, storeType.ttl)?.get()?.size?.toLong() ?: 0
     }
 
-    fun isCollectionHasOneTable(collection: String, realm: DynamicRealm): Boolean {
-        val currentSchema: RealmSchema = realm.schema
+    fun isCollectionHasOneTable(collection: String, realm: DynamicRealm?): Boolean {
+        val currentSchema = realm?.schema
         var className: String
         var schemaCounter = 0
-        val schemas: Set<RealmObjectSchema> = currentSchema.all
+        val schemas = currentSchema?.all!!
         for (schema in schemas) {
             className = schema.className
             if (className == TableNameManagerUtil.getShortName(collection, realm)) {
@@ -899,22 +899,20 @@ open class BaseDataStoreTest {
      * Check that main and each internal tables have correct items count
      * @param expectedItemsCount expected items count
      */
-    fun checkInternalTablesHasItems(expectedItemsCount: Int, collection: String, realm: DynamicRealm) {
-        val currentSchema: RealmSchema = realm.schema
+    fun checkInternalTablesHasItems(expectedItemsCount: Int, collection: String?, realm: DynamicRealm?) {
+        val currentSchema = realm?.schema
         var originalName: String?
         var className: String
-        val schemas: Set<RealmObjectSchema> = currentSchema.all
-        for (schema in schemas) {
-            className = schema.className
+        val schemas = currentSchema?.all
+        schemas?.forEach { schema ->
+                className = schema.className
 //search class
             if (className == TableNameManagerUtil.getShortName(collection, realm)) {
-                assertTrue(realm.where(TableNameManagerUtil.getShortName(collection, realm)).count() == expectedItemsCount.toLong())
+                assertTrue(realm?.where(TableNameManagerUtil.getShortName(collection, realm))?.count() == expectedItemsCount.toLong())
                 //search sub-classes
-
-
-                for (subClassSchema in schemas) {
+                schemas.forEach { subClassSchema ->
                     originalName = TableNameManagerUtil.getOriginalName(subClassSchema.className, realm)
-                    if (originalName != null && originalName.startsWith(className + Constants.UNDERSCORE)) {
+                    if (originalName != null && originalName?.startsWith(className + Constants.UNDERSCORE) == true) {
                         checkInternalTablesHasItems(expectedItemsCount, originalName, realm)
                     }
                 }
@@ -951,7 +949,7 @@ open class BaseDataStoreTest {
         })
         looperThread.start()
         latch.await(seconds.toLong(), TimeUnit.SECONDS)
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 

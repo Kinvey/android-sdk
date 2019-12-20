@@ -56,7 +56,7 @@ class ClientTest {
         val looperThread = LooperThread(Runnable { client?.ping(pingCallback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return pingCallback
     }
 
