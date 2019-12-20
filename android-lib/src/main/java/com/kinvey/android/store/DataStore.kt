@@ -224,7 +224,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      * @param cachedCallback either successfully returns list of resolved entities from cache or an error
      */
     @JvmOverloads
-    fun find(entityID: String, callback: KinveyClientCallback<T?>, cachedCallback: KinveyCachedClientCallback<T?>? = null) {
+    fun find(entityID: String, callback: KinveyClientCallback<T>, cachedCallback: KinveyCachedClientCallback<T>? = null) {
         Preconditions.checkNotNull(client, "client must not be null")
         Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         Preconditions.checkNotNull(entityID, "entityID must not be null.")
@@ -385,7 +385,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      * @param entity The entity to save
      * @param callback KinveyClientCallback<T>
     </T> */
-    fun save(entity: T, callback: KinveyClientCallback<T?>) {
+    fun save(entity: T, callback: KinveyClientCallback<T>) {
         Preconditions.checkNotNull(client, "client must not be null")
         Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         Preconditions.checkNotNull(entity, "Entity cannot be null.")
@@ -1045,7 +1045,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      * @param storeLiveServiceCallback [KinveyDataStoreLiveServiceCallback]
      * @param callback [<]
      */
-    fun subscribe(storeLiveServiceCallback: KinveyDataStoreLiveServiceCallback<T>, callback: KinveyClientCallback<Boolean?>) {
+    fun subscribe(storeLiveServiceCallback: KinveyDataStoreLiveServiceCallback<T>, callback: KinveyClientCallback<Boolean>) {
         AsyncRequest(this, methodMap!![KEY_SUBSCRIBE], callback, getWrappedLiveServiceCallback(storeLiveServiceCallback)).execute()
     }
 
@@ -1053,11 +1053,11 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      * Unsubscribe this instance.
      * @param callback [<]
      */
-    fun unsubscribe(callback: KinveyClientCallback<Void?>) {
+    fun unsubscribe(callback: KinveyClientCallback<Void>) {
         AsyncRequest(this, methodMap!![KEY_UNSUBSCRIBE], callback).execute()
     }
 
-    private inner class SaveRequest(internal var entity: T, callback: KinveyClientCallback<T?>) : AsyncClientRequest<T?>(callback) {
+    private inner class SaveRequest(internal var entity: T, callback: KinveyClientCallback<T>) : AsyncClientRequest<T>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): T? {
@@ -1084,9 +1084,8 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
         }
     }
 
-    private class ThreadedKinveyCachedClientCallback<T> internal constructor(private val callback: KinveyCachedClientCallback<T?>) : KinveyCachedClientCallback<T?> {
-        internal var handler: KinveyCallbackHandler<T?>
-
+    private class ThreadedKinveyCachedClientCallback<T>(private val callback: KinveyCachedClientCallback<T>) : KinveyCachedClientCallback<T> {
+        var handler: KinveyCallbackHandler<T>
         init {
             handler = KinveyCallbackHandler()
         }
@@ -1161,8 +1160,8 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
             return DataStore(collectionName, myClass, client!!.isUseDeltaCache, client!!, storeType)
         }
 
-        private fun <T> getWrappedCacheCallback(callback: KinveyCachedClientCallback<T?>?): KinveyCachedClientCallback<T?>? {
-            var ret: KinveyCachedClientCallback<T?>? = null
+        private fun <T> getWrappedCacheCallback(callback: KinveyCachedClientCallback<T>?): KinveyCachedClientCallback<T>? {
+            var ret: KinveyCachedClientCallback<T>? = null
             if (callback != null) {
                 ret = ThreadedKinveyCachedClientCallback(callback)
             }
