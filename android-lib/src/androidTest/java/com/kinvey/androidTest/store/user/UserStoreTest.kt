@@ -63,13 +63,12 @@ import com.kinvey.java.model.KinveyMetaData.Companion.KMD
 import com.kinvey.java.store.StoreType
 import com.kinvey.java.store.UserStoreRequestManager
 import junit.framework.Assert.*
-import org.checkerframework.checker.units.qual.C
+import junit.framework.AssertionFailedError
 import org.junit.*
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
 import org.junit.runner.RunWith
 import java.io.IOException
-import java.lang.reflect.Constructor
 import java.lang.reflect.InvocationTargetException
 import java.util.*
 import java.util.concurrent.CountDownLatch
@@ -330,6 +329,7 @@ class UserStoreTest {
     }
 
     @Test
+    @Throws(AssertionFailedError::class)
     fun testUserStoreLoginClassConstructors() {
         val userName = "user"
         val userPass = "pass"
@@ -348,69 +348,117 @@ class UserStoreTest {
 
         val credential = Credential(id, authToken, refresh)
 
-        Looper.prepare()
+        val latch = CountDownLatch(1)
 
-        val login1 = UserStore.Login(client as AbstractClient<User>, null)
-        assertEquals(client, login1.client)
+        var login1: UserStore.Login<*>? = null
+        var login2: UserStore.Login<*>? = null
+        var login3: UserStore.Login<*>? = null
+        var login4: UserStore.Login<*>? = null
+        var login5: UserStore.Login<*>? = null
+        var login6: UserStore.Login<*>? = null
+        var login7: UserStore.Login<*>? = null
 
-        val login2 = UserStore.Login(userName, userPass, client as AbstractClient<User>, null)
-        assertEquals(client, login2.client)
-        assertEquals(userName, login2.username)
-        assertEquals(userPass, login2.password)
+        val looperThread = LooperThread(Runnable {
+            login1 = UserStore.Login(client as AbstractClient<User>, null)
+            login2 = UserStore.Login(userName, userPass, client as AbstractClient<User>, null)
+            login3 = UserStore.Login(accessToken, loginType, client as AbstractClient<User>, null)
+            login4 = UserStore.Login(accessToken, refreshToken, loginType, client as AbstractClient<User>, null)
+            login5 = UserStore.Login(accessToken, accessSecret, consumerKey, consumerSecret, client as AbstractClient<User>, loginType, null)
+            login6 = UserStore.Login(accessToken, clientId, refresh, id, client as AbstractClient<User>, null)
+            login7 = UserStore.Login(credential, client as AbstractClient<User>, null)
+            latch.countDown()
+        })
 
-        val login3 = UserStore.Login(accessToken, loginType, client as AbstractClient<User>, null)
-        assertEquals(client, login3.client)
-        assertEquals(accessToken, login3.accessToken)
-        assertEquals(loginType, login3.type)
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
 
-        val login4 = UserStore.Login(accessToken, refreshToken, loginType, client as AbstractClient<User>, null)
-        assertEquals(client, login4.client)
-        assertEquals(accessToken, login4.accessToken)
-        assertEquals(refreshToken, login4.refreshToken)
-        assertEquals(loginType, login4.type)
+        assertEquals(client, login1?.client)
 
-        val login5 = UserStore.Login(accessToken, accessSecret, consumerKey, consumerSecret, client as AbstractClient<User>, loginType, null)
-        assertEquals(client, login5.client)
-        assertEquals(accessToken, login5.accessToken)
-        assertEquals(loginType, login5.type)
-        assertEquals(accessSecret, login5.accessSecret)
-        assertEquals(consumerKey, login5.consumerKey)
-        assertEquals(consumerSecret, login5.consumerSecret)
+        assertEquals(client, login2?.client)
+        assertEquals(userName, login2?.username)
+        assertEquals(userPass, login2?.password)
 
-        val login6 = UserStore.Login(accessToken, clientId, refresh, id, client as AbstractClient<User>, null)
-        assertEquals(client, login6.client)
-        assertEquals(accessToken, login6.accessToken)
-        assertEquals(clientId, login6.clientId)
-        assertEquals(refresh, login6.refreshToken)
-        assertEquals(id, login6.id)
+        assertEquals(client, login3?.client)
+        assertEquals(accessToken, login3?.accessToken)
+        assertEquals(loginType, login3?.type)
 
-        val login7 = UserStore.Login(credential, client as AbstractClient<User>, null)
-        assertEquals(client, login7.client)
-        assertEquals(credential, login7.credential)
+        assertEquals(client, login4?.client)
+        assertEquals(accessToken, login4?.accessToken)
+        assertEquals(refreshToken, login4?.refreshToken)
+        assertEquals(loginType, login4?.type)
+
+        assertEquals(client, login5?.client)
+        assertEquals(accessToken, login5?.accessToken)
+        assertEquals(loginType, login5?.type)
+        assertEquals(accessSecret, login5?.accessSecret)
+        assertEquals(consumerKey, login5?.consumerKey)
+        assertEquals(consumerSecret, login5?.consumerSecret)
+
+        assertEquals(client, login6?.client)
+        assertEquals(accessToken, login6?.accessToken)
+        assertEquals(clientId, login6?.clientId)
+        assertEquals(refresh, login6?.refreshToken)
+        assertEquals(id, login6?.id)
+
+        assertEquals(client, login7?.client)
+        assertEquals(credential, login7?.credential)
     }
 
     @Test
     fun testUserStoreCreateClassConstructors() {
         val userName = "user"
         val userPass = "pass"
-        val create = UserStore.Create(userName, userPass, client?.activeUser, client as AbstractClient<User>, null)
-        assertEquals(client, create.client)
-        assertEquals(userName, create.username)
-        assertEquals(userPass, create.password)
+        var create: UserStore.Create<*>? = null
+        val latch = CountDownLatch(1)
+
+        val looperThread = LooperThread(Runnable {
+            create = UserStore.Create(userName, userPass, client?.activeUser, client as AbstractClient<User>, null)
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+
+        assertEquals(client, create?.client)
+        assertEquals(userName, create?.username)
+        assertEquals(userPass, create?.password)
     }
 
     @Test
     fun testUserStoreDeleteClassConstructors() {
         val hardDel = true
-        val delete = UserStore.Delete(true, client as AbstractClient<BaseUser>, null)
-        assertEquals(client, delete.client)
-        assertEquals(hardDel, delete.hardDelete)
+        val latch = CountDownLatch(1)
+        var delete: UserStore.Delete? = null
+
+        val looperThread = LooperThread(Runnable {
+            delete = UserStore.Delete(true, client as AbstractClient<BaseUser>, null)
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+
+        assertEquals(client, delete?.client)
+        assertEquals(hardDel, delete?.hardDelete)
     }
 
     @Test
     fun testUserStoreLogoutClassConstructors() {
-        val logout = UserStore.Logout(client as AbstractClient<BaseUser>, null)
-        assertEquals(client, logout.client)
+        val latch = CountDownLatch(1)
+        var logout: UserStore.Logout? = null
+
+        val looperThread = LooperThread(Runnable {
+            logout = UserStore.Logout(client as AbstractClient<BaseUser>, null)
+            latch.countDown()
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+
+        assertEquals(client, logout?.client)
     }
 
     @Test
