@@ -3,6 +3,7 @@ package com.kinvey.androidTest.store.user
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.util.Log
@@ -60,6 +61,7 @@ import com.kinvey.java.core.KinveyJsonResponseException
 import com.kinvey.java.dto.BaseUser
 import com.kinvey.java.model.KinveyMetaData.Companion.KMD
 import com.kinvey.java.store.StoreType
+import com.kinvey.java.store.UserStoreRequestManager
 import junit.framework.Assert.*
 import org.checkerframework.checker.units.qual.C
 import org.junit.*
@@ -325,6 +327,90 @@ class UserStoreTest {
                 throwable.printStackTrace()
             }
         }
+    }
+
+    @Test
+    fun testUserStoreLoginClassConstructors() {
+        val userName = "user"
+        val userPass = "pass"
+        val accessToken = "accessToken"
+        val loginType = UserStoreRequestManager.LoginType.CREDENTIALSTORE
+        val refreshToken = "refreshToken"
+
+        val accessSecret = "accessSecret"
+        val consumerKey = "consumerKey"
+        val consumerSecret = "consumerSecret"
+
+        val clientId = "clientId"
+        val refresh = "refresh"
+        val id = "id"
+        val authToken = "authToken"
+
+        val credential = Credential(id, authToken, refresh)
+
+        Looper.prepare()
+
+        val login1 = UserStore.Login(client as AbstractClient<User>, null)
+        assertEquals(client, login1.client)
+
+        val login2 = UserStore.Login(userName, userPass, client as AbstractClient<User>, null)
+        assertEquals(client, login2.client)
+        assertEquals(userName, login2.username)
+        assertEquals(userPass, login2.password)
+
+        val login3 = UserStore.Login(accessToken, loginType, client as AbstractClient<User>, null)
+        assertEquals(client, login3.client)
+        assertEquals(accessToken, login3.accessToken)
+        assertEquals(loginType, login3.type)
+
+        val login4 = UserStore.Login(accessToken, refreshToken, loginType, client as AbstractClient<User>, null)
+        assertEquals(client, login4.client)
+        assertEquals(accessToken, login4.accessToken)
+        assertEquals(refreshToken, login4.refreshToken)
+        assertEquals(loginType, login4.type)
+
+        val login5 = UserStore.Login(accessToken, accessSecret, consumerKey, consumerSecret, client as AbstractClient<User>, loginType, null)
+        assertEquals(client, login5.client)
+        assertEquals(accessToken, login5.accessToken)
+        assertEquals(loginType, login5.type)
+        assertEquals(accessSecret, login5.accessSecret)
+        assertEquals(consumerKey, login5.consumerKey)
+        assertEquals(consumerSecret, login5.consumerSecret)
+
+        val login6 = UserStore.Login(accessToken, clientId, refresh, id, client as AbstractClient<User>, null)
+        assertEquals(client, login6.client)
+        assertEquals(accessToken, login6.accessToken)
+        assertEquals(clientId, login6.clientId)
+        assertEquals(refresh, login6.refreshToken)
+        assertEquals(id, login6.id)
+
+        val login7 = UserStore.Login(credential, client as AbstractClient<User>, null)
+        assertEquals(client, login7.client)
+        assertEquals(credential, login7.credential)
+    }
+
+    @Test
+    fun testUserStoreCreateClassConstructors() {
+        val userName = "user"
+        val userPass = "pass"
+        val create = UserStore.Create(userName, userPass, client?.activeUser, client as AbstractClient<User>, null)
+        assertEquals(client, create.client)
+        assertEquals(userName, create.username)
+        assertEquals(userPass, create.password)
+    }
+
+    @Test
+    fun testUserStoreDeleteClassConstructors() {
+        val hardDel = true
+        val delete = UserStore.Delete(true, client as AbstractClient<BaseUser>, null)
+        assertEquals(client, delete.client)
+        assertEquals(hardDel, delete.hardDelete)
+    }
+
+    @Test
+    fun testUserStoreLogoutClassConstructors() {
+        val logout = UserStore.Logout(client as AbstractClient<BaseUser>, null)
+        assertEquals(client, logout.client)
     }
 
     @Test
