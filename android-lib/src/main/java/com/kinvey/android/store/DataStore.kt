@@ -390,7 +390,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
         Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         Preconditions.checkNotNull(entity, "Entity cannot be null.")
         Logger.INFO("Calling DataStore#save(object)")
-        SaveRequest(entity, callback).execute()
+        SaveRequest(this, entity, callback).execute()
     }
 
     /**
@@ -430,7 +430,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
         Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         Preconditions.checkNotNull(entities, "Entity cannot be null.")
         Logger.INFO("Calling DataStore#save(listObjects)")
-        SaveListRequest(entities, callback).execute()
+        SaveListRequest(this, entities, callback).execute()
     }
 
     private fun saveBatch(entities: List<T>, callback: KinveyClientCallback<List<T>>) {
@@ -439,7 +439,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
         Preconditions.checkNotNull(entities, "Entity cannot be null.")
         Preconditions.checkState(entities.size > 0, "Entity list cannot be empty.")
         Logger.INFO("Calling DataStore#saveBatch(listObjects)")
-        SaveListBatchRequest(entities, callback).execute()
+        SaveListBatchRequest(this, entities, callback).execute()
     }
 
     /**
@@ -1057,30 +1057,30 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
         AsyncRequest(this, methodMap!![KEY_UNSUBSCRIBE], callback).execute()
     }
 
-    private inner class SaveRequest(internal var entity: T, callback: KinveyClientCallback<T>) : AsyncClientRequest<T>(callback) {
+    class SaveRequest<T: GenericJson>(val store: DataStore<T>, var entity: T, callback: KinveyClientCallback<T>?) : AsyncClientRequest<T>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): T? {
             Logger.INFO("Calling SaveRequest#executeAsync()")
-            return super@DataStore.save(entity)
+            return store.save(entity)
         }
     }
 
-    private inner class SaveListRequest internal constructor(internal var entities: List<T>, callback: KinveyClientCallback<List<T>>) : AsyncClientRequest<List<T>>(callback) {
+    class SaveListRequest<T: GenericJson>(val store: DataStore<T>, var entities: List<T>, callback: KinveyClientCallback<List<T>>?) : AsyncClientRequest<List<T>>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): List<T>? {
             Logger.INFO("Calling SaveListRequest#executeAsync()")
-            return super@DataStore.save(entities)
+            return store.save(entities)
         }
     }
 
-    private inner class SaveListBatchRequest internal constructor(internal var entities: List<T>, callback: KinveyClientCallback<List<T>>) : AsyncClientRequest<List<T>>(callback) {
+    class SaveListBatchRequest<T: GenericJson>(val store: DataStore<T>, var entities: List<T>, callback: KinveyClientCallback<List<T>>?) : AsyncClientRequest<List<T>>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): List<T> {
             Logger.INFO("Calling SaveListRequest#executeAsync()")
-            return super@DataStore.saveBatch(entities)
+            return store.saveBatch(entities)
         }
     }
 
