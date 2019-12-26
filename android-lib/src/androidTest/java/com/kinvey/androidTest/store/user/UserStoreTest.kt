@@ -329,7 +329,6 @@ class UserStoreTest {
     }
 
     @Test
-    @Throws(AssertionFailedError::class)
     fun testUserStoreLoginClassConstructors() {
         val userName = "user"
         val userPass = "pass"
@@ -454,11 +453,188 @@ class UserStoreTest {
             logout = UserStore.Logout(client as AbstractClient<BaseUser>, null)
             latch.countDown()
         })
+
         looperThread.start()
         latch.await()
         looperThread.mHandler?.sendMessage(Message())
 
         assertEquals(client, logout?.client)
+    }
+
+    @Test
+    fun testUserStorePostForAccessTokenClassConstructors() {
+
+        val redirectURI = "redirectURI"
+        val token = "token"
+        val clientId = "clientId"
+
+        val latch = CountDownLatch(1)
+        var post: UserStore.PostForAccessToken<User>? = null
+
+        val looperThread = LooperThread(Runnable {
+            post = UserStore.PostForAccessToken(client as Client<User>, redirectURI, token, clientId, null)
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+
+        assertEquals(client, post?.client)
+        assertEquals(redirectURI, post?.redirectURI)
+        assertEquals(token, post?.token)
+        assertEquals(clientId, post?.clientId)
+    }
+
+    @Test
+    fun testUserStorePostForOAuthTokenClassConstructors() {
+
+        val redirectURI = "redirectURI"
+        val clientId = "clientId"
+        val username = "username"
+        val password = "password"
+
+        val latch = CountDownLatch(1)
+        var post: UserStore.PostForOAuthToken<User>? = null
+
+        val looperThread = LooperThread(Runnable {
+            post = UserStore.PostForOAuthToken(client as Client<User>, clientId, redirectURI, username, password, null)
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+
+        assertEquals(client, post?.client)
+        assertEquals(clientId, post?.clientId)
+        assertEquals(redirectURI, post?.redirectURI)
+        assertEquals(username, post?.username)
+        assertEquals(password, post?.password)
+    }
+
+    @Test
+    fun testUserStoreRetrieveClassConstructors() {
+        val resolves = arrayOf("res1", "res2")
+        val latch = CountDownLatch(1)
+        var retrieve1: UserStore.Retrieve<User>? = null
+        var retrieve2: UserStore.Retrieve<User>? = null
+
+        val looperThread = LooperThread(Runnable {
+            retrieve1 = UserStore.Retrieve(client as Client<User>, null)
+            retrieve2 = UserStore.Retrieve(resolves, client as Client<User>, null)
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+
+        assertEquals(client, retrieve1?.client)
+
+        assertEquals(client, retrieve2?.client)
+        assertEquals(resolves, retrieve2?.resolves)
+    }
+
+    @Test
+    fun testUserStoreRetrieveUserListConstructors() {
+
+        val resolves = arrayOf("res1", "res2")
+        val query: Query = Query()
+        val latch = CountDownLatch(1)
+        var retrieve1: UserStore.RetrieveUserList<User>? = null
+        var retrieve2: UserStore.RetrieveUserList<User>? = null
+
+        val looperThread = LooperThread(Runnable {
+            retrieve1 = UserStore.RetrieveUserList(query, client as Client<User>, null)
+            retrieve2 = UserStore.RetrieveUserList(query, resolves, client as Client<User>, null)
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+
+        assertEquals(client, retrieve1?.client)
+        assertEquals(query, retrieve1?.query)
+
+        assertEquals(client, retrieve2?.client)
+        assertEquals(query, retrieve2?.query)
+        assertEquals(resolves, retrieve2?.resolves)
+    }
+
+    @Test
+    fun testUserStoreRetrieveUserArrayConstructors() {
+        val resolves = arrayOf("res1", "res2")
+        val query: Query = Query()
+        val latch = CountDownLatch(1)
+        var retrieve1: UserStore.RetrieveUserArray<User>? = null
+
+        val looperThread = LooperThread(Runnable {
+            retrieve1 = UserStore.RetrieveUserArray(query, resolves, client as Client<User>, null)
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+
+        assertEquals(client, retrieve1?.client)
+        assertEquals(query, retrieve1?.query)
+        assertEquals(resolves, retrieve1?.resolves)
+    }
+
+    @Test
+    fun testUserStoreRetrieveMetaDataConstructors() {
+        val latch = CountDownLatch(1)
+        var retrieve1: UserStore.RetrieveMetaData<User>? = null
+
+        val looperThread = LooperThread(Runnable {
+            retrieve1 = UserStore.RetrieveMetaData(client as Client<User>, null)
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+
+        assertEquals(client, retrieve1?.client)
+    }
+
+    @Test
+    fun testUserStoreUpdateConstructors() {
+        val latch = CountDownLatch(1)
+        var retrieve1: UserStore.Update<User>? = null
+
+        val looperThread = LooperThread(Runnable {
+            retrieve1 = UserStore.Update(client as Client<User>, null)
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+
+        assertEquals(client, retrieve1?.client)
+    }
+
+    @Test
+    fun testUserStoreChangePasswordConstructors() {
+        val password = "password"
+        val latch = CountDownLatch(1)
+        var changePassword: UserStore.ChangePassword? = null
+
+        val looperThread = LooperThread(Runnable {
+            changePassword = UserStore.ChangePassword(password, client as Client<User>, null)
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+
+        assertEquals(client, changePassword?.client)
+        assertEquals(password, changePassword?.password)
     }
 
     @Test
