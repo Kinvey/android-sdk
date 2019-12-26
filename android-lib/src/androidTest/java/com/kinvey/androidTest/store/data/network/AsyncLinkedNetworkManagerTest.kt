@@ -93,6 +93,88 @@ class AsyncLinkedNetworkManagerTest {
     }
 
     @Test
+    fun testGetConstructor() {
+        val latch = CountDownLatch(1)
+        var get: AsyncLinkedNetworkManager.Get<LinkedPerson>? = null
+
+        val linkedNetworkManager = AsyncLinkedNetworkManager(LinkedPerson.COLLECTION, LinkedPerson::class.java, client)
+        val query = Query()
+        val attachments = arrayOf("path1", "path2")
+        val resolves = arrayOf<String?>("res1", "res2")
+        val resolveDepth = 1
+        val retain = true
+        val storeType = StoreType.AUTO
+
+        val looperThread = LooperThread(Runnable {
+            get = AsyncLinkedNetworkManager.Get(linkedNetworkManager, query, null, null,
+                    attachments, resolves, resolveDepth, retain, storeType)
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+
+        assertEquals(linkedNetworkManager, get?.networkManager)
+        assertEquals(query, get?.query)
+        assertEquals(attachments, get?.attachments)
+        assertEquals(resolves, get?.resolves)
+        assertEquals(resolveDepth, get?.resolve_depth)
+        assertEquals(retain, get?.retain)
+        assertEquals(storeType, get?.storeType)
+    }
+
+    @Test
+    fun testGetEntityConstructor() {
+        val latch = CountDownLatch(1)
+        var getEntity: AsyncLinkedNetworkManager.GetEntity<LinkedPerson>? = null
+
+        val linkedNetworkManager = AsyncLinkedNetworkManager(LinkedPerson.COLLECTION, LinkedPerson::class.java, client)
+        val entityId = "entityId1"
+        val attachments = arrayOf("path1", "path2")
+        val storeType = StoreType.AUTO
+
+        val looperThread = LooperThread(Runnable {
+            getEntity = AsyncLinkedNetworkManager.GetEntity(linkedNetworkManager, entityId, null, null, attachments, storeType)
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+
+        assertEquals(linkedNetworkManager, getEntity?.networkManager)
+        assertEquals(entityId, getEntity?.entityID)
+        assertEquals(attachments, getEntity?.attachments)
+        assertEquals(storeType, getEntity?.storeType)
+    }
+
+    @Test
+    fun testSaveConstructor() {
+        val latch = CountDownLatch(1)
+        var save: AsyncLinkedNetworkManager.Save<LinkedPerson>? = null
+
+        val linkedNetworkManager = AsyncLinkedNetworkManager(LinkedPerson.COLLECTION, LinkedPerson::class.java, client)
+        val person = LinkedPerson()
+        val attachments = arrayOf<String?>("path1", "path2")
+        val storeType = StoreType.AUTO
+
+        val looperThread = LooperThread(Runnable {
+            save = AsyncLinkedNetworkManager.Save(linkedNetworkManager, person, null, null, attachments, storeType)
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+
+        assertEquals(linkedNetworkManager, save?.networkManager)
+        assertEquals(person, save?.entity)
+        assertEquals(attachments, save?.attachments)
+        assertEquals(storeType, save?.storeType)
+    }
+
+    @Test
     fun testConstructor() {
         val linkedNetworkManager = AsyncLinkedNetworkManager(LinkedPerson.COLLECTION, LinkedPerson::class.java, client)
         assertNotNull(linkedNetworkManager)
