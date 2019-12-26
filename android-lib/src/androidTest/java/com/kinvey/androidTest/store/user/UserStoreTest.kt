@@ -11,12 +11,9 @@ import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
 import com.google.api.client.http.HttpResponseException
-import com.kinvey.android.AsyncUserDiscovery
-import com.kinvey.android.AsyncUserGroup
-import com.kinvey.android.Client
+import com.kinvey.android.*
 import com.kinvey.android.Client.Builder
 import com.kinvey.android.Client.Companion.sharedInstance
-import com.kinvey.android.SharedPrefCredentialStore
 import com.kinvey.android.callback.*
 import com.kinvey.android.model.User
 import com.kinvey.android.store.DataStore
@@ -635,6 +632,121 @@ class UserStoreTest {
 
         assertEquals(client, changePassword?.client)
         assertEquals(password, changePassword?.password)
+    }
+
+    @Test
+    fun testUserStoreResetPasswordConstructors() {
+        val usernameOrEmail = "test@test.com"
+        val latch = CountDownLatch(1)
+        var resetPassword: UserStore.ResetPassword? = null
+
+        val looperThread = LooperThread(Runnable {
+            resetPassword = UserStore.ResetPassword(usernameOrEmail, client as Client<User>, null)
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+
+        assertEquals(client, resetPassword?.client)
+        assertEquals(usernameOrEmail, resetPassword?.usernameOrEmail)
+    }
+
+    @Test
+    fun testUserStoreExistsUserConstructors() {
+        val username = "username"
+        val latch = CountDownLatch(1)
+        var existsUser: UserStore.ExistsUser? = null
+
+        val looperThread = LooperThread(Runnable {
+            existsUser = UserStore.ExistsUser(username, client as Client<User>, null)
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+
+        assertEquals(client, existsUser?.client)
+        assertEquals(username, existsUser?.username)
+    }
+
+    @Test
+    fun testUserStoreGetUserConstructors() {
+        val userId = "userId"
+        val latch = CountDownLatch(1)
+        var getUser: UserStore.GetUser<User>? = null
+
+        val looperThread = LooperThread(Runnable {
+            getUser = UserStore.GetUser(userId, client as Client<User>, null)
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+
+        assertEquals(client, getUser?.client)
+        assertEquals(userId, getUser?.userId)
+    }
+
+    @Test
+    fun testUserStoreEmailVerificationConstructors() {
+        val latch = CountDownLatch(1)
+        var getUser: UserStore.EmailVerification? = null
+
+        val looperThread = LooperThread(Runnable {
+            getUser = UserStore.EmailVerification(client as Client<User>, null)
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+
+        assertEquals(client, getUser?.client)
+    }
+
+    @Test
+    fun testUserStoreForgotUsernameConstructors() {
+        val email = "email"
+        val latch = CountDownLatch(1)
+        var forgotUser: UserStore.ForgotUsername? = null
+
+        val looperThread = LooperThread(Runnable {
+            forgotUser = UserStore.ForgotUsername(client as Client<User>, email, null)
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+
+        assertEquals(client, forgotUser?.client)
+        assertEquals(email, forgotUser?.email)
+    }
+
+    @Test
+    fun testUserStoreLoginKinveyAuthConstructors() {
+        val userID = "userID"
+        val authToken = "authToken"
+
+        val latch = CountDownLatch(1)
+        var loginKinveyAuth: UserStore.LoginKinveyAuth<User>? = null
+
+        val looperThread = LooperThread(Runnable {
+            loginKinveyAuth = UserStore.LoginKinveyAuth(userID, authToken, client as Client<User>, null)
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+
+        assertEquals(client, loginKinveyAuth?.client)
+        assertEquals(userID, loginKinveyAuth?.userID)
+        assertEquals(authToken, loginKinveyAuth?.authToken)
     }
 
     @Test

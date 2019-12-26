@@ -329,8 +329,8 @@ class UserStore {
         }
     }
 
-    class ResetPassword(internal var usernameOrEmail: String, private val client: AbstractClient<*>,
-                                callback: KinveyClientCallback<Void>) : AsyncClientRequest<Void>(callback) {
+    class ResetPassword(var usernameOrEmail: String, val client: AbstractClient<*>,
+                        callback: KinveyClientCallback<Void>?) : AsyncClientRequest<Void>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): Void? {
@@ -339,8 +339,8 @@ class UserStore {
         }
     }
 
-    private class ExistsUser(internal var username: String, private val client: AbstractClient<*>,
-                                                  callback: KinveyClientCallback<Boolean>) : AsyncClientRequest<Boolean>(callback) {
+    class ExistsUser(var username: String, val client: AbstractClient<*>,
+                     callback: KinveyClientCallback<Boolean>?) : AsyncClientRequest<Boolean>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): Boolean? {
@@ -348,17 +348,17 @@ class UserStore {
         }
     }
 
-    private class GetUser<T : User>(internal var userId: String, private val client: AbstractClient<*>,
-                                    callback: KinveyClientCallback<T>) : AsyncClientRequest<T>(callback) {
+    class GetUser<T : User>(var userId: String, val client: AbstractClient<*>,
+                            callback: KinveyClientCallback<T>?) : AsyncClientRequest<T>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): T {
-            return BaseUserStore.get(userId, client) as T
+            return BaseUserStore[userId, client] as T
         }
     }
 
-    private class EmailVerification(private val client: AbstractClient<*>,
-                                    callback: KinveyClientCallback<Void>) : AsyncClientRequest<Void>(callback) {
+    class EmailVerification(val client: AbstractClient<*>,
+                            callback: KinveyClientCallback<Void>?) : AsyncClientRequest<Void>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): Void? {
@@ -367,8 +367,8 @@ class UserStore {
         }
     }
 
-    private class ForgotUsername (private val client: AbstractClient<*>, private val email: String,
-                                  callback: KinveyClientCallback<Void>) : AsyncClientRequest<Void>(callback) {
+    class ForgotUsername(val client: AbstractClient<*>, val email: String,
+                          callback: KinveyClientCallback<Void>?) : AsyncClientRequest<Void>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): Void? {
@@ -377,8 +377,8 @@ class UserStore {
         }
     }
 
-    private class LoginKinveyAuth<T : User>(private val userID: String, private val authToken: String,
-                                            private val client: AbstractClient<T>, callback: KinveyClientCallback<T>) : AsyncClientRequest<T>(callback) {
+    class LoginKinveyAuth<T : User>(val userID: String, val authToken: String,
+                                    val client: AbstractClient<T>, callback: KinveyClientCallback<T>?) : AsyncClientRequest<T>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): T? {
