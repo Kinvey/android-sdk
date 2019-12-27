@@ -33,10 +33,12 @@ import com.kinvey.java.cache.ICache
 import com.kinvey.java.core.*
 import com.kinvey.java.deltaset.DeltaSetItem
 import com.kinvey.java.deltaset.DeltaSetMerge
+import com.kinvey.java.dto.BaseUser
 import com.kinvey.java.dto.BatchList
 import com.kinvey.java.dto.DeviceId
 import com.kinvey.java.model.*
 import com.kinvey.java.query.MongoQueryFilter.MongoQueryFilterBuilder
+import com.sun.security.ntlm.Client
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -119,8 +121,8 @@ open class NetworkManager<T : GenericJson>(
      * @throws java.io.IOException
      */
     @Throws(IOException::class)
-    fun getEntityBlocking(entityID: String): GetEntity? {
-        val getEntity = GetEntity(entityID, currentClass)
+    fun getEntityBlocking(entityID: String): GetEntity<T>? {
+        val getEntity = GetEntity(this, client, entityID, currentClass)
         client?.initializeRequest(getEntity)
         return getEntity
     }
@@ -137,8 +139,8 @@ open class NetworkManager<T : GenericJson>(
      * @throws java.io.IOException
      */
     @Throws(IOException::class)
-    fun getEntityBlocking(entityID: String?, resolves: Array<String>?, resolve_depth: Int, retain: Boolean): GetEntity? {
-        val getEntity = GetEntity(entityID, currentClass, resolves, resolve_depth, retain)
+    fun getEntityBlocking(entityID: String?, resolves: Array<String>?, resolve_depth: Int, retain: Boolean): GetEntity<T>? {
+        val getEntity = GetEntity(this, client, entityID, currentClass, resolves, resolve_depth, retain)
         client?.initializeRequest(getEntity)
         return getEntity
     }
@@ -152,9 +154,9 @@ open class NetworkManager<T : GenericJson>(
      * @throws java.io.IOException
      */
     @Throws(IOException::class)
-    fun getBlocking(query: Query?): Get? {
+    fun getBlocking(query: Query?): Get<T>? {
         Preconditions.checkNotNull(query)
-        val get = Get(query, currentClass)
+        val get = Get(this, client, query, currentClass)
         client?.initializeRequest(get)
         return get
     }
@@ -167,9 +169,9 @@ open class NetworkManager<T : GenericJson>(
      * @throws java.io.IOException
      */
     @Throws(IOException::class)
-    fun getBlocking(queryString: String?): Get? {
+    fun getBlocking(queryString: String?): Get<T>? {
         Preconditions.checkNotNull(queryString)
-        val get = Get(queryString, currentClass)
+        val get = Get(this, client, queryString, currentClass)
         client?.initializeRequest(get)
         return get
     }
@@ -182,7 +184,7 @@ open class NetworkManager<T : GenericJson>(
      * @throws java.io.IOException
      */
     @Throws(IOException::class)
-    fun getBlocking(ids: Array<String>?): Get? {
+    fun getBlocking(ids: Array<String>?): Get<T>? {
         Preconditions.checkNotNull(ids, "ids cannot be null.")
         val q = Query()
         q.`in`("_id", ids)
@@ -200,8 +202,8 @@ open class NetworkManager<T : GenericJson>(
      * @throws java.io.IOException
      */
     @Throws(IOException::class)
-    fun getBlocking(query: Query?, resolves: Array<String>?, resolve_depth: Int, retain: Boolean): Get? {
-        val getEntity = Get(query, currentClass, resolves, resolve_depth, retain)
+    fun getBlocking(query: Query?, resolves: Array<String>?, resolve_depth: Int, retain: Boolean): Get<T>? {
+        val getEntity = Get(this, client, query, currentClass, resolves, resolve_depth, retain)
         client?.initializeRequest(getEntity)
         return getEntity
     }
@@ -216,7 +218,7 @@ open class NetworkManager<T : GenericJson>(
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun getBlocking(query: Query?, resolves: Array<String>?): Get? {
+    fun getBlocking(query: Query?, resolves: Array<String>?): Get<T>? {
         return getBlocking(query, resolves, 1, true)
     }
 
@@ -229,7 +231,7 @@ open class NetworkManager<T : GenericJson>(
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun getEntityBlocking(id: String?, resolves: Array<String>?): GetEntity? {
+    fun getEntityBlocking(id: String?, resolves: Array<String>?): GetEntity<T>? {
         return getEntityBlocking(id, resolves, 1, true)
     }
 
@@ -240,16 +242,16 @@ open class NetworkManager<T : GenericJson>(
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun getBlocking(): Get? = getBlocking(client?.query())
+    fun getBlocking(): Get<T>? = getBlocking(client?.query())
 
     @Deprecated("use {@link #getBlocking(Query)} instead.")
     @Throws(IOException::class)
-    fun pullBlocking(query: Query?, cachedItems: List<T>?, deltaSetCachingEnabled: Boolean): Get? {
+    fun pullBlocking(query: Query?, cachedItems: List<T>?, deltaSetCachingEnabled: Boolean): Get<T>? {
         Preconditions.checkNotNull(query)
         val pull = if (deltaSetCachingEnabled) {
-            DeltaGet(query, currentClass, cachedItems)
+            DeltaGet(this, client, query, currentClass, cachedItems)
         } else {
-            Get(query, currentClass)
+            Get(this, client, query, currentClass)
         }
         client?.initializeRequest(pull)
         return pull
@@ -267,14 +269,14 @@ open class NetworkManager<T : GenericJson>(
      */
     @Deprecated("use {@link #getBlocking(Query)} instead.")
     @Throws(IOException::class)
-    fun pullBlocking(query: Query?, cache: ICache<T>?, deltaSetCachingEnabled: Boolean): Get? {
+    fun pullBlocking(query: Query?, cache: ICache<T>?, deltaSetCachingEnabled: Boolean): Get<T>? {
         Preconditions.checkNotNull(query)
         val pull = if (deltaSetCachingEnabled) {
-            if (cache != null) {
-                DeltaGet(query, currentClass, query?.run { cache[this] })
+        if (cache != null) {
+            DeltaGet(this, client, query, currentClass, query?.run { cache[this] })
             } else null
         } else {
-            Get(query, currentClass)
+            Get(this, client, query, currentClass)
         }
         client?.initializeRequest(pull as AbstractKinveyClientRequest<*>)
         return pull
@@ -289,9 +291,9 @@ open class NetworkManager<T : GenericJson>(
      */
     @Deprecated("use {@link #getBlocking(Query)} instead.")
     @Throws(IOException::class)
-    fun pullBlocking(query: Query): Get? {
+    fun pullBlocking(query: Query): Get<T>? {
         Preconditions.checkNotNull(query)
-        val pull = Get(query, currentClass)
+        val pull = Get(this, client, query, currentClass)
         client?.initializeRequest(pull)
         return pull
     }
@@ -305,12 +307,12 @@ open class NetworkManager<T : GenericJson>(
      * @throws java.io.IOException
      */
     @Throws(IOException::class)
-    fun getBlocking(query: Query, cachedItems: List<T>?, deltaSetCachingEnabled: Boolean): Get? {
+    fun getBlocking(query: Query, cachedItems: List<T>?, deltaSetCachingEnabled: Boolean): Get<T>? {
         Preconditions.checkNotNull(query)
         val get = if (deltaSetCachingEnabled) {
-            DeltaGet(query, currentClass, cachedItems)
+            DeltaGet(this, client, query, currentClass, cachedItems)
         } else {
-            Get(query, currentClass)
+            Get(this, client, query, currentClass)
         }
         client?.initializeRequest(get)
         return get
@@ -324,9 +326,9 @@ open class NetworkManager<T : GenericJson>(
      * @throws IOException
      */
     @Throws(IOException::class)
-    open fun queryCacheGetBlocking(query: Query?, lastRequestTime: String?): QueryCacheGet? {
+    open fun queryCacheGetBlocking(query: Query?, lastRequestTime: String?): QueryCacheGet<T>? {
         Preconditions.checkNotNull(query)
-        val queryCacheGet = QueryCacheGet(query, currentClass, lastRequestTime)
+        val queryCacheGet = QueryCacheGet(this, client, query, currentClass, lastRequestTime)
         client?.initializeRequest(queryCacheGet)
         return queryCacheGet
     }
@@ -337,9 +339,9 @@ open class NetworkManager<T : GenericJson>(
      * @throws IOException
      */
     @get:Throws(IOException::class)
-    val countBlocking: GetCount?
+    val countBlocking: GetCount<T>?
         get() {
-            val getCount = GetCount()
+            val getCount = GetCount(this, client)
             client?.initializeRequest(getCount)
             return getCount
         }
@@ -350,8 +352,8 @@ open class NetworkManager<T : GenericJson>(
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun getCountBlocking(query: Query?): GetCount? {
-        val getCount = GetCount(query)
+    fun getCountBlocking(query: Query?): GetCount<T>? {
+        val getCount = GetCount(this, client, query)
         client?.initializeRequest(getCount)
         return getCount
     }
@@ -364,10 +366,10 @@ open class NetworkManager<T : GenericJson>(
      * @throws IOException
      */
     @Throws(IOException::class)
-    open fun saveBlocking(entity: T?): Save? {
+    open fun saveBlocking(entity: T?): Save<T>? {
         Preconditions.checkNotNull(entity, "accessToken must not be null")
         INFO("Start saveBlocking for object")
-        val save: Save
+        val save: Save<T>
         val sourceID: String?
         val jsonEntity = entity as GenericJson?
         sourceID = jsonEntity?.run { this[ID_FIELD_NAME] as String? }
@@ -377,11 +379,11 @@ open class NetworkManager<T : GenericJson>(
         INFO("Start choosing PUT or POST request")
         if (sourceID != null && !bRealmGeneratedId) {
             INFO("Start for preparing new Save(entity, myClass, sourceID, SaveMode.PUT)")
-            save = Save(entity, currentClass, sourceID, SaveMode.PUT)
+            save = Save(this, client, entity, currentClass, sourceID, SaveMode.PUT)
             INFO("Finish for preparing new Save(entity, myClass, sourceID, SaveMode.PUT)")
         } else {
             INFO("Start for preparing new Save(entity, myClass, sourceID, SaveMode.POST)")
-            save = Save(entity, currentClass, SaveMode.POST)
+            save = Save(this, client, entity, currentClass, SaveMode.POST)
             INFO("Finish for preparing new Save(entity, myClass, SaveMode.POST)")
         }
         client?.initializeRequest(save)
@@ -405,7 +407,7 @@ open class NetworkManager<T : GenericJson>(
                         INFO("Start recursive call for manager.saveBlocking(object).execute() inside saveBlocking")
                         val saved = manager.saveBlocking(item)?.execute()
                         INFO("return saved.get(ID_FIELD_NAME).toString() for onUnsavedReferenceFound(String, GenericJson)")
-                        return saved?.run { this[ID_FIELD_NAME]?.toString() } ?: ""
+                        return saved?.run { this.get(ID_FIELD_NAME)?.toString() } ?: ""
                     } catch (e: IOException) {
                         ERROR("Catch exception for recursive call for manager.saveBlocking(object).execute()")
                         e.printStackTrace()
@@ -422,9 +424,9 @@ open class NetworkManager<T : GenericJson>(
     }
 
     @Throws(IOException::class)
-    open fun saveBatchBlocking(list: List<T>?): SaveBatch? {
+    open fun saveBatchBlocking(list: List<T>?): SaveBatch<T>? {
         val responseClassType = KinveySaveBatchResponse::class.java
-        val batch = SaveBatch(list, responseClassType as Class<KinveySaveBatchResponse<T>>, currentClass, SaveMode.POST)
+        val batch = SaveBatch(this, client, list, responseClassType as Class<KinveySaveBatchResponse<T>>, currentClass, SaveMode.POST)
         client?.initializeRequest(batch)
         return batch
     }
@@ -452,9 +454,9 @@ open class NetworkManager<T : GenericJson>(
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun deleteBlocking(entityID: String?): Delete? {
+    fun deleteBlocking(entityID: String?): Delete<T>? {
         Preconditions.checkNotNull(entityID)
-        val delete = Delete(entityID)
+        val delete = Delete(this, client, entityID)
         client?.initializeRequest(delete)
         return delete
     }
@@ -467,9 +469,9 @@ open class NetworkManager<T : GenericJson>(
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun deleteBlocking(query: Query?): Delete? {
+    fun deleteBlocking(query: Query?): Delete<T>? {
         Preconditions.checkNotNull(query)
-        val delete = Delete(query)
+        val delete = Delete(this, client, query)
         client?.initializeRequest(delete)
         return delete
     }
@@ -483,7 +485,7 @@ open class NetworkManager<T : GenericJson>(
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun countBlocking(fields: List<String>?, myClass: Class<Array<T>>?, query: Query?): Aggregate? {
+    fun countBlocking(fields: List<String>?, myClass: Class<Array<T>>?, query: Query?): Aggregate<T>? {
         Preconditions.checkNotNull(fields)
         return aggregate(fields, AggregateType.COUNT, null, myClass, query)
     }
@@ -498,7 +500,7 @@ open class NetworkManager<T : GenericJson>(
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun sumBlocking(fields: List<String>?, sumField: String?, myClass: Class<Array<T>>?, query: Query?): Aggregate? {
+    fun sumBlocking(fields: List<String>?, sumField: String?, myClass: Class<Array<T>>?, query: Query?): Aggregate<T>? {
         Preconditions.checkNotNull(fields)
         Preconditions.checkNotNull(sumField)
         return aggregate(fields, AggregateType.SUM, sumField, myClass, query)
@@ -514,7 +516,7 @@ open class NetworkManager<T : GenericJson>(
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun maxBlocking(fields: List<String>?, maxField: String?, myClass: Class<Array<T>>?, query: Query?): Aggregate? {
+    fun maxBlocking(fields: List<String>?, maxField: String?, myClass: Class<Array<T>>?, query: Query?): Aggregate<T>? {
         Preconditions.checkNotNull(fields)
         Preconditions.checkNotNull(maxField)
         return aggregate(fields, AggregateType.MAX, maxField, myClass, query)
@@ -530,7 +532,7 @@ open class NetworkManager<T : GenericJson>(
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun minBlocking(fields: List<String>?, minField: String?, myClass: Class<Array<T>>?, query: Query?): Aggregate? {
+    fun minBlocking(fields: List<String>?, minField: String?, myClass: Class<Array<T>>?, query: Query?): Aggregate<T>? {
         Preconditions.checkNotNull(fields)
         Preconditions.checkNotNull(minField)
         return aggregate(fields, AggregateType.MIN, minField, myClass, query)
@@ -546,7 +548,7 @@ open class NetworkManager<T : GenericJson>(
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun averageBlocking(fields: List<String>?, averageField: String?, myClass: Class<Array<T>>?, query: Query?): Aggregate? {
+    fun averageBlocking(fields: List<String>?, averageField: String?, myClass: Class<Array<T>>?, query: Query?): Aggregate<T>? {
         Preconditions.checkNotNull(fields)
         Preconditions.checkNotNull(averageField)
         return aggregate(fields, AggregateType.AVERAGE, averageField, myClass, query)
@@ -563,9 +565,9 @@ open class NetworkManager<T : GenericJson>(
      */
     @Throws(IOException::class)
     fun aggregate(fields: List<String>?, type: AggregateType?, aggregateField: String?,
-                  myClass: Class<Array<T>>?, query: Query?): Aggregate? {
+                  myClass: Class<Array<T>>?, query: Query?): Aggregate<T>? {
         val entity = AggregateEntity(fields, type, aggregateField, query, client)
-        val aggregate = Aggregate(entity, myClass)
+        val aggregate = Aggregate(this, client, entity, myClass)
         client?.initializeRequest(aggregate)
         return aggregate
     }
@@ -577,19 +579,19 @@ open class NetworkManager<T : GenericJson>(
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun subscribe(deviceId: String?): Subscribe? {
+    fun subscribe(deviceId: String?): Subscribe<T>? {
         Preconditions.checkNotNull(deviceId)
         val deviceID = DeviceId()
         deviceID.deviceId = deviceId
-        val subscribe = Subscribe(deviceID)
+        val subscribe = Subscribe(this, client, deviceID)
         client?.initializeRequest(subscribe)
         return subscribe
     }
 
-    private inner class MetadataGet internal constructor(getRequest: DeltaGet?)
+    class  MetadataGet<T: GenericJson>(val netManager: NetworkManager<T>, val client: AbstractClient<*>?, val getRequest: DeltaGet<T>?)
         : AbstractKinveyJsonClientRequest<Array<DeltaSetItem>>(client, HttpVerb.GET.verb, METADATA_GET_REST_PATH, null, Array<DeltaSetItem>::class.java) {
         @Key
-        private var collectionName: String? = this@NetworkManager.collectionName
+        private var collectionName: String? = netManager.collectionName
         @Key("query")
         private val queryFilter: String?
         @Key("sort")
@@ -627,14 +629,15 @@ open class NetworkManager<T : GenericJson>(
      * requests with Delta set cache functionality.
      *
      */
-    inner class DeltaGet constructor(private val query: Query?, var myClass: Class<T>?, private val currentItems: List<T>?) : Get(query, myClass) {
+    class DeltaGet<T: GenericJson>(val networkManager: NetworkManager<T>, val client: AbstractClient<*>?, val query: Query?,
+                                   var myClass: Class<T>?, val currentItems: List<T>?) : Get<T>(networkManager, client, query, myClass) {
 
         @Throws(IOException::class)
         override fun execute(): KinveyReadResponse<T>? {
             var ret: KinveyReadResponse<T>? = null
             if (currentItems != null && currentItems.isNotEmpty()) {
                 ret = KinveyReadResponse()
-                val deltaRequest = MetadataGet(DeltaGet(query, myClass, currentItems))
+                val deltaRequest = MetadataGet(networkManager, client, DeltaGet(networkManager, client, query, myClass, currentItems))
                 client?.initializeRequest(deltaRequest)
                 val itemsArray = deltaRequest.execute()
                 //init empty array in case if there is no ids to update
@@ -662,8 +665,8 @@ open class NetworkManager<T : GenericJson>(
                 val chunkItems = ids.subList(0, chunkSize)
                 ids = ids.subList(chunkSize, ids.size)
                 val arrayItems = chunkItems.toTypedArray()
-                val query = query()?.`in`("_id", arrayItems)
-                val pageGet = Get(query,
+                val query = networkManager.query()?.`in`("_id", arrayItems)
+                val pageGet = Get(networkManager, client, query,
                         myClass,
                         if (resolve != null) resolve?.split(",")?.toTypedArray() else arrayOf(),
                         if (resolveDepth != null) Integer.parseInt(resolveDepth) else 0,
@@ -681,7 +684,7 @@ open class NetworkManager<T : GenericJson>(
      * requests.
      *
      */
-    open inner class Get: AbstractKinveyReadRequest<T> {
+    open class Get<T: GenericJson>: AbstractKinveyReadRequest<T> {
         @Key
         var collectionName: String?
         @Key("query")
@@ -693,14 +696,15 @@ open class NetworkManager<T : GenericJson>(
         @Key("skip")
         var skip: String? = null
         @Key("resolve")
-        protected var resolve: String? = null
+        var resolve: String? = null
         @Key("resolve_depth")
-        protected var resolveDepth: String? = null
+        var resolveDepth: String? = null
         @Key("retainReferences")
-        protected var retainReferences: String? = null
+        var retainReferences: String? = null
 
-        constructor(query: Query?, myClass: Class<T>?) : super(client, HttpVerb.GET.verb, GET_REST_PATH, null, myClass) {
-            this.collectionName = this@NetworkManager.collectionName
+        constructor(networkManager: NetworkManager<T>, client: AbstractClient<*>?, query: Query?, myClass: Class<T>?)
+            : super(client, HttpVerb.GET.verb, GET_REST_PATH, null, myClass) {
+            this.collectionName = networkManager.collectionName
             queryFilter = query?.getQueryFilterJson(client?.jsonFactory)
             val queryLimit = query?.limit ?: 0
             val querySkip = query?.skip ?: 0
@@ -708,15 +712,16 @@ open class NetworkManager<T : GenericJson>(
             skip = if (querySkip > 0) querySkip.toString() else null
             val sortString = query?.sortString
             sortFilter = if (sortString != "") sortString else null
-            getRequestHeaders()["X-Kinvey-Client-App-Version"] = clientAppVersion
-            if (!this@NetworkManager.customRequestProperties.isNullOrEmpty()) {
-                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(this@NetworkManager.customRequestProperties)
+            getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkManager.clientAppVersion
+            if (!networkManager.customRequestProperties.isNullOrEmpty()) {
+                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkManager.customRequestProperties)
             }
         }
 
-        constructor(query: Query?, myClass: Class<T>?, resolves: Array<String>?, resolveDepth: Int, retain: Boolean)
+        constructor(networkManager: NetworkManager<T>, client: AbstractClient<*>?, query: Query?, myClass: Class<T>?,
+                    resolves: Array<String>?, resolveDepth: Int, retain: Boolean)
             : super(client, HttpVerb.GET.verb, GET_REST_PATH, null, myClass) {
-            this.collectionName = this@NetworkManager.collectionName
+            this.collectionName = networkManager.collectionName
             queryFilter = query?.getQueryFilterJson(client?.jsonFactory)
             val queryLimit = query?.limit ?: 0
             val querySkip = query?.skip ?: 0
@@ -728,18 +733,19 @@ open class NetworkManager<T : GenericJson>(
             this.resolveDepth = if (resolveDepth > 0) resolveDepth.toString() else null
             retainReferences = retain.toString()
             getRequestHeaders()["X-Kinvey-Client-App-Version"] = client?.clientAppVersion
-            if (!this@NetworkManager.customRequestProperties.isNullOrEmpty()) {
-                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(this@NetworkManager.customRequestProperties)
+            if (!networkManager.customRequestProperties.isNullOrEmpty()) {
+                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkManager.customRequestProperties)
             }
         }
 
-        constructor(queryString: String?, myClass: Class<T>?) : super(client, HttpVerb.GET.verb, GET_REST_PATH, null, myClass) {
-            this.collectionName = this@NetworkManager.collectionName
+        constructor(networkManager: NetworkManager<T>, client: AbstractClient<*>?, queryString: String?, myClass: Class<T>?)
+            : super(client, HttpVerb.GET.verb, GET_REST_PATH, null, myClass) {
+            this.collectionName = networkManager.collectionName
             queryFilter = if (queryString != "{}") queryString else null
             setTemplateExpand(false)
-            getRequestHeaders()["X-Kinvey-Client-App-Version"] = clientAppVersion
-            if (!this@NetworkManager.customRequestProperties.isNullOrEmpty()) {
-                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(this@NetworkManager.customRequestProperties)
+            getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkManager.clientAppVersion
+            if (!networkManager.customRequestProperties.isNullOrEmpty()) {
+                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkManager.customRequestProperties)
             }
         }
 
@@ -749,22 +755,23 @@ open class NetworkManager<T : GenericJson>(
         }
     }
 
-    open inner class QueryCacheGet internal constructor(query: Query?, myClass: Class<T>?, @Key("since") protected var since: String?)
+    open class QueryCacheGet<T: GenericJson>(val networkManager: NetworkManager<T>, val client: AbstractClient<*>?,
+                                             query: Query?, myClass: Class<T>?, @Key("since") var since: String?)
         : AbstractKinveyQueryCacheReadRequest<T>(client, HttpVerb.GET.verb, QUERY_CACHE_GET_REST_PATH, null, myClass) {
         @Key
-        protected var collectionName: String?
+        var collectionName: String?
         @Key("query")
-        protected var queryFilter: String?
+        var queryFilter: String?
         @Key("sort")
-        protected var sortFilter: String?
+        var sortFilter: String?
         @Key("limit")
-        protected var limit: String?
+        var limit: String?
         @Key("skip")
-        protected var skip: String?
+        var skip: String?
         @Key("resolve")
-        protected var resolve: String? = null
+        var resolve: String? = null
         @Key("resolve_depth")
-        protected var resolveDepth: String? = null
+        var resolveDepth: String? = null
 
         @Throws(IOException::class)
         override fun execute(): KinveyQueryCacheResponse<T>? {
@@ -772,7 +779,7 @@ open class NetworkManager<T : GenericJson>(
         }
 
         init {
-            this.collectionName = this@NetworkManager.collectionName
+            this.collectionName = networkManager.collectionName
             queryFilter = query?.getQueryFilterJson(client?.jsonFactory)
             val queryLimit = query?.limit ?: 0
             val querySkip = query?.skip ?: 0
@@ -780,9 +787,9 @@ open class NetworkManager<T : GenericJson>(
             skip = if (querySkip > 0) querySkip.toString() else null
             val sortString = query?.sortString ?: ""
             sortFilter = if (sortString.isNotEmpty()) sortString else null
-            getRequestHeaders()["X-Kinvey-Client-App-Version"] = clientAppVersion
-            if (!this@NetworkManager.customRequestProperties.isNullOrEmpty()) {
-                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(this@NetworkManager.customRequestProperties)
+            getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkManager.clientAppVersion
+            if (!networkManager.customRequestProperties.isNullOrEmpty()) {
+                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkManager.customRequestProperties)
             }
         }
     }
@@ -792,37 +799,39 @@ open class NetworkManager<T : GenericJson>(
      * requests.
      *
      */
-    inner class GetEntity : AbstractKinveyJsonClientRequest<T> {
+    class GetEntity<T: GenericJson> : AbstractKinveyJsonClientRequest<T> {
         @Key
-        private var entityID: String?
+        var entityID: String?
         @Key
-        private var collectionName: String?
+        var collectionName: String?
         @Key("resolve")
-        private var resolve: String? = null
+        var resolve: String? = null
         @Key("resolve_depth")
-        private var resolveDepth: String? = null
+        var resolveDepth: String? = null
         @Key("retainReferences")
-        private var retainReferences: String? = null
+        var retainReferences: String? = null
 
-        internal constructor(entityID: String?, myClass: Class<T>?) : super(client, HttpVerb.GET.verb, GET_ENTITY_REST_PATH, null, myClass) {
-            this.collectionName = this@NetworkManager.collectionName
+        constructor(networkManager: NetworkManager<T>, client: AbstractClient<*>?, entityID: String?, myClass: Class<T>?)
+            : super(client, HttpVerb.GET.verb, GET_ENTITY_REST_PATH, null, myClass) {
+            this.collectionName = networkManager.collectionName
             this.entityID = entityID
-            getRequestHeaders()["X-Kinvey-Client-App-Version"] = clientAppVersion
-            if (!this@NetworkManager.customRequestProperties.isNullOrEmpty()) {
-                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(this@NetworkManager.customRequestProperties)
+            getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkManager.clientAppVersion
+            if (!networkManager.customRequestProperties.isNullOrEmpty()) {
+                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkManager.customRequestProperties)
             }
         }
 
-        internal constructor(entityID: String?, myClass: Class<T>?, resolves: Array<String>?, resolveDepth: Int, retain: Boolean)
-                : super(client, HttpVerb.GET.verb, GET_ENTITY_REST_PATH, null, myClass) {
-            this.collectionName = this@NetworkManager.collectionName
+        constructor(networkManager: NetworkManager<T>, client: AbstractClient<*>?, entityID: String?,
+                    myClass: Class<T>?, resolves: Array<String>?, resolveDepth: Int, retain: Boolean)
+            : super(client, HttpVerb.GET.verb, GET_ENTITY_REST_PATH, null, myClass) {
+            this.collectionName = networkManager.collectionName
             this.entityID = entityID
             this.resolve = Joiner.on(",").join(resolves)
             this.resolveDepth = if (resolveDepth > 0) resolveDepth.toString() else null
             retainReferences = retain.toString()
-            getRequestHeaders()["X-Kinvey-Client-App-Version"] = clientAppVersion
-            if (!this@NetworkManager.customRequestProperties.isNullOrEmpty()) {
-                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(this@NetworkManager.customRequestProperties)
+            getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkManager.clientAppVersion
+            if (!networkManager.customRequestProperties.isNullOrEmpty()) {
+                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkManager.customRequestProperties)
             }
         }
 
@@ -837,9 +846,9 @@ open class NetworkManager<T : GenericJson>(
      * requests.
      *
      */
-    inner class GetCount : AbstractKinveyReadHeaderRequest<KinveyCountResponse> {
+    class GetCount<T : GenericJson> : AbstractKinveyReadHeaderRequest<KinveyCountResponse> {
         @Key
-        private var collectionName: String?
+        var collectionName: String?
         @Key("query")
         private var queryFilter: String? = null
         @Key("sort")
@@ -849,16 +858,18 @@ open class NetworkManager<T : GenericJson>(
         @Key("skip")
         private var skip: String? = null
 
-        internal constructor() : super(client, HttpVerb.GET.verb, GET_COUNT_REST_PATH, null, KinveyCountResponse::class.java) {
-            this.collectionName = this@NetworkManager.collectionName
-            getRequestHeaders()["X-Kinvey-Client-App-Version"] = clientAppVersion
-            if (!this@NetworkManager.customRequestProperties.isNullOrEmpty()) {
-                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(this@NetworkManager.customRequestProperties)
+        constructor(networkManager: NetworkManager<T>, client : AbstractClient<*>?)
+            : super(client, HttpVerb.GET.verb, GET_COUNT_REST_PATH, null, KinveyCountResponse::class.java) {
+            this.collectionName = networkManager.collectionName
+            getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkManager.clientAppVersion
+            if (!networkManager.customRequestProperties.isNullOrEmpty()) {
+                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkManager.customRequestProperties)
             }
         }
 
-        internal constructor(query: Query?) : super(client, HttpVerb.GET.verb, GET_COUNT_REST_PATH, null, KinveyCountResponse::class.java) {
-            this.collectionName = this@NetworkManager.collectionName
+        constructor(networkManager: NetworkManager<T>, client : AbstractClient<*>?, query: Query?)
+            : super(client, HttpVerb.GET.verb, GET_COUNT_REST_PATH, null, KinveyCountResponse::class.java) {
+            this.collectionName = networkManager.collectionName
             queryFilter = query?.getQueryFilterJson(client?.jsonFactory)
             val queryLimit = query?.limit ?: 0
             val querySkip = query?.skip ?: 0
@@ -866,9 +877,9 @@ open class NetworkManager<T : GenericJson>(
             skip = if (querySkip > 0) querySkip.toString() else null
             val sortString = query?.sortString
             sortFilter = if (sortString != "") sortString else null
-            getRequestHeaders()["X-Kinvey-Client-App-Version"] = clientAppVersion
-            if (!this@NetworkManager.customRequestProperties.isNullOrEmpty()) {
-                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(this@NetworkManager.customRequestProperties)
+            getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkManager.clientAppVersion
+            if (!networkManager.customRequestProperties.isNullOrEmpty()) {
+                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkManager.customRequestProperties)
             }
         }
     }
@@ -878,22 +889,23 @@ open class NetworkManager<T : GenericJson>(
      * Create / Update requests.
      *
     </T> */
-    inner class Save internal constructor(entity: T?, myClass: Class<T>?, entityID: String?, update: SaveMode?)
+    class Save<T : GenericJson>(networkManager: NetworkManager<T>, client : AbstractClient<*>?, entity: T?, myClass: Class<T>?, entityID: String?, update: SaveMode?)
         : AbstractKinveyJsonClientRequest<T>(client, update.toString(), SAVE_REST_PATH, entity, myClass) {
         @Key
-        private val collectionName: String? = this@NetworkManager.collectionName
+        val collectionName: String? = networkManager.collectionName
         @Key
-        private var entityID: String? = null
+        var entityID: String? = null
 
-        internal constructor(entity: T?, myClass: Class<T>?, update: SaveMode?) : this(entity, myClass, null, update) {}
+        constructor(networkManager: NetworkManager<T>, client : AbstractClient<*>?, entity: T?, myClass: Class<T>?, update: SaveMode?)
+        : this(networkManager, client, entity, myClass, null, update)
 
         init {
             if (update == SaveMode.PUT) {
                 this.entityID = entityID
             }
-            getRequestHeaders()["X-Kinvey-Client-App-Version"] = clientAppVersion
-            if (!this@NetworkManager.customRequestProperties.isNullOrEmpty()) {
-                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(this@NetworkManager.customRequestProperties)
+            getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkManager.clientAppVersion
+            if (!networkManager.customRequestProperties.isNullOrEmpty()) {
+                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkManager.customRequestProperties)
             }
         }
     }
@@ -903,14 +915,16 @@ open class NetworkManager<T : GenericJson>(
      * create multi-insert requests.
      *
      */
-    inner class SaveBatch internal constructor(itemsList: List<T>?, responseClassType: Class<KinveySaveBatchResponse<T>>, parClassType: Class<T>?, update: SaveMode?)
-        : KinveyJsonStringClientRequest<KinveySaveBatchResponse<T>>(client, update.toString(), SAVE_BATCH_REST_PATH, BatchList<Any?>(itemsList).toString(), responseClassType, parClassType) {
+    class SaveBatch<T : GenericJson>(networkManager: NetworkManager<T>, client : AbstractClient<*>?, itemsList: List<T>?,
+                    responseClassType: Class<KinveySaveBatchResponse<T>>, parClassType: Class<T>?, update: SaveMode?)
+        : KinveyJsonStringClientRequest<KinveySaveBatchResponse<T>>(client, update.toString(), SAVE_BATCH_REST_PATH,
+            BatchList<Any?>(itemsList).toString(), responseClassType, parClassType) {
         @Key
-        private var collectionName: String? = this@NetworkManager.collectionName
+        var collectionName: String? = networkManager.collectionName
 
         init {
-            val customRequestProperties = this@NetworkManager.customRequestProperties
-            val clientAppVersion = clientAppVersion
+            val customRequestProperties = networkManager.customRequestProperties
+            val clientAppVersion = networkManager.clientAppVersion
             getRequestHeaders()["X-Kinvey-Client-App-Version"] = clientAppVersion
             if (!customRequestProperties.isNullOrEmpty()) {
                 getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(customRequestProperties)
@@ -923,11 +937,11 @@ open class NetworkManager<T : GenericJson>(
      * for Delete requests.
      *
      */
-    inner class Delete : AbstractKinveyJsonClientRequest<KinveyDeleteResponse> {
+    class Delete<T : GenericJson> : AbstractKinveyJsonClientRequest<KinveyDeleteResponse> {
         @Key
-        private var entityID: String? = null
+        var entityID: String? = null
         @Key
-        private var collectionName: String?
+        var collectionName: String?
         @Key("query")
         private var queryFilter: String? = null
         @Key("sort")
@@ -937,17 +951,19 @@ open class NetworkManager<T : GenericJson>(
         @Key("skip")
         private var skip: String? = null
 
-        internal constructor(entityID: String?) : super(client, HttpVerb.DELETE.verb, DELETE_REST_PATH, null, KinveyDeleteResponse::class.java) {
+        constructor(networkManager: NetworkManager<T>, client : AbstractClient<*>?, entityID: String?)
+            : super(client, HttpVerb.DELETE.verb, DELETE_REST_PATH, null, KinveyDeleteResponse::class.java) {
             this.entityID = entityID
-            this.collectionName = this@NetworkManager.collectionName
-            getRequestHeaders()["X-Kinvey-Client-App-Version"] = clientAppVersion
-            if (!this@NetworkManager.customRequestProperties.isNullOrEmpty()) {
-                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(this@NetworkManager.customRequestProperties)
+            this.collectionName = networkManager.collectionName
+            getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkManager.clientAppVersion
+            if (!networkManager.customRequestProperties.isNullOrEmpty()) {
+                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkManager.customRequestProperties)
             }
         }
 
-        internal constructor(query: Query?) : super(client, HttpVerb.DELETE.verb, DELETE_REST_PATH, null, KinveyDeleteResponse::class.java) {
-            this.collectionName = this@NetworkManager.collectionName
+        constructor(networkManager: NetworkManager<T>, client : AbstractClient<*>?, query: Query?)
+            : super(client, HttpVerb.DELETE.verb, DELETE_REST_PATH, null, KinveyDeleteResponse::class.java) {
+            this.collectionName = networkManager.collectionName
             queryFilter = query?.getQueryFilterJson(client?.jsonFactory)
             val queryLimit = query?.limit ?: 0
             val querySkip = query?.skip ?: 0
@@ -955,9 +971,9 @@ open class NetworkManager<T : GenericJson>(
             skip = if (querySkip > 0) querySkip.toString() else null
             val sortString = query?.sortString
             sortFilter = if (!sortString.isNullOrEmpty()) sortString else null
-            getRequestHeaders()["X-Kinvey-Client-App-Version"] = clientAppVersion
-            if (!this@NetworkManager.customRequestProperties.isNullOrEmpty()) {
-                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(this@NetworkManager.customRequestProperties)
+            getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkManager.clientAppVersion
+            if (!networkManager.customRequestProperties.isNullOrEmpty()) {
+                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkManager.customRequestProperties)
             }
         }
     }
@@ -967,15 +983,15 @@ open class NetworkManager<T : GenericJson>(
      * Aggregate requests.
      *
      */
-    inner class Aggregate internal constructor(entity: AggregateEntity?, myClass: Class<Array<T>>?)
+    class Aggregate<T : GenericJson>(networkManager: NetworkManager<T>, client : AbstractClient<*>?, entity: AggregateEntity?, myClass: Class<Array<T>>?)
         : AbstractKinveyJsonClientRequest<Array<T>>(client, HttpVerb.POST.verb, AGGREGATE_REST_PATH, entity, myClass) {
         @Key
-        private var collectionName: String? = this@NetworkManager.collectionName
+        var collectionName: String? = networkManager.collectionName
 
         init {
-            getRequestHeaders()["X-Kinvey-Client-App-Version"] = clientAppVersion
-            if (!this@NetworkManager.customRequestProperties.isNullOrEmpty()) {
-                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(this@NetworkManager.customRequestProperties)
+            getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkManager.clientAppVersion
+            if (!networkManager.customRequestProperties.isNullOrEmpty()) {
+                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkManager.customRequestProperties)
             }
         }
     }
@@ -985,15 +1001,15 @@ open class NetworkManager<T : GenericJson>(
      * Aggregate requests.
      *
      */
-    inner class Subscribe internal constructor(deviceId: DeviceId?)
+    class Subscribe<T : GenericJson>(networkManager: NetworkManager<T>, client : AbstractClient<*>?, deviceId: DeviceId?)
         : AbstractKinveyJsonClientRequest<GenericJson>(client, HttpVerb.POST.verb, SUBSCRIBE_REST_PATH, deviceId, GenericJson::class.java) {
         @Key
-        private var collectionName: String? = this@NetworkManager.collectionName
+        private var collectionName: String? = networkManager.collectionName
 
         init {
-            getRequestHeaders()["X-Kinvey-Client-App-Version"] = clientAppVersion
-            if (!this@NetworkManager.customRequestProperties.isNullOrEmpty()) {
-                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(this@NetworkManager.customRequestProperties)
+            getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkManager.clientAppVersion
+            if (!networkManager.customRequestProperties.isNullOrEmpty()) {
+                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkManager.customRequestProperties)
             }
         }
     }

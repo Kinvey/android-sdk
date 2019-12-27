@@ -74,7 +74,7 @@ protected constructor(
          * @return the responseClass
          */
         @JvmField
-        protected val responseClass: Class<T>?) : GenericData() {
+        val responseClass: Class<T>?) : GenericData() {
 
     /**
      * URI template of the path relative to the base url *

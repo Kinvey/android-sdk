@@ -61,10 +61,12 @@ protected constructor(val storeType: StoreType? = StoreType.SYNC, private val ab
     : AbstractKinveyJsonClientRequest<T>(abstractClient, requestMethod ?: "",
         uriTemplate ?: "", jsonContent, responseClass) {
     var upload: UploaderProgressListener? = null
-    private var mimeTypeFinder: MimeTypeFinder? = null
-    fun setMimeTypeFinder(finder: MimeTypeFinder?) {
-        mimeTypeFinder = finder
-    }
+
+    var mimeTypeFinder: MimeTypeFinder? = null
+
+    //fun setMimeTypeFinder(finder: MimeTypeFinder?) {
+    //    mimeTypeFinder = finder
+    //}
 
     @Throws(IOException::class)
     override fun execute(): T? {
