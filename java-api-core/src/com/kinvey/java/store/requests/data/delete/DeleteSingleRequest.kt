@@ -38,7 +38,7 @@ class DeleteSingleRequest<T : GenericJson>(cache: ICache<T>?, networkManager: Ne
     }
 
     @Throws(IOException::class)
-    override fun deleteNetwork(): NetworkManager<T>.Delete? {
+    override fun deleteNetwork(): NetworkManager.Delete<T>? {
         return networkManager?.deleteBlocking(id)
     }
 
