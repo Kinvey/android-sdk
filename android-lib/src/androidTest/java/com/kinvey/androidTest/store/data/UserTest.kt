@@ -62,6 +62,7 @@ class UserTest {
             registerLiveService = User.RegisterLiveService(callback)
             latch.countDown()
         })
+        
         looperThread.start()
         latch.await()
         looperThread.mHandler?.sendMessage(Message())
