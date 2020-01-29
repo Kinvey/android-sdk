@@ -8,12 +8,12 @@ import com.kinvey.java.model.Aggregation
 
 abstract class KinveyCachedAggregateCallback : KinveyClientCallback<List<Aggregation.Result>> {
 
-    override fun onSuccess(result: List<Aggregation.Result>) {
+    override fun onSuccess(result: List<Aggregation.Result>?) {
         val response = Aggregation(result)
         onSuccess(response)
     }
 
-    abstract override fun onFailure(error: Throwable)
+    abstract override fun onFailure(error: Throwable?)
 
     abstract fun onSuccess(response: Aggregation)
 }

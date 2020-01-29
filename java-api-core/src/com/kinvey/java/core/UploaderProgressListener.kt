@@ -77,7 +77,5 @@ interface UploaderProgressListener {
      * @param uploader Media HTTP uploader
      */
     @Throws(IOException::class)
-    fun progressChanged(uploader: MediaHttpUploader)
-
-
+    fun progressChanged(uploader: MediaHttpUploader?)
 }

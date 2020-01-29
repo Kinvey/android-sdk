@@ -27,12 +27,12 @@ interface KinveyPushCallback : KinveyClientCallback<KinveyPushResponse> {
     /**
      * Used to indicate successful execution of a request by the background service.
      */
-    override fun onSuccess(result: KinveyPushResponse)
+    override fun onSuccess(result: KinveyPushResponse?)
 
     /**
      * Used to indicate the failed execution of a request by the background service.
      */
-    override fun onFailure(error: Throwable)
+    override fun onFailure(error: Throwable?)
 
     fun onProgress(current: Long, all: Long)
 }

@@ -12,11 +12,11 @@ interface KinveyCachedClientCallback<T> : KinveyClientCallback<T> {
      * Successfull callback that is invoked when that data successfully retreived
      * @param result - fetched Entity
      */
-    override fun onSuccess(result: T)
+    override fun onSuccess(result: T?)
 
     /**
      * Error callback that send an application the error occured during fetch operation
      * @param error - the error occured
      */
-    override fun onFailure(error: Throwable)
+    override fun onFailure(error: Throwable?)
 }

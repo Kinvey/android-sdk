@@ -78,7 +78,7 @@ class FileStore(networkFileManager: NetworkFileManager,
     }
 
     @Throws(IOException::class)
-    fun upload(file: File, metadata: FileMetaData,
+    fun upload(file: File?, metadata: FileMetaData?,
                listener: AsyncUploaderProgressListener<FileMetaData>) {
 
         AsyncUploadRequest(this, FileMethods.UPLOAD_FILE_METADATA.method, listener,
@@ -99,20 +99,20 @@ class FileStore(networkFileManager: NetworkFileManager,
     }
 
     @Throws(IOException::class)
-    fun remove(metadata: FileMetaData, callback: KinveyDeleteCallback) {
+    fun remove(metadata: FileMetaData?, callback: KinveyDeleteCallback?) {
         AsyncRequest(this, FileMethods.REMOVE_ID.method, callback,
                 metadata).execute()
     }
 
     @Throws(IOException::class)
-    fun download(metadata: FileMetaData, os: OutputStream,
+    fun download(metadata: FileMetaData?, os: OutputStream,
                  progressListener: AsyncDownloaderProgressListener<FileMetaData>, cachedClientCallback: KinveyCachedClientCallback<FileMetaData>?) {
         download(metadata, os, progressListener, null, cachedClientCallback)
     }
 
     @Throws(IOException::class)
     @JvmOverloads
-    fun download(metadata: FileMetaData, os: OutputStream,
+    fun download(metadata: FileMetaData?, os: OutputStream,
                  progressListener: AsyncDownloaderProgressListener<FileMetaData>, cachedOs: OutputStream? = null, cachedClientCallback: KinveyCachedClientCallback<FileMetaData>? = null) {
         AsyncDownloadRequest(this, FileMethods.CACHED_DOWNLOAD_METADATA.method, progressListener,
                 metadata, os, cachedOs, getWrappedCacheCallback(cachedClientCallback)).execute()
@@ -120,7 +120,7 @@ class FileStore(networkFileManager: NetworkFileManager,
 
     @Throws(IOException::class)
     @JvmOverloads
-    fun refresh(metadata: FileMetaData, metaCallback: KinveyClientCallback<FileMetaData>, cachedClientCallback: KinveyCachedClientCallback<FileMetaData>? = null) {
+    fun refresh(metadata: FileMetaData?, metaCallback: KinveyClientCallback<FileMetaData>?, cachedClientCallback: KinveyCachedClientCallback<FileMetaData>? = null) {
         AsyncRequest(this, FileMethods.REFRESH_FILE.method, metaCallback, metadata, cachedClientCallback).execute()
     }
 
@@ -133,29 +133,23 @@ class FileStore(networkFileManager: NetworkFileManager,
         return cache?.get(fileId)
     }
 
-    fun cachedFile(fileMetaData: FileMetaData): FileMetaData? {
-        return if (fileMetaData.id == null) {
-            //"File.fileId is required"
-            null
-        } else fileMetaData.id?.let { cache?.get(it) }
+    fun cachedFile(fileMetaData: FileMetaData?): FileMetaData? {
+        //"File.fileId is required"
+        return fileMetaData?.id?.let { cache?.get(it) }
     }
 
-    private class ThreadedKinveyCachedClientCallback<T> internal constructor(private val callback: KinveyCachedClientCallback<T>) : KinveyCachedClientCallback<T> {
-
-        internal var handler: KinveyCallbackHandler<T>
-
-
+    private class ThreadedKinveyCachedClientCallback<T>(private val callback: KinveyCachedClientCallback<T>) : KinveyCachedClientCallback<T> {
+        var handler: KinveyCallbackHandler<T>
         init {
             handler = KinveyCallbackHandler()
         }
 
-        override fun onSuccess(result: T) {
+        override fun onSuccess(result: T?) {
             handler.onResult(result, callback)
         }
 
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             handler.onFailure(error, callback)
-
         }
     }
 
@@ -164,7 +158,6 @@ class FileStore(networkFileManager: NetworkFileManager,
     }
 
     companion object {
-
         private fun <T> getWrappedCacheCallback(callback: KinveyCachedClientCallback<T>?): KinveyCachedClientCallback<T>? {
             var ret: KinveyCachedClientCallback<T>? = null
             if (callback != null) {
@@ -172,7 +165,5 @@ class FileStore(networkFileManager: NetworkFileManager,
             }
             return ret
         }
-
     }
-
 }

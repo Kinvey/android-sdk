@@ -59,7 +59,7 @@ import java.util.*
  * @author edwardf
  * @since 3.0
  */
-class FCMPush(client: Client<*>?, inProduction: Boolean, vararg senderIDs: String?) : AbstractPush(client) {
+class FCMPush(client: Client<*>?, inProduction: Boolean, senderIDs: Array<String>?) : AbstractPush(client) {
     /**
      * Initialize FCM by registering the current user with both FCM as well as your backend at Kinvey.
      *
@@ -81,8 +81,8 @@ class FCMPush(client: Client<*>?, inProduction: Boolean, vararg senderIDs: Strin
                 ERROR("FCM - successful register CGM")
             }
 
-            override fun onFailure(error: Throwable) {
-                ERROR("FCM - unsuccessful register CGM: " + error.message)
+            override fun onFailure(error: Throwable?) {
+                ERROR("FCM - unsuccessful register CGM: " + error?.message)
             }
         }).execute()
         return this
@@ -104,17 +104,17 @@ class FCMPush(client: Client<*>?, inProduction: Boolean, vararg senderIDs: Strin
                     c.push(cls)?.enablePushViaRest(object : KinveyClientCallback<Any?> {
                         override fun onSuccess(result: Any?) {
                             retrieve(c as AbstractClient<User>, object : KinveyUserCallback<User> {
-                                override fun onSuccess(result: User) {
+                                override fun onSuccess(result: User?) {
                                     client?.activeUser?.let {
-                                        it["_messaging"] = result["_messaging"]
+                                        it["_messaging"] = result?.get("_messaging")
                                     }
                                 }
-                                override fun onFailure(error: Throwable) {
+                                override fun onFailure(error: Throwable?) {
                                     ERROR("FCM - user update error: $error")
                                 }
                             })
                         }
-                        override fun onFailure(error: Throwable) {
+                        override fun onFailure(error: Throwable?) {
                             ERROR("FCM - user update error: $error")
                         }
                     }, fcmRegID)
@@ -126,7 +126,7 @@ class FCMPush(client: Client<*>?, inProduction: Boolean, vararg senderIDs: Strin
                     ERROR("FCM - user update success")
                 }
 
-                override fun onFailure(error: Throwable) {
+                override fun onFailure(error: Throwable?) {
                     ERROR("FCM - user update error: $error")
                 }
             }, fcmRegID)
@@ -197,8 +197,8 @@ class FCMPush(client: Client<*>?, inProduction: Boolean, vararg senderIDs: Strin
             override fun onSuccess(result: Any?) {
                 ERROR("FCM - successful unregister FCM")
             }
-            override fun onFailure(error: Throwable) {
-                ERROR("FCM - unsuccessful unregister FCM: " + error.message)
+            override fun onFailure(error: Throwable?) {
+                ERROR("FCM - unsuccessful unregister FCM: " + error?.message)
             }
         }).execute()
 //        GCMRegistrar.unregister(getClient().getContext());
@@ -209,7 +209,7 @@ class FCMPush(client: Client<*>?, inProduction: Boolean, vararg senderIDs: Strin
      *
      * @return an array of sender IDs
      */
-    override var senderIDs: Array<String>? = senderIDs as Array<String>?
+    override var senderIDs: Array<String>? = senderIDs
 
     /**
      * This class is used to maintain metadata about the current GCM push configuration in the User collection.

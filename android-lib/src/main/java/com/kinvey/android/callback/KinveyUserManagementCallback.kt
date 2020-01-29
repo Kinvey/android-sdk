@@ -35,11 +35,11 @@ interface KinveyUserManagementCallback : KinveyClientCallback<Void> {
      *
      * @param result - typed to `Void` because there is no usable return value.
      */
-    override fun onSuccess(result: Void)
+    override fun onSuccess(result: Void?)
 
     /**
      * Method invoked when a user operation fails to complete.
      * @param error - details about the error.
      */
-    override fun onFailure(error: Throwable)
+    override fun onFailure(error: Throwable?)
 }

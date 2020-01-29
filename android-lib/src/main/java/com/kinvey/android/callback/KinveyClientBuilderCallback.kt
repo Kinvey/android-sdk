@@ -29,6 +29,6 @@ import com.kinvey.java.core.KinveyClientCallback
  * @since 2.0
  */
 interface KinveyClientBuilderCallback : KinveyClientCallback<Client<*>> {
-    override fun onSuccess(result: Client<*>)
-    override fun onFailure(error: Throwable)
+    override fun onSuccess(result: Client<*>?)
+    override fun onFailure(error: Throwable?)
 }

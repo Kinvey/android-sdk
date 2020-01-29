@@ -233,8 +233,8 @@ class UserStoreRequestManager<T : BaseUser> {
      * @return LoginRequest object
      * @throws IOException
      */
-    @Throws(IOException::class)
-    fun login(thirdPartyType: ThirdPartyIdentity.Type, vararg args: String): LoginRequest {
+    @Throws(IOException::class, java.lang.NullPointerException::class)
+    fun login(thirdPartyType: ThirdPartyIdentity.Type, vararg args: String?): LoginRequest {
         Preconditions.checkNotNull(args)
         val identity = ThirdPartyIdentity.createThirdPartyIdentity(thirdPartyType, *args)
         return LoginRequest(identity).buildAuthRequest()

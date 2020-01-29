@@ -1,77 +1,78 @@
 package com.kinvey.androidTest.store.datastore
 
+import android.content.Context
 import android.os.Message
+import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
-import com.google.api.client.json.GenericJson
+import com.google.api.client.http.HttpRequest
+import com.google.api.client.http.HttpRequestInitializer
 import com.kinvey.android.Client
+import com.kinvey.android.Client.Builder
+import com.kinvey.android.callback.KinveyCountCallback
 import com.kinvey.android.callback.KinveyDeleteCallback
+import com.kinvey.android.callback.KinveyPurgeCallback
 import com.kinvey.android.callback.KinveyReadCallback
 import com.kinvey.android.model.User
 import com.kinvey.android.store.DataStore
-import com.kinvey.android.store.UserStore
+import com.kinvey.android.store.DataStore.Companion.collection
+import com.kinvey.android.store.UserStore.Companion.login
+import com.kinvey.android.sync.KinveyPullCallback
 import com.kinvey.android.sync.KinveyPushCallback
 import com.kinvey.android.sync.KinveyPushResponse
 import com.kinvey.android.sync.KinveySyncCallback
 import com.kinvey.androidTest.LooperThread
 import com.kinvey.androidTest.TestManager
-import com.kinvey.androidTest.model.EntitySet
-import com.kinvey.androidTest.model.Person
-import com.kinvey.androidTest.network.MockMultiInsertNetworkManager
-import com.kinvey.java.*
+import com.kinvey.androidTest.model.*
+import com.kinvey.androidTest.util.TableNameManagerUtil
+import com.kinvey.java.AbstractClient
 import com.kinvey.java.AbstractClient.Companion.kinveyApiVersion
+import com.kinvey.java.Constants
+import com.kinvey.java.Query
+import com.kinvey.java.cache.KinveyCachedClientCallback
 import com.kinvey.java.core.AbstractKinveyClient
 import com.kinvey.java.core.KinveyClientCallback
-import com.kinvey.java.model.KinveyBatchInsertError
 import com.kinvey.java.model.KinveyPullResponse
 import com.kinvey.java.model.KinveyReadResponse
 import com.kinvey.java.store.StoreType
 import com.kinvey.java.sync.dto.SyncItem
-import com.kinvey.java.sync.dto.SyncRequest
-import org.junit.Assert
+import io.realm.DynamicRealm
+import io.realm.RealmObjectSchema
+import io.realm.RealmSchema
+import org.junit.After
+import org.junit.Assert.*
 import org.junit.Before
+import java.io.File
 import java.io.IOException
 import java.lang.reflect.Field
-import java.util.*
+import java.net.SocketTimeoutException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 open class BaseDataStoreTest {
 
-    protected lateinit var client: Client<User>
-
-    companion object {
-        const val TEST_USERNAME = "Test_UserName"
-        const val DEFAULT_TIMEOUT = 60
-        const val MAX_PERSONS_COUNT = 5
-        const val LONG_TIMEOUT = 6 * DEFAULT_TIMEOUT
-
-        const val ERR_GEOLOC = "#!@%^&*())_+?{}"
-        const val ERR_GEOLOC_MSG = "The value specified for one of the request parameters is out of range"
-        const val ERR_PERMISSION_MSG = "The credentials used to authenticate this request are not authorized to run this operation"
-        const val ERR_EMPTY_LIST_MSG = "Entity list cannot be empty"
-    }
+    var client: Client<User>? = null
 
     @Before
     @Throws(InterruptedException::class, IOException::class)
     fun setUp() {
-        val mMockContext = InstrumentationRegistry.getInstrumentation().targetContext
-        kinveyApiVersion = "5"
-        client = Client.Builder<User>(mMockContext).build()
-        client.enableDebugLogging()
-        kinveyApiVersion = "5"
+        val mMockContext: Context? = InstrumentationRegistry.getInstrumentation().targetContext
+        kinveyApiVersion = "4"
+        client = Builder<User>(mMockContext).build()
+        client?.enableDebugLogging()
+        kinveyApiVersion = "4"
         val latch = CountDownLatch(1)
         var looperThread: LooperThread? = null
-        if (!client.isUserLoggedIn) {
+        if (client?.isUserLoggedIn == false) {
             looperThread = LooperThread(Runnable {
                 try {
-                    UserStore.login(TestManager.USERNAME, TestManager.PASSWORD, client as Client<User>, object : KinveyClientCallback<User> {
-                        override fun onSuccess(result: User) {
-                            Assert.assertNotNull(result)
+                    login<User>(TestManager.USERNAME, TestManager.PASSWORD, client as AbstractClient<User>, object : KinveyClientCallback<User> {
+                        override fun onSuccess(result: User?) {
+                            assertNotNull(result)
                             latch.countDown()
                         }
 
-                        override fun onFailure(error: Throwable) {
-                            Assert.assertNull(error)
+                        override fun onFailure(error: Throwable?) {
+                            assertNull(error)
                             latch.countDown()
                         }
                     })
@@ -87,139 +88,283 @@ open class BaseDataStoreTest {
         looperThread?.mHandler?.sendMessage(Message())
     }
 
-    protected class DefaultKinveyClientCallback<T : GenericJson> (private val latch: CountDownLatch) : KinveyClientCallback<T> {
-        var result: T? = null
+    class DefaultKinveyClientCallback (private val latch: CountDownLatch) : KinveyClientCallback<Person> {
+        var result: Person? = null
         var error: Throwable? = null
-
-        override fun onSuccess(result: T) {
+        override fun onSuccess(result: Person?) {
             this.result = result
             finish()
         }
-
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
-
-        internal fun finish() {
+        fun finish() {
             latch.countDown()
         }
     }
 
-    protected class DefaultKinveyClientListCallback<T : GenericJson> (private val latch: CountDownLatch) : KinveyClientCallback<List<T>> {
-        var result: List<T>? = null
+    class DefaultKinveyEntityCallback (private val latch: CountDownLatch) : KinveyClientCallback<EntitySet> {
+        var result: EntitySet? = null
         var error: Throwable? = null
-
-        override fun onSuccess(result: List<T>) {
+        override fun onSuccess(result: EntitySet?) {
             this.result = result
             finish()
         }
-
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
-
-        internal fun finish() {
+        fun finish() {
             latch.countDown()
         }
     }
 
-    protected class DefaultKinveyDeleteCallback (private val latch: CountDownLatch) : KinveyDeleteCallback {
-        var result: Int? = null
+    class DefaultKinveyPurgeCallback (private val latch: CountDownLatch) : KinveyPurgeCallback {
         var error: Throwable? = null
-
-        override fun onSuccess(result: Int?) {
-            this.result = result
+        override fun onSuccess(result: Void?) {
             finish()
         }
-
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
-
-        internal fun finish() {
+        fun finish() {
             latch.countDown()
         }
     }
 
-    protected class DefaultKinveyReadCallback<T : GenericJson> (private val latch: CountDownLatch) : KinveyReadCallback<T> {
-        var result: KinveyReadResponse<T>? = null
+    class DefaultKinveyClientArrayCallback (private val latch: CountDownLatch) : KinveyClientCallback<PersonArray> {
+        var result: PersonArray? = null
         var error: Throwable? = null
-
-        override fun onSuccess(result: KinveyReadResponse<T>?) {
+        override fun onSuccess(result: PersonArray?) {
             this.result = result
             finish()
         }
-
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
-
-        internal fun finish() {
+        fun finish() {
             latch.countDown()
         }
     }
 
-    protected class DefaultKinveyPushCallback (private val latch: CountDownLatch) : KinveyPushCallback {
-        var result: KinveyPushResponse? = null
-        var error: Throwable? = null
-
-        override fun onSuccess(result: KinveyPushResponse) {
-            this.result = result
-            finish()
-        }
-
-        override fun onFailure(error: Throwable) {
-            this.error = error
-            finish()
-        }
-
-        override fun onProgress(current: Long, all: Long) {
-
-        }
-
-        internal fun finish() {
-            latch.countDown()
-        }
-    }
-
-    protected class DefaultKinveySyncCallback (private val latch: CountDownLatch) : KinveySyncCallback {
+    class DefaultKinveySyncCallback (private val latch: CountDownLatch) : KinveySyncCallback {
         var kinveyPushResponse: KinveyPushResponse? = null
         var kinveyPullResponse: KinveyPullResponse? = null
         var error: Throwable? = null
-
         override fun onSuccess(kinveyPushResponse: KinveyPushResponse?, kinveyPullResponse: KinveyPullResponse?) {
             this.kinveyPushResponse = kinveyPushResponse
             this.kinveyPullResponse = kinveyPullResponse
             finish()
         }
-
-        override fun onPullStarted() {
-
-        }
-
-        override fun onPushStarted() {
-
-        }
-
+        override fun onPullStarted() {}
+        override fun onPushStarted() {}
         override fun onPullSuccess(kinveyPullResponse: KinveyPullResponse?) {
             this.kinveyPullResponse = kinveyPullResponse
         }
-
         override fun onPushSuccess(kinveyPushResponse: KinveyPushResponse?) {
             this.kinveyPushResponse = kinveyPushResponse
         }
-
         override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
-
-        internal fun finish() {
+        fun finish() {
             latch.countDown()
+        }
+    }
+
+    class DefaultKinveyPushCallback internal constructor(private val latch: CountDownLatch) : KinveyPushCallback {
+        var result: KinveyPushResponse? = null
+        var error: Throwable? = null
+        override fun onSuccess(result: KinveyPushResponse?) {
+            this.result = result
+            finish()
+        }
+        override fun onFailure(error: Throwable?) {
+            this.error = error
+            finish()
+        }
+        override fun onProgress(current: Long, all: Long) {}
+        fun finish() {
+            latch.countDown()
+        }
+    }
+
+    class DefaultKinveyPullCallback internal constructor(private val latch: CountDownLatch) : KinveyPullCallback {
+        var result: KinveyPullResponse? = null
+        var error: Throwable? = null
+        override fun onSuccess(result: KinveyPullResponse?) {
+            this.result = result
+            finish()
+        }
+        override fun onFailure(error: Throwable?) {
+            this.error = error
+            finish()
+        }
+        fun finish() {
+            latch.countDown()
+        }
+    }
+
+    class DefaultKinveyCountCallback(private val latch: CountDownLatch) : KinveyCountCallback {
+        var result: Int? = null
+        var error: Throwable? = null
+        override fun onSuccess(result: Int?) {
+            this.result = result
+            finish()
+        }
+        override fun onFailure(error: Throwable?) {
+            this.error = error
+            finish()
+        }
+        fun finish() {
+            latch.countDown()
+        }
+    }
+
+    class DefaultKinveyCachedCallback<T>() : KinveyCachedClientCallback<Int> {
+        var latch: CountDownLatch? = null
+        var result: Int? = null
+        var error: Throwable? = null
+        constructor(latch: CountDownLatch?): this() {
+            this.latch = latch
+        }
+        override fun onSuccess(result: Int?) {
+            this.result = result
+            finish()
+        }
+        override fun onFailure(error: Throwable?) {
+            this.error = error
+            finish()
+        }
+        fun finish() {
+            latch?.countDown()
+        }
+    }
+
+    class CustomKinveyCachedCallback<T>() : KinveyCachedClientCallback<T> {
+        var latch: CountDownLatch? = null
+        var result: T? = null
+        var error: Throwable? = null
+        constructor(latch: CountDownLatch?): this() {
+            this.latch = latch
+        }
+        override fun onSuccess(result: T?) {
+            this.result = result
+            finish()
+        }
+        override fun onFailure(error: Throwable?) {
+            this.error = error
+            finish()
+        }
+        fun finish() {
+            latch?.countDown()
+        }
+    }
+
+    class DefaultKinveyDeleteCallback(private val latch: CountDownLatch) : KinveyDeleteCallback {
+        var result: Int? = null
+        var error: Throwable? = null
+        override fun onSuccess(result: Int?) {
+            this.result = result
+            finish()
+        }
+        override fun onFailure(error: Throwable?) {
+            this.error = error
+            finish()
+        }
+        fun finish() {
+            latch.countDown()
+        }
+    }
+
+    class DefaultKinveyReadCallback(private val latch: CountDownLatch) : KinveyReadCallback<Person> {
+        var result: KinveyReadResponse<Person>? = null
+        var error: Throwable? = null
+        override fun onSuccess(result: KinveyReadResponse<Person>?) {
+            this.result = result
+            finish()
+        }
+        override fun onFailure(error: Throwable?) {
+            this.error = error
+            finish()
+        }
+        fun finish() {
+            latch.countDown()
+        }
+    }
+
+    class DefaultKinveyReadEntitySetCallback(private val latch: CountDownLatch) : KinveyReadCallback<EntitySet> {
+        var result: KinveyReadResponse<EntitySet>? = null
+        var error: Throwable? = null
+        override fun onSuccess(result: KinveyReadResponse<EntitySet>?) {
+            this.result = result
+            finish()
+        }
+        override fun onFailure(error: Throwable?) {
+            this.error = error
+            finish()
+        }
+        fun finish() {
+            latch.countDown()
+        }
+    }
+
+    class DefaultKinveyClientEntitySetCallback(private val latch: CountDownLatch) : KinveyClientCallback<EntitySet> {
+        var result: EntitySet? = null
+        var error: Throwable? = null
+        override fun onSuccess(result: EntitySet?) {
+            this.result = result
+            finish()
+        }
+        override fun onFailure(error: Throwable?) {
+            this.error = error
+            finish()
+        }
+        fun finish() {
+            latch.countDown()
+        }
+    }
+
+    class DefaultKinveyReadDateCallback(private val latch: CountDownLatch) : KinveyReadCallback<DateExample> {
+        var result: KinveyReadResponse<DateExample>? = null
+        var error: Throwable? = null
+        override fun onSuccess(result: KinveyReadResponse<DateExample>?) {
+            this.result = result
+            finish()
+        }
+        override fun onFailure(error: Throwable?) {
+            this.error = error
+            finish()
+        }
+        fun finish() {
+            latch.countDown()
+        }
+    }
+
+    class DefaultKinveyDateCallback(private val latch: CountDownLatch) : KinveyClientCallback<DateExample> {
+        var result: DateExample? = null
+        var error: Throwable? = null
+        override fun onSuccess(result: DateExample?) {
+            this.result = result
+            finish()
+        }
+        override fun onFailure(error: Throwable?) {
+            this.error = error
+            finish()
+        }
+        fun finish() {
+            latch.countDown()
+        }
+    }
+
+    class ChangeTimeout : HttpRequestInitializer {
+        @Throws(SocketTimeoutException::class)
+        override fun initialize(request: HttpRequest) {
+            throw SocketTimeoutException()
         }
     }
 
@@ -228,91 +373,169 @@ open class BaseDataStoreTest {
     }
 
     @Throws(InterruptedException::class)
-    protected fun <T : GenericJson> delete(store: DataStore<T>, query: Query): DefaultKinveyDeleteCallback {
+    fun save(store: DataStore<Person>, person: Person): DefaultKinveyClientCallback {
         val latch = CountDownLatch(1)
-        val callback = DefaultKinveyDeleteCallback(latch)
-        val looperThread = LooperThread(Runnable { store.delete(query, callback) })
+        val callback = DefaultKinveyClientCallback(latch)
+        val looperThread = LooperThread(Runnable { store.save(person, callback) })
         looperThread.start()
-        latch.await(120, TimeUnit.SECONDS)
-        looperThread.mHandler.sendMessage(Message())
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
     @Throws(InterruptedException::class)
-    protected fun <T : GenericJson> find(store: DataStore<T>, seconds: Int): DefaultKinveyReadCallback<T> {
+    fun testSave(storeType: StoreType) {
+        val store = collection(COLLECTION, Person::class.java, storeType, client)
+        client?.syncManager?.clear(COLLECTION)
+        val callback = save(store, createPerson(TEST_USERNAME))
+        assertNotNull(callback.result)
+        assertNotNull(callback.result?.username)
+        assertNull(callback.error)
+        assertTrue(callback.result?.username == TEST_USERNAME)
+    }
+
+    @Throws(InterruptedException::class)
+    fun testUpdate(storeType: StoreType) {
+        val store = collection(COLLECTION, Person::class.java, storeType, client)
+        client?.syncManager?.clear(COLLECTION)
+        val person = createPerson(TEST_USERNAME)
+        var callback = save(store, person)
+        assertNotNull(callback.result)
+        assertNotNull(callback.result?.username)
+        assertNull(callback.error)
+        assertTrue(callback.result?.username == TEST_USERNAME)
+        person.username = TEST_USERNAME_2
+        callback = save(store, person)
+        assertNotNull(callback.result)
+        assertNotNull(callback.result?.username)
+        assertNull(callback.error)
+        assertFalse(callback.result?.username == TEST_USERNAME)
+    }
+
+    @Throws(InterruptedException::class)
+    fun saveDate(store: DataStore<DateExample>, `object`: DateExample): DefaultKinveyDateCallback {
         val latch = CountDownLatch(1)
-        val callback = DefaultKinveyReadCallback<T>(latch)
+        val callback = DefaultKinveyDateCallback(latch)
+        val looperThread = LooperThread(Runnable { store.save(`object`, callback) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
+    fun saveEntitySet(store: DataStore<EntitySet>, `object`: EntitySet): DefaultKinveyEntityCallback {
+        val latch = CountDownLatch(1)
+        val callback = DefaultKinveyEntityCallback(latch)
+        val looperThread = LooperThread(Runnable { store.save(`object`, callback) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
+    fun findDate(store: DataStore<DateExample>, query: Query?, seconds: Int): DefaultKinveyReadDateCallback {
+        val latch = CountDownLatch(1)
+        val callback = DefaultKinveyReadDateCallback(latch)
+        val looperThread = LooperThread(Runnable { store.find(query!!, callback, null) })
+        looperThread.start()
+        latch.await(seconds.toLong(), TimeUnit.SECONDS)
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
+    fun deleteDate(store: DataStore<DateExample>, query: Query?): DefaultKinveyDeleteCallback {
+        val latch = CountDownLatch(1)
+        val callback = DefaultKinveyDeleteCallback(latch)
+        val looperThread = LooperThread(Runnable { store.delete(query!!, callback) })
+        looperThread.start()
+        latch.await(120, TimeUnit.SECONDS)
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
+    fun savePersonArray(store: DataStore<PersonArray>, person: PersonArray): DefaultKinveyClientArrayCallback {
+        val latch = CountDownLatch(1)
+        val callback = DefaultKinveyClientArrayCallback(latch)
+        val looperThread = LooperThread(Runnable { store.save(person, callback) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
+    fun find(store: DataStore<Person>, id: String?, seconds: Int, cachedClientCallback: KinveyCachedClientCallback<Person>?): DefaultKinveyClientCallback {
+        val latch = CountDownLatch(1)
+        val callback = DefaultKinveyClientCallback(latch)
+        val looperThread = LooperThread(Runnable { store.find(id!!, callback, cachedClientCallback) })
+        looperThread.start()
+        latch.await(seconds.toLong(), TimeUnit.SECONDS)
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
+    fun testFindById(storeType: StoreType) {
+        val store = collection(COLLECTION, Person::class.java, storeType, client)
+        if (storeType !== StoreType.NETWORK) {
+            cleanBackendDataStore(store)
+        }
+        val person = createPerson(TEST_USERNAME)
+        val saveCallback = save(store, person)
+        assertNotNull(saveCallback.result)
+        assertNull(saveCallback.error)
+        assertNotNull(saveCallback.result?.id)
+        val personId = saveCallback.result?.id
+        val findCallback = find(store, personId, DEFAULT_TIMEOUT, null)
+        assertNotNull(findCallback.result)
+        assertNull(saveCallback.error)
+        assertEquals(findCallback.result?.id, personId)
+    }
+
+    @Throws(InterruptedException::class)
+    fun find(store: DataStore<Person>, query: Query?, seconds: Int): DefaultKinveyReadCallback {
+        val latch = CountDownLatch(1)
+        val callback = DefaultKinveyReadCallback(latch)
+        val looperThread = LooperThread(Runnable { store.find(query!!, callback, null) })
+        looperThread.start()
+        latch.await(seconds.toLong(), TimeUnit.SECONDS)
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
+    fun find(store: DataStore<Person>, seconds: Int): DefaultKinveyReadCallback {
+        val latch = CountDownLatch(1)
+        val callback = DefaultKinveyReadCallback(latch)
         val looperThread = LooperThread(Runnable { store.find(callback) })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
     @Throws(InterruptedException::class)
-    protected fun sync(store: DataStore<Person>, seconds: Int): DefaultKinveySyncCallback {
-        val latch = CountDownLatch(1)
-        val callback = DefaultKinveySyncCallback(latch)
-        val looperThread = LooperThread(Runnable { store.sync(callback) })
-        looperThread.start()
-        latch.await(seconds.toLong(), TimeUnit.SECONDS)
-        looperThread.mHandler.sendMessage(Message())
-        return callback
-    }
-
-    @Throws(InterruptedException::class)
-    fun <T : GenericJson> clearBackend(store: DataStore<T>) {
+    fun testFindByQuery(storeType: StoreType) {
+        val store = collection(COLLECTION, Person::class.java, storeType, client)
+        clearBackend(store)
+        client?.syncManager?.clear(COLLECTION)
+        val person = createPerson(TEST_USERNAME)
+        val saveCallback = save(store, person)
+        assertNotNull(saveCallback.result)
+        assertNull(saveCallback.error)
+        assertNotNull(saveCallback.result?.id)
+        val userId = saveCallback?.result?.id
         var query = client?.query()
-        query = query?.notEqual("age", "100500")
-        query?.let { delete(store, query) }
-    }
-
-    fun pendingSyncEntities(collectionName: String): List<SyncItem>? {
-        return client?.syncManager?.popSingleItemQueue(collectionName)
-    }
-
-    fun print(msg: String) {
-        Logger.INFO(msg)
-        println(msg)
-    }
-
-    @Throws(InterruptedException::class)
-    protected fun <T : GenericJson> saveList(store: DataStore<T>, items: List<T>): DefaultKinveyClientListCallback<T> {
-        val latch = CountDownLatch(1)
-        val callback = DefaultKinveyClientListCallback<T>(latch)
-        val looperThread = LooperThread(Runnable {
-            try {
-                store.save(items, callback)
-            } catch (e: Exception) {
-                callback.onFailure(e)
-            }
-        })
-        looperThread.start()
-        latch.await()
-        looperThread.mHandler.sendMessage(Message())
-        return callback
-    }
-
-    @Throws(InterruptedException::class)
-    protected fun <T : GenericJson> save(store: DataStore<T>, item: T): DefaultKinveyClientCallback<T> {
-        val latch = CountDownLatch(1)
-        val callback = DefaultKinveyClientCallback<T>(latch)
-        val looperThread = LooperThread(Runnable { store.save(item, callback) })
-        looperThread.start()
-        latch.await()
-        looperThread.mHandler.sendMessage(Message())
-        return callback
-    }
-
-    @Throws(InterruptedException::class)
-    protected fun <T : GenericJson> push(store: DataStore<T>, seconds: Int): DefaultKinveyPushCallback {
-        val latch = CountDownLatch(1)
-        val callback = DefaultKinveyPushCallback(latch)
-        val looperThread = LooperThread(Runnable { store.push(callback) })
-        looperThread.start()
-        latch.await(seconds.toLong(), TimeUnit.SECONDS)
-        looperThread.mHandler.sendMessage(Message())
-        return callback
+        query = query?.equals(ID, userId)
+        val kinveyListCallback = find(store, query, DEFAULT_TIMEOUT)
+        assertNull(kinveyListCallback.error)
+        assertNotNull(kinveyListCallback.result)
+        assertTrue(kinveyListCallback.result?.result?.size ?: 0 > 0)
+        delete(store, query)
     }
 
     fun mockInvalidConnection() {
@@ -347,344 +570,401 @@ open class BaseDataStoreTest {
         }
     }
 
-    fun isBackendItem(item: GenericJson?): Boolean {
-        return item?.containsKey(Constants._KMD) == true && item.containsKey(Constants._ACL)
+    @Throws(InterruptedException::class)
+    fun findEntitySet(store: DataStore<EntitySet>, seconds: Int): DefaultKinveyReadEntitySetCallback {
+        val latch = CountDownLatch(1)
+        val callback = DefaultKinveyReadEntitySetCallback(latch)
+        val looperThread = LooperThread(Runnable { store.find(callback) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
     }
 
-    // create an array with a few items that have _id property or have not.
-    fun createPersonsList(count: Int, error: Boolean = false, withId: Boolean = false): List<Person> {
-        return 1.rangeTo(count).map { i ->
-            val person = createPerson(TEST_USERNAME + i.toString())
-            if (withId) {
-                val id = "123456$i"
-                person.id = id
-            }
-            if (error) {
-                person.geoloc = ERR_GEOLOC
-            }
-            person
+    @Throws(InterruptedException::class)
+    fun findIdEntitySet(store: DataStore<EntitySet>, id: String, seconds: Int): DefaultKinveyClientEntitySetCallback {
+        val latch = CountDownLatch(1)
+        val callback = DefaultKinveyClientEntitySetCallback(latch)
+        val looperThread = LooperThread(Runnable { store.find(id, callback, null) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    fun pendingSyncEntities(collectionName: String): List<SyncItem>? {
+        return client?.syncManager?.popSingleItemQueue(collectionName)
+    }
+
+    @Throws(InterruptedException::class)
+    fun createAndSavePerson(store: DataStore<Person>, username: String) {
+        val person = createPerson(username)
+        val saveCallback = save(store, person)
+        assertNotNull(saveCallback.result)
+        assertNull(saveCallback.error)
+    }
+
+    @Throws(InterruptedException::class, IOException::class)
+    fun testFindCount(storeType: StoreType, isCachedCallbackUsed: Boolean) {
+        val store = collection(COLLECTION, Person::class.java, storeType, client)
+        if (storeType !== StoreType.NETWORK) {
+            client?.syncManager?.clear(COLLECTION)
         }
-    }
-
-    // create an array with a few items that have _id property or have not.
-    fun createPersonsListErr(count: Int, errCount: Int, errPos: Int = count): List<Person> {
-        val items = createPersonsList(count, error = false, withId = false)
-        val itemsErr = createPersonsList(errCount, error = true, withId = false)
-        (items as MutableList).addAll(errPos, itemsErr)
-        return items
-    }
-
-    fun createPersonsList(withId: Boolean): List<Person> {
-        return createPersonsList(MAX_PERSONS_COUNT, error = false, withId = withId)
-    }
-
-    fun createEntityList(itemsCount: Int): List<EntitySet> {
-        return 1.rangeTo(itemsCount).map { i ->
-            val entity = EntitySet()
-            entity.description = "entity #$i"
-            entity
+        clearBackend(store)
+        val person = createPerson(TEST_USERNAME)
+        val saveCallback = save(store, person)
+        assertNotNull(saveCallback.result)
+        assertNull(saveCallback.error)
+        assertNotNull(saveCallback.result?.id)
+        var cachedCallback: DefaultKinveyCachedCallback<Int>? = null
+        if (storeType === StoreType.CACHE && isCachedCallbackUsed) {
+            cachedCallback = DefaultKinveyCachedCallback()
         }
+        val countCallback = findCount(store, DEFAULT_TIMEOUT, cachedCallback)
+        assertNull(countCallback.error)
+        assertNotNull(countCallback.result)
+        if (storeType === StoreType.CACHE && isCachedCallbackUsed) {
+            assertNotNull(cachedCallback?.result)
+            assertNotNull(cachedCallback?.result == 1)
+            assertNull(cachedCallback?.error)
+        }
+        assertTrue(countCallback.result == 1)
     }
 
-    // create an array that has 2 items with _id and 2 without in the following order - [no _id, _id, no _id, _id]
-    fun createCombineList(): List<Person> {
-        val items = ArrayList<Person>()
-        val person1 = Person("$TEST_USERNAME${1}")
-        items.add(person1)
-        val person2 = Person("76575", "$TEST_USERNAME${2}")
-        items.add(person2)
-        val person3 = Person("$TEST_USERNAME${3}")
-        items.add(person3)
-        val person4 = Person("53521", "$TEST_USERNAME${4}")
-        items.add(person4)
-        return items
-    }
-
-    // create an array containing two items failing for different reasons
-    fun createPushErrList(): List<Person> {
-        val items = ArrayList<Person>()
-        val errStr = ERR_GEOLOC
-        val person1 = Person("$TEST_USERNAME${1}")
-        person1.geoloc = errStr
-        items.add(person1)
-        val person2 = Person("$TEST_USERNAME${2}")
-        person2.geoloc = errStr
-        items.add(person2)
-        val person3 = Person("$TEST_USERNAME${3}")
-        items.add(person3)
-        return items
-    }
-
-    // create an array containing two items failing for different reasons
-    fun createErrList(): List<Person> {
-        val items = ArrayList<Person>()
-        val errStr = ERR_GEOLOC
-        val person1 = Person("$TEST_USERNAME${1}")
-        person1.geoloc = errStr
-        items.add(person1)
-        val person2 = Person("$TEST_USERNAME${2}")
-        person2.geoloc = errStr
-        items.add(person2)
-        return items
-    }
-
-    // create an array of items with no _id and the second of them should have invalid _geoloc params
-    fun createErrList1(): List<Person> {
-        val items = ArrayList<Person>()
-        val person1 = Person("$TEST_USERNAME${1}")
-        items.add(person1)
-        val person2 = Person("$TEST_USERNAME${2}")
-        person2.geoloc = ERR_GEOLOC
-        items.add(person2)
-        return items
-    }
-
-    // create an array of items with no _id and the second of them should have invalid _geoloc params
-    fun createErrList2(): List<Person> {
-        val items = ArrayList<Person>()
-        val person1 = Person("$TEST_USERNAME${1}")
-        items.add(person1)
-        val person2 = Person("$TEST_USERNAME${2}")
-        person2.geoloc = ERR_GEOLOC
-        items.add(person2)
-        val person3 = Person("$TEST_USERNAME${3}")
-        items.add(person3)
-        return items
-    }
-
-    // create an array  - [{no_id, invalid_geoloc},{_id}, {_id, invalid_geoloc}, {no_id}]
-    fun createErrListGeoloc(): List<Person> {
-        val items = ArrayList<Person>()
-        val errStr = ERR_GEOLOC
-        val person1 = Person("$TEST_USERNAME${1}")
-        person1.geoloc = errStr
-        items.add(person1)
-        val person2 = Person("76575", "$TEST_USERNAME${2}")
-        items.add(person2)
-        val person3 = Person("343275", "$TEST_USERNAME${3}")
-        person1.geoloc = errStr
-        items.add(person3)
-        val person4 = Person("$TEST_USERNAME${4}")
-        items.add(person4)
-        return items
-    }
-
-    fun <T : GenericJson> getResultCheckFields(resultList: List<T?>?, checkField: String): List<String> {
-        return resultList?.map { item ->
-            item?.get(checkField).toString()
-        } ?: mutableListOf()
-    }
-
-    @Throws(AssertionError::class)
-    fun <T : GenericJson> checkIfItemsAtRightIndex(srcList: List<T>, resultList: List<T?>?,
-                                                   checkIndexes: IntArray, checkField: String,
-                                                   checkErr: Boolean, checkIsBackendItem: Boolean): Boolean {
-        Assert.assertNotNull(srcList)
-        Assert.assertNotNull(resultList)
-
-        var result = true
-        var srcItem: GenericJson
-        var item: GenericJson?
-        val resultFields = getResultCheckFields(resultList, checkField)
-        for ((curIdx, idx) in checkIndexes.withIndex()) {
-            item = resultList?.get(curIdx)
-            if (checkErr) {
-                result = result and (item == null)
+    @Throws(InterruptedException::class, IOException::class)
+    fun findCount(store: DataStore<Person>, seconds: Int, cachedClientCallback: DefaultKinveyCachedCallback<Int>?): DefaultKinveyCountCallback {
+        val latch = CountDownLatch(if (cachedClientCallback != null) 2 else 1)
+        if (cachedClientCallback != null) {
+            cachedClientCallback.latch = latch
+        }
+        val callback = DefaultKinveyCountCallback(latch)
+        val looperThread = LooperThread(Runnable {
+            if (cachedClientCallback != null) {
+                store.count(callback, cachedClientCallback)
             } else {
-                srcItem = srcList[idx]
-                result = result and (item != null)
-                if (checkIsBackendItem) {
-                    result = result and isBackendItem(item)
+                store.count(callback)
+            }
+        })
+        looperThread.start()
+        latch.await(seconds.toLong(), TimeUnit.SECONDS)
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
+    fun delete(store: DataStore<Person>, id: String?, seconds: Int): DefaultKinveyDeleteCallback {
+        val latch = CountDownLatch(1)
+        val callback = DefaultKinveyDeleteCallback(latch)
+        val looperThread = LooperThread(Runnable { store.delete(id, callback) })
+        looperThread.start()
+        latch.await(seconds.toLong(), TimeUnit.SECONDS)
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
+    fun testDelete(storeType: StoreType) {
+        val store = collection(COLLECTION, Person::class.java, storeType, client)
+        client?.syncManager?.clear(COLLECTION)
+        val person = createPerson(TEST_USERNAME)
+        val saveCallback = save(store, person)
+        assertNotNull(saveCallback.result)
+        assertNull(saveCallback.error)
+        assertNotNull(saveCallback.result?.id)
+        val userId = saveCallback.result?.id
+        val deleteCallback = delete(store, userId, DEFAULT_TIMEOUT)
+        assertNull(deleteCallback.error)
+        assertNotNull(deleteCallback.result)
+        assertTrue(deleteCallback.result == 1)
+    }
+
+    @Throws(InterruptedException::class)
+    fun testDeleteNullId(storeType: StoreType) {
+        val store = collection(COLLECTION, Person::class.java, storeType, client)
+        client?.syncManager?.clear(COLLECTION)
+        val person = createPerson(TEST_USERNAME)
+        val saveCallback = save(store, person)
+        assertNotNull(saveCallback.result)
+        assertNull(saveCallback.error)
+        assertNotNull(saveCallback.result?.id)
+        val deleteCallback = delete(store, null, DEFAULT_TIMEOUT)
+        assertNotNull(deleteCallback.error)
+        assertNull(deleteCallback.result)
+    }
+
+    @Throws(InterruptedException::class)
+    fun delete(store: DataStore<Person>, entityIDs: Iterable<String>): DefaultKinveyDeleteCallback {
+        val latch = CountDownLatch(1)
+        val callback = DefaultKinveyDeleteCallback(latch)
+        val looperThread = LooperThread(Runnable { store.delete(entityIDs, callback) })
+        looperThread.start()
+        latch.await(120, TimeUnit.SECONDS)
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
+    fun testDeleteArray(storeType: StoreType) {
+        val store = collection(COLLECTION, Person::class.java, storeType, client)
+        client?.syncManager?.clear(COLLECTION)
+        var saveCallback = save(store, createPerson(TEST_USERNAME))
+        assertNotNull(saveCallback.result)
+        assertNull(saveCallback.error)
+        assertNotNull(saveCallback.result?.id)
+        val user1Id = saveCallback.result?.id ?: ""
+        saveCallback = save(store, createPerson(TEST_USERNAME_2))
+        assertNotNull(saveCallback.result)
+        assertNull(saveCallback.error)
+        assertNotNull(saveCallback.result?.id)
+        val user2Id = saveCallback.result?.id ?: ""
+        assertNotEquals(user1Id, user2Id)
+        val list = listOf(user1Id, user2Id)
+        val deleteCallback = delete(store, list)
+        assertNull(deleteCallback.error)
+        assertNotNull(deleteCallback.result)
+        assertTrue(deleteCallback.result == list.size)
+    }
+
+    fun removeFiles(path: String) {
+        var file = File(path)
+        if (file.exists()) {
+            file.delete()
+        }
+        val lockPath = "$path.lock"
+        file = File(lockPath)
+        if (file.exists()) {
+            file.delete()
+        }
+        val logPath = "$path.management"
+        file = File(logPath)
+        if (file.exists()) {
+            file.delete()
+        }
+    }
+
+    @Throws(InterruptedException::class)
+    fun purge(query: Query?, store: DataStore<Person>): DefaultKinveyPurgeCallback {
+        val latch = CountDownLatch(1)
+        val callback = DefaultKinveyPurgeCallback(latch)
+        val looperThread = LooperThread(Runnable {
+            if (query != null) {
+                store.purge(query, callback)
+            } else {
+                store.purge(callback)
+            }
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
+    fun sync(store: DataStore<Person>, seconds: Int): DefaultKinveySyncCallback {
+        val latch = CountDownLatch(1)
+        val callback = DefaultKinveySyncCallback(latch)
+        val looperThread = LooperThread(Runnable { store.sync(callback) })
+        looperThread.start()
+        latch.await(seconds.toLong(), TimeUnit.SECONDS)
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
+    fun sync(store: DataStore<Person>, query: Query, seconds: Int): DefaultKinveySyncCallback {
+        val latch = CountDownLatch(1)
+        val callback = DefaultKinveySyncCallback(latch)
+        val looperThread = LooperThread(Runnable { store.sync(query, callback) })
+        looperThread.start()
+        latch.await(seconds.toLong(), TimeUnit.SECONDS)
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
+    fun push(store: DataStore<Person>, seconds: Int): DefaultKinveyPushCallback {
+        val latch = CountDownLatch(1)
+        val callback = DefaultKinveyPushCallback(latch)
+        val looperThread = LooperThread(Runnable { store.push(callback) })
+        looperThread.start()
+        latch.await(seconds.toLong(), TimeUnit.SECONDS)
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
+    fun pull(store: DataStore<Person>, query: Query?): DefaultKinveyPullCallback {
+        val latch = CountDownLatch(1)
+        val callback = DefaultKinveyPullCallback(latch)
+        val looperThread = LooperThread(Runnable {
+            if (query != null) {
+                store.pull(query, callback)
+            } else {
+                store.pull(callback)
+            }
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
+    fun pullEntitySet(store: DataStore<EntitySet>, query: Query?): DefaultKinveyPullCallback {
+        val latch = CountDownLatch(1)
+        val callback = DefaultKinveyPullCallback(latch)
+        val looperThread = LooperThread(Runnable {
+            if (query != null) {
+                store.pull(query, callback)
+            } else {
+                store.pull(callback)
+            }
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
+    fun pull(store: DataStore<Person>, query: Query?, pageSize: Int): DefaultKinveyPullCallback {
+        val latch = CountDownLatch(1)
+        val callback = DefaultKinveyPullCallback(latch)
+        val looperThread = LooperThread(Runnable {
+            if (query != null) {
+                store.pull(query, pageSize, callback)
+            } else {
+                store.pull(pageSize, callback)
+            }
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
+    fun delete(store: DataStore<Person>, query: Query?): DefaultKinveyDeleteCallback {
+        val latch = CountDownLatch(1)
+        val callback = DefaultKinveyDeleteCallback(latch)
+        val looperThread = LooperThread(Runnable { store.delete(query!!, callback) })
+        looperThread.start()
+        latch.await(120, TimeUnit.SECONDS)
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    //cleaning backend store
+    @Throws(InterruptedException::class)
+    fun cleanBackendDataStore(store: DataStore<Person>) {
+        val syncCallback = sync(store, 120)
+        assertNull(syncCallback.error)
+        var query = client?.query()
+        query = query?.notEqual("age", "100500")
+        val deleteCallback = delete(store, query)
+        assertNull(deleteCallback.error)
+        val pushCallback = push(store, 120)
+        assertNull(pushCallback.error)
+        assertTrue(pushCallback.result?.listOfExceptions?.size == 0)
+        Log.d("testPull", " : clearing backend store successful")
+    }
+
+    @Throws(InterruptedException::class)
+    fun clearBackend(store: DataStore<Person>) {
+        var query = client?.query()
+        query = query?.notEqual("age", "100500")
+        val deleteCallback = delete(store, query)
+    }
+
+    //use for COLLECTION and for Person.class
+    fun getCacheSize(storeType: StoreType): Long {
+        return client?.cacheManager?.getCache(COLLECTION, Person::class.java, storeType.ttl)?.get()?.size?.toLong() ?: 0
+    }
+
+    fun isCollectionHasOneTable(collection: String, realm: DynamicRealm?): Boolean {
+        val currentSchema = realm?.schema
+        var className: String
+        var schemaCounter = 0
+        val schemas = currentSchema?.all!!
+        for (schema in schemas) {
+            className = schema.className
+            if (className == TableNameManagerUtil.getShortName(collection, realm)) {
+                schemaCounter++
+            }
+        }
+        return schemaCounter == 1
+    }
+
+    /**
+     * Check that main and each internal tables have correct items count
+     * @param expectedItemsCount expected items count
+     */
+    fun checkInternalTablesHasItems(expectedItemsCount: Int, collection: String?, realm: DynamicRealm?) {
+        val currentSchema = realm?.schema
+        var originalName: String?
+        var className: String
+        val schemas = currentSchema?.all
+        schemas?.forEach { schema ->
+                className = schema.className
+//search class
+            if (className == TableNameManagerUtil.getShortName(collection, realm)) {
+                assertTrue(realm?.where(TableNameManagerUtil.getShortName(collection, realm))?.count() == expectedItemsCount.toLong())
+                //search sub-classes
+                schemas.forEach { subClassSchema ->
+                    originalName = TableNameManagerUtil.getOriginalName(subClassSchema.className, realm)
+                    if (originalName != null && originalName?.startsWith(className + Constants.UNDERSCORE) == true) {
+                        checkInternalTablesHasItems(expectedItemsCount, originalName, realm)
+                    }
                 }
-                val srcField = srcItem.get(checkField).toString()
-                result = result and resultFields.contains(srcField)
             }
         }
-        return result
     }
 
-    @Throws(AssertionError::class)
-    fun <T : GenericJson> checkIfSameObjects(srcList: List<T>, resultList: List<T?>?,
-                                             checkField: String, checkIsBackendItem: Boolean): Boolean {
-
-        Assert.assertNotNull(srcList)
-        Assert.assertNotNull(resultList)
-
-        var result = true
-        var srcItem: GenericJson?
-        var resultItem: GenericJson?
-        val resultFields = getResultCheckFields(resultList, checkField)
-        for (i in srcList.indices) {
-            srcItem = srcList[i]
-            resultItem = resultList?.get(i)
-            if (checkIsBackendItem) {
-                result = result and isBackendItem(resultItem)
-            }
-            val srcField = srcItem[checkField].toString()
-            result = result and resultFields.contains(srcField)
-        }
-        return result
-    }
-
-    @Throws(AssertionError::class)
-    fun checkBatchResponseErrors(errors: List<KinveyBatchInsertError>?, checkIndexes: IntArray,
-                                 checkErrMsg: Boolean = false, errMessages: Array<String>? = null): Boolean {
-        Assert.assertNotNull(errors)
-        Assert.assertNotNull(checkIndexes)
-        Assert.assertEquals(errors?.count(), checkIndexes.count())
-        if (checkErrMsg) {
-            Assert.assertNotNull(errMessages)
-            Assert.assertEquals(checkIndexes.count(), errMessages?.count())
-        }
-        var result = true
-        var err: KinveyBatchInsertError?
-        for ((curIdx, idx) in checkIndexes.withIndex()) {
-            err = errors?.get(curIdx)
-            result = result and (idx == err?.index)
-            if (checkErrMsg) {
-                val msg = errMessages?.get(curIdx) ?: ""
-                result = result and (err?.errorMessage?.contains(msg) == true)
+    @After
+    fun tearDown() {
+        client?.performLockDown()
+        if (Client.kinveyHandlerThread != null) {
+            try {
+                client?.stopKinveyHandlerThread()
+            } catch (throwable: Throwable) {
+                throwable.printStackTrace()
             }
         }
-        return result
-    }
-
-    @Throws(AssertionError::class)
-    fun <T : GenericJson> checkSyncItems(list: List<SyncItem>?, checkCount: Int,
-                                                 requestMethod: SyncRequest.HttpVerb): Boolean {
-        Assert.assertEquals(list?.count(), checkCount)
-        var result = false
-        list?.let { items ->
-            result = true
-            items.onEach { item -> result = result and (requestMethod == item.requestMethod) }
-        }
-        return result
-    }
-
-    @Throws(AssertionError::class)
-    fun checkPersonIfSameObjects(srcList: List<Person>, resultList: List<Person>?, checkIsBackendItem: Boolean): Boolean {
-        return checkIfSameObjects(srcList, resultList, Person.USERNAME_KEY, checkIsBackendItem)
-    }
-
-    @Throws(AssertionError::class)
-    fun checkPersonIfSameObjects(srcList: List<Person>, resultList: List<Person>?): Boolean {
-        return checkIfSameObjects(srcList, resultList, Person.USERNAME_KEY, true)
-    }
-
-    fun checkIfPersonItemsAtRightIndex(srcList: List<Person>, resultList: List<Person>?,
-                                       checkIndexes: IntArray, checkErr: Boolean): Boolean {
-        return checkIfItemsAtRightIndex(srcList, resultList, checkIndexes, Person.USERNAME_KEY, checkErr, true)
-    }
-
-    @Throws(AssertionError::class)
-    fun checkPersonListIfSameOrder(personList: List<Person>, resultPersonList: List<Person>?): Boolean {
-        Assert.assertTrue(personList.count() == resultPersonList?.count())
-        var result: Boolean? = false
-        resultPersonList?.let { list ->
-            result = personList.zip(list) { p, r ->  p.username == r.username}.min()
-        }
-        return result ?: false
     }
 
     @Throws(InterruptedException::class)
-    fun <T : GenericJson> testSaveEmptyList(list: List<T>, cls: Class<T>, collection: String, storeType: StoreType) {
-        val personStore = DataStore.collection(collection, cls, storeType, client)
-        clearBackend(personStore)
-        client?.syncManager?.clear(Person.COLLECTION)
-
-        val saveCallback = saveList(personStore, list)
-        Assert.assertNull(saveCallback.result)
-        val error = saveCallback.error
-        Assert.assertNotNull(error)
-        Assert.assertEquals(error?.javaClass, IllegalStateException::class.java)
-        Assert.assertTrue(error?.message?.contains(ERR_EMPTY_LIST_MSG) == true)
+    fun find(store: DataStore<Person>, ids: Iterable<String>, seconds: Int,
+                     cachedClientCallback: CustomKinveyCachedCallback<KinveyReadResponse<Person>?>?): DefaultKinveyReadCallback {
+        val latch = CountDownLatch(if (cachedClientCallback != null) 2 else 1)
+        if (cachedClientCallback != null) {
+            cachedClientCallback.latch = latch
+        }
+        val callback = DefaultKinveyReadCallback(latch)
+        val looperThread = LooperThread(Runnable {
+            if (cachedClientCallback != null) {
+                store.find(ids, callback, cachedClientCallback)
+            } else {
+                store.find(ids, callback)
+            }
+        })
+        looperThread.start()
+        latch.await(seconds.toLong(), TimeUnit.SECONDS)
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
     }
 
-    // save an item without _id
-    // save another item without _id
-    // push(), should use a multi-insert POST request and return the items with POST operations
-    // pendingSyncEntities(), should return an empty array
-    // find using syncstore, should return all items from step 1
-    @Throws(InterruptedException::class)
-    protected fun testPushMultiInsertSupport(storeType: StoreType) {
-
-        val personsList = createPersonsList(2, false)
-
-        val netManager = MockMultiInsertNetworkManager(Person.COLLECTION, Person::class.java, client as Client)
-        val personStore = DataStore(Person.COLLECTION, Person::class.java, client, storeType, netManager)
-        val storeSync = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.SYNC, netManager)
-
-        clearBackend(personStore)
-        clearBackend(storeSync)
-        client?.syncManager?.clear(Person.COLLECTION)
-
-        personsList.onEach { item -> save(storeSync, item) }
-
-        netManager.clear()
-        val pushCallback = push(personStore, LONG_TIMEOUT)
-        Assert.assertNotNull(pushCallback.result)
-        Assert.assertEquals(pushCallback.result?.successCount, personsList.count())
-        Assert.assertTrue(netManager.useMultiInsertSave())
-
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
-        Assert.assertTrue(syncItems == null || syncItems.isEmpty())
-
-        val findCallback = find(storeSync, LONG_TIMEOUT)
-        Assert.assertNotNull(findCallback.result)
-        Assert.assertTrue(checkPersonIfSameObjects(personsList, findCallback.result?.result))
-    }
-
-    // create an array of 3 items, the second of which has invalid _geoloc parameters
-    // save()
-    // Sync(), Should return error for not pushed item
-    // pendingSyncEntities(), should return the item with invalid params
-    // find() using networkstore, should return the valid items
-    // find using syncstore, should return all items including the invalid one
-    @Throws(InterruptedException::class)
-    protected fun testSyncItemsList(mockConnectionErr: Boolean, storeType: StoreType) {
-
-        val personList = createErrList2()
-        val checkIndexesSuccess = intArrayOf(0, 2)
-        val checkIndexesErr = intArrayOf(1)
-        val personStoreCurrent = DataStore.collection(Person.COLLECTION, Person::class.java, storeType, client)
-        val personStoreNet = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.NETWORK, client)
-        val personStoreSync = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
-
-        clearBackend(personStoreCurrent)
-        clearBackend(personStoreNet)
-        clearBackend(personStoreSync)
-        client?.syncManager?.clear(Person.COLLECTION)
-
-        if (mockConnectionErr) {
-            mockInvalidConnection()
-        }
-        saveList(personStoreSync, personList)
-        if (mockConnectionErr) {
-            cancelMockInvalidConnection()
-        }
-
-        val syncCallback = sync(personStoreCurrent, LONG_TIMEOUT)
-        Assert.assertNotNull(syncCallback.error)
-        if (syncCallback.error is KinveySaveBatchException) {
-            val resultEntities = (syncCallback.error as KinveySaveBatchException).entities as List<Person>?
-            val errorsList = (syncCallback.error as KinveySaveBatchException).errors
-            Assert.assertTrue(checkIfPersonItemsAtRightIndex(personList, resultEntities, checkIndexesSuccess, false))
-            Assert.assertTrue(checkIfPersonItemsAtRightIndex(personList, resultEntities, checkIndexesErr, true))
-            val errMessages = arrayOf(ERR_GEOLOC_MSG)
-            Assert.assertTrue(checkBatchResponseErrors(errorsList, checkIndexesErr, true, errMessages))
-        }
-
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
-        Assert.assertNotNull(syncItems)
-        Assert.assertEquals(syncItems?.count(), 1)
-
-        val findCallbackNet = find(personStoreNet, LONG_TIMEOUT)
-        val findCallbackSync = find(personStoreSync, LONG_TIMEOUT)
-
-        Assert.assertNotNull(findCallbackNet.result)
-        Assert.assertTrue(checkIfPersonItemsAtRightIndex(personList, findCallbackNet.result?.result, checkIndexesSuccess, false))
-
-        Assert.assertNotNull(findCallbackSync.result)
-        Assert.assertTrue(checkPersonIfSameObjects(personList, findCallbackSync.result?.result))
+    companion object {
+        const val COLLECTION = "PersonsNew"
+        const val TEST_USERNAME = "Test_UserName"
+        const val TEST_USERNAME_2 = "Test_UserName_2"
+        const val TEST_TEMP_USERNAME = "Temp_UserName"
+        const val USERNAME = "username"
+        const val ID = "_id"
+        const val KMD = "_kmd"
+        const val SORT_FIELD = "_kmd.ect"
+        const val LMT = "lmt"
+        const val FIELD = "field"
+        const val DEFAULT_TIMEOUT = 60
+        const val LONG_TIMEOUT = 6 * DEFAULT_TIMEOUT
     }
 }

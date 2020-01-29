@@ -21,6 +21,6 @@ package com.kinvey.java.core
  * @author edwardf
  */
 interface KinveyClientCallback<T> {
-    fun onSuccess(result: T)
-    fun onFailure(error: Throwable)
+    fun onSuccess(result: T?)
+    fun onFailure(error: Throwable?)
 }

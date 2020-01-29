@@ -61,7 +61,7 @@ open class KinveyAuthRequest<T : BaseUser?> : GenericJson {
     /**
      * appkey and secret RequestInitializer for the initial POST to the user endpoint *
      */
-    private val appKeyAuthentication: BasicAuthentication
+    private val appKeyAuthentication: BasicAuthentication?
     /**
      * used to formulate the uri in [.buildHttpRequestUrl] *
      */
@@ -95,13 +95,13 @@ open class KinveyAuthRequest<T : BaseUser?> : GenericJson {
      * @param password             password for the user or `null` if none is known
      */
     protected constructor(transport: HttpTransport?, jsonFactory: JsonFactory,
-                          baseUrl: String?, appKeyAuthentication: BasicAuthentication, username: String?, password: String?,
+                          baseUrl: String?, appKeyAuthentication: BasicAuthentication?, username: String?, password: String?,
                           user: GenericJson?, create: Boolean) {
         this.transport = transport
         this.jsonFactory = jsonFactory
         this.baseUrl = baseUrl
         this.appKeyAuthentication = appKeyAuthentication
-        appKey = appKeyAuthentication.username
+        appKey = appKeyAuthentication?.username
         requestPayload = if (username == null || password == null) GenericJson() else AuthRequestPayload(username, password)
         if (user != null) {
             requestPayload.putAll(user)
@@ -112,13 +112,13 @@ open class KinveyAuthRequest<T : BaseUser?> : GenericJson {
     }
 
     protected constructor(transport: HttpTransport?, jsonFactory: JsonFactory,
-                          baseUrl: String?, appKeyAuthentication: BasicAuthentication, thirdPartyIdentity: ThirdPartyIdentity?,
+                          baseUrl: String?, appKeyAuthentication: BasicAuthentication?, thirdPartyIdentity: ThirdPartyIdentity?,
                           user: GenericJson?, create: Boolean) {
         this.transport = transport
         this.jsonFactory = jsonFactory
         this.appKeyAuthentication = appKeyAuthentication
         this.baseUrl = baseUrl
-        appKey = appKeyAuthentication.username
+        appKey = appKeyAuthentication?.username
         requestPayload = thirdPartyIdentity
         if (user != null) {
             for (key in user.keys) {
@@ -241,7 +241,7 @@ open class KinveyAuthRequest<T : BaseUser?> : GenericJson {
     </pre> *
      */
     open class Builder<T : BaseUser?>(transport: HttpTransport?, jsonFactory: JsonFactory,
-                                      val baseUrl: String?, appKey: String, appSecret: String, user: GenericJson?) {
+                                      val baseUrl: String?, appKey: String?, appSecret: String?, user: GenericJson?) {
         /**
          * @return the http trasport
          */
@@ -294,15 +294,15 @@ open class KinveyAuthRequest<T : BaseUser?> : GenericJson {
         //    return this
         //}
 
-        constructor(transport: HttpTransport, jsonFactory: JsonFactory, baseUrl: String, appKey: String, appSecret: String,
-                    username: String, password: String, user: GenericJson) : this(transport, jsonFactory, baseUrl, appKey, appSecret, user) {
+        constructor(transport: HttpTransport?, jsonFactory: JsonFactory, baseUrl: String?, appKey: String?, appSecret: String?,
+                    username: String, password: String, user: GenericJson?) : this(transport, jsonFactory, baseUrl, appKey, appSecret, user) {
             Preconditions.checkArgument("" != username, "username cannot be empty, use null if no username is known")
             Preconditions.checkArgument("" != password, "password cannot be empty, use null if no password is known")
             this.username = username
             this.password = password
         }
 
-        constructor(transport: HttpTransport, jsonFactory: JsonFactory, baseUrl: String, appKey: String, appSecret: String,
+        constructor(transport: HttpTransport, jsonFactory: JsonFactory, baseUrl: String?, appKey: String?, appSecret: String?,
                     identity: ThirdPartyIdentity?, user: GenericJson) : this(transport, jsonFactory, baseUrl, appKey, appSecret, user) {
             Preconditions.checkNotNull(identity, "identity must not be null")
             thirdPartyAuthStatus = identity != null

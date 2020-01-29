@@ -195,10 +195,10 @@ open class NetworkFileManager
      * @throws IOException if initializing the request fails
      */
     @Throws(IOException::class)
-    fun prepUploadBlocking(fileMetaData: FileMetaData, content: AbstractInputStreamContent,
+    fun prepUploadBlocking(fileMetaData: FileMetaData?, content: AbstractInputStreamContent,
                            uploadProgressListener: UploaderProgressListener): UploadMetadataAndFile {
         Preconditions.checkNotNull(fileMetaData, "file meta data cannot be null")
-        val mode = if (fileMetaData.containsKey(ID_FIELD_NAME)) {
+        val mode = if (fileMetaData?.containsKey(ID_FIELD_NAME) == true) {
             SaveMode.PUT
         } else {
             SaveMode.POST
@@ -590,7 +590,7 @@ open class NetworkFileManager
      *
      *
      */
-    class UploadMetadataAndFile (private val networkFileManager: NetworkFileManager, val meta: FileMetaData, val mode: SaveMode,
+    class UploadMetadataAndFile (private val networkFileManager: NetworkFileManager, val meta: FileMetaData?, val mode: SaveMode,
                                  mediaContent: AbstractInputStreamContent, progressListener: UploaderProgressListener):
             MetadataRequest(networkFileManager.client, mode.toString(), meta, FileMetaData::class.java) {
 
@@ -603,7 +603,7 @@ open class NetworkFileManager
         init {
             initializeMediaHttpUploader(mediaContent, progressListener)
             if (mode == SaveMode.PUT) {
-                this.id = Preconditions.checkNotNull(meta.id)
+                this.id = Preconditions.checkNotNull(meta?.id)
             }
             this.getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkFileManager.clientAppVersion
             if (networkFileManager.customRequestProperties?.isEmpty() == false) {

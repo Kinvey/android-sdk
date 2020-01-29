@@ -88,17 +88,17 @@ open class BaseFileStore
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun upload(file: File, metadata: FileMetaData,
+    fun upload(file: File?, metadata: FileMetaData?,
                listener: UploaderProgressListener): FileMetaData {
         var metadata = metadata
         Preconditions.checkNotNull(file, "file must not be null")
         Preconditions.checkNotNull(metadata, "metadata must not be null")
         Preconditions.checkNotNull(listener, "listener must not be null")
 
-        metadata.fileSize = file.length()
+        metadata?.fileSize = file?.length() ?: 0L
 
         val fileMetadataWithPath = FileMetadataWithPath()
-        fileMetadataWithPath.putAll(metadata)
+        fileMetadataWithPath.putAll(metadata as FileMetaData)
 
         if (fileMetadataWithPath.id == null) {
             fileMetadataWithPath.id = UUID.randomUUID().toString()
@@ -121,12 +121,11 @@ open class BaseFileStore
                     e.printStackTrace()
                 }
 
-                fileMetadataWithPath.putAll(metadata)
+                fileMetadataWithPath.putAll(metadata as FileMetaData)
                 saveCacheFile(FileInputStream(file), fileMetadataWithPath)
             }
         }
-
-        return metadata
+        return metadata as FileMetaData
     }
 
     /**

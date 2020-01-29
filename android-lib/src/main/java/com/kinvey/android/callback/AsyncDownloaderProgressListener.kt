@@ -6,11 +6,11 @@ import com.kinvey.java.core.MediaHttpDownloader
 import java.io.IOException
 
 interface AsyncDownloaderProgressListener<T> : DownloaderProgressListener, KinveyCancellableCallback<T> {
-    override fun onSuccess(result: T)
-    override fun onFailure(error: Throwable)
+    override fun onSuccess(result: T?)
+    override fun onFailure(error: Throwable?)
     @Throws(IOException::class)
-    override fun progressChanged(uploader: MediaHttpDownloader)
+    override fun progressChanged(uploader: MediaHttpDownloader?)
 
     override fun onCancelled()
-    abstract override val isCancelled: Boolean
+    override var isCancelled: Boolean
 }

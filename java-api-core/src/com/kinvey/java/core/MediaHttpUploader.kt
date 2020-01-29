@@ -746,11 +746,11 @@ constructor (mediaContent: AbstractInputStreamContent,
      * package-level for testing
      */
     @Throws(IOException::class)
-    fun parse(initationResponseParser: JsonObjectParser, response: HttpResponse): FileMetaData {
+    fun parse(initationResponseParser: JsonObjectParser?, response: HttpResponse?): FileMetaData? {
         return try {
-            initationResponseParser.parseAndClose(response.content, response.contentCharset, FileMetaData::class.java)
+            initationResponseParser?.parseAndClose(response?.content, response?.contentCharset, FileMetaData::class.java)
         } catch (e: Exception) {
-            initationResponseParser.parseAndClose(response.content, response.contentCharset, Array<FileMetaData>::class.java)[0]
+            initationResponseParser?.parseAndClose(response?.content, response?.contentCharset, Array<FileMetaData>::class.java)?.get(0)
         }
     }
 

@@ -11,11 +11,10 @@ import com.kinvey.android.Client.Builder
 import com.kinvey.android.callback.KinveyDeleteCallback
 import com.kinvey.android.model.User
 import com.kinvey.android.network.AsyncLinkedNetworkManager
-import com.kinvey.android.store.UserStore
 import com.kinvey.android.store.UserStore.Companion.login
 import com.kinvey.androidTest.LooperThread
-import com.kinvey.androidTest.TestManager.PASSWORD
-import com.kinvey.androidTest.TestManager.USERNAME
+import com.kinvey.androidTest.TestManager.Companion.PASSWORD
+import com.kinvey.androidTest.TestManager.Companion.USERNAME
 import com.kinvey.java.Query
 import com.kinvey.java.core.*
 import com.kinvey.java.linkedResources.LinkedFile
@@ -52,12 +51,12 @@ class AsyncLinkedNetworkManagerTest {
             looperThread = LooperThread(Runnable {
                 try {
                     login(USERNAME, PASSWORD, client as Client<User>, object : KinveyClientCallback<User> {
-                        override fun onSuccess(result: User) {
+                        override fun onSuccess(result: User?) {
                             Assert.assertNotNull(result)
                             latch.countDown()
                         }
 
-                        override fun onFailure(error: Throwable) {
+                        override fun onFailure(error: Throwable?) {
                             Assert.assertNull(error)
                             latch.countDown()
                         }
@@ -77,12 +76,12 @@ class AsyncLinkedNetworkManagerTest {
     private class DefaultKinveyClientCallback<T>(private val latch: CountDownLatch) : KinveyClientCallback<T> {
         var result: T? = null
         var error: Throwable? = null
-        override fun onSuccess(result: T) {
+        override fun onSuccess(result: T?) {
             this.result = result
             finish()
         }
 
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -149,7 +148,7 @@ class AsyncLinkedNetworkManagerTest {
             finish()
         }
 
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             this.error = error
             finish()
         }
@@ -190,13 +189,13 @@ class AsyncLinkedNetworkManagerTest {
         val looperThread = LooperThread(Runnable {
             netMan.getEntity(entityId, callback, object : DownloaderProgressListener {
                 @Throws(IOException::class)
-                override fun progressChanged(downloader: MediaHttpDownloader) {
+                override fun progressChanged(downloader: MediaHttpDownloader?) {
                 }
             }, storeType)
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 
@@ -207,13 +206,13 @@ class AsyncLinkedNetworkManagerTest {
         val looperThread = LooperThread(Runnable {
             netMan.save(entity, callback, object : UploaderProgressListener {
                 @Throws(IOException::class)
-                override fun progressChanged(uploader: MediaHttpUploader) {
+                override fun progressChanged(uploader: MediaHttpUploader?) {
                 }
             }, storeType)
         })
         looperThread.start()
         latch.await()
-        looperThread.mHandler.sendMessage(Message())
+        looperThread.mHandler?.sendMessage(Message())
         return callback
     }
 

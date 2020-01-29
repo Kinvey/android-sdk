@@ -168,7 +168,7 @@ class UserStore {
         }
     }
 
-    private class Logout internal constructor(private val client: AbstractClient<BaseUser>, callback: KinveyClientCallback<Void?>) : AsyncClientRequest<Void?>(callback) {
+    private class Logout internal constructor(private val client: AbstractClient<BaseUser>, callback: KinveyClientCallback<Void>) : AsyncClientRequest<Void>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): Void? {
@@ -776,7 +776,7 @@ class UserStore {
          * @param client [Client] an instance of the client
          */
         @JvmStatic
-        fun logout(client: AbstractClient<BaseUser>, callback: KinveyClientCallback<Void?>) {
+        fun logout(client: AbstractClient<BaseUser>, callback: KinveyClientCallback<Void>) {
             Logout(client, callback).execute()
         }
 
@@ -1279,11 +1279,11 @@ class UserStore {
                     client.context?.startActivity(i)
                 }
 
-                override fun onSuccess(result: User) {
+                override fun onSuccess(result: User?) {
                     callback.onSuccess(result)
                 }
 
-                override fun onFailure(error: Throwable) {
+                override fun onFailure(error: Throwable?) {
                     callback.onFailure(error)
                 }
             })

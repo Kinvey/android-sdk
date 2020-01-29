@@ -259,7 +259,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      * @param cachedCallback either successfully returns list of resolved entities from cache or an error
      */
     @JvmOverloads
-    fun find(ids: Iterable<String>, callback: KinveyReadCallback<T>, cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>>? = null) {
+    fun find(ids: Iterable<String>, callback: KinveyReadCallback<T>, cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>?>? = null) {
         Preconditions.checkNotNull(client, "client must not be null")
         Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         Preconditions.checkNotNull(ids, "ids must not be null.")
@@ -299,7 +299,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      * @param cachedCallback either successfully returns list of resolved entities from cache or an error
      */
     @JvmOverloads
-    fun find(query: Query, callback: KinveyReadCallback<T>, cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>>? = null) {
+    fun find(query: Query, callback: KinveyReadCallback<T>, cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>?>? = null) {
         Preconditions.checkNotNull(client, "client must not be null")
         Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         Preconditions.checkNotNull(query, "Query must not be null.")
@@ -334,7 +334,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      * @param cachedCallback either successfully returns list of resolved entities from cache or an error
      */
     @JvmOverloads
-    fun find(callback: KinveyReadCallback<T>, cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>>? = null) {
+    fun find(callback: KinveyReadCallback<T>, cachedCallback: KinveyCachedClientCallback<KinveyReadResponse<T>?>? = null) {
         Preconditions.checkNotNull(client, "client must not be null")
         Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         AsyncRequest(this, methodMap!![KEY_GET_ALL], callback, getWrappedCacheCallback(cachedCallback)).execute()
@@ -835,24 +835,24 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
         Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized")
         callback.onPushStarted()
         push(object : KinveyPushCallback {
-            override fun onSuccess(pushResult: KinveyPushResponse) {
+            override fun onSuccess(pushResult: KinveyPushResponse?) {
                 callback.onPushSuccess(pushResult)
                 callback.onPullStarted()
                 this@DataStore.pull(query, object : KinveyPullCallback {
 
-                    override fun onSuccess(pullResult: KinveyPullResponse) {
+                    override fun onSuccess(pullResult: KinveyPullResponse?) {
                         callback.onPullSuccess(pullResult)
                         callback.onSuccess(pushResult, pullResult)
                     }
 
-                    override fun onFailure(error: Throwable) {
+                    override fun onFailure(error: Throwable?) {
                         callback.onFailure(error)
 
                     }
                 })
             }
 
-            override fun onFailure(error: Throwable) {
+            override fun onFailure(error: Throwable?) {
 
                 callback.onFailure(error)
             }
@@ -901,30 +901,27 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
         Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized")
         callback.onPushStarted()
         push(object : KinveyPushCallback {
-            override fun onSuccess(pushResult: KinveyPushResponse) {
+            override fun onSuccess(pushResult: KinveyPushResponse?) {
                 callback.onPushSuccess(pushResult)
                 callback.onPullStarted()
                 this@DataStore.pull(query, isAutoPagination, object : KinveyPullCallback {
 
-                    override fun onSuccess(pullResult: KinveyPullResponse) {
+                    override fun onSuccess(pullResult: KinveyPullResponse?) {
                         callback.onPullSuccess(pullResult)
                         callback.onSuccess(pushResult, pullResult)
                     }
 
-                    override fun onFailure(error: Throwable) {
+                    override fun onFailure(error: Throwable?) {
                         callback.onFailure(error)
-
                     }
                 })
             }
 
-            override fun onFailure(error: Throwable) {
-
+            override fun onFailure(error: Throwable?) {
                 callback.onFailure(error)
             }
 
             override fun onProgress(current: Long, all: Long) {
-
             }
         })
     }
@@ -969,24 +966,23 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
         Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         callback.onPushStarted()
         push(object : KinveyPushCallback {
-            override fun onSuccess(pushResult: KinveyPushResponse) {
+            override fun onSuccess(pushResult: KinveyPushResponse?) {
                 callback.onPushSuccess(pushResult)
                 callback.onPullStarted()
                 this@DataStore.pull(query, pageSize, object : KinveyPullCallback {
 
-                    override fun onSuccess(pullResult: KinveyPullResponse) {
+                    override fun onSuccess(pullResult: KinveyPullResponse?) {
                         callback.onPullSuccess(pullResult)
                         callback.onSuccess(pushResult, pullResult)
                     }
 
-                    override fun onFailure(error: Throwable) {
+                    override fun onFailure(error: Throwable?) {
                         callback.onFailure(error)
-
                     }
                 })
             }
 
-            override fun onFailure(error: Throwable) {
+            override fun onFailure(error: Throwable?) {
                 callback.onFailure(error)
             }
 
@@ -1088,21 +1084,18 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
         }
     }
 
-    private class ThreadedKinveyCachedClientCallback<T> internal constructor(private val callback: KinveyCachedClientCallback<T>) : KinveyCachedClientCallback<T> {
-        internal var handler: KinveyCallbackHandler<T>
-
-
+    private class ThreadedKinveyCachedClientCallback<T>(private val callback: KinveyCachedClientCallback<T>) : KinveyCachedClientCallback<T> {
+        var handler: KinveyCallbackHandler<T>
         init {
             handler = KinveyCallbackHandler()
         }
 
-        override fun onSuccess(result: T) {
+        override fun onSuccess(result: T?) {
             handler.onResult(result, callback)
         }
 
-        override fun onFailure(error: Throwable) {
+        override fun onFailure(error: Throwable?) {
             handler.onFailure(error, callback)
-
         }
     }
 
