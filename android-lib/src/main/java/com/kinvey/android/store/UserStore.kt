@@ -171,7 +171,6 @@ class UserStore {
     }
 
     class Logout(val client: AbstractClient<BaseUser>, callback: KinveyClientCallback<Void>?) : AsyncClientRequest<Void>(callback) {
-
         @Throws(IOException::class)
         override fun executeAsync(): Void? {
             BaseUserStore.logout(client)

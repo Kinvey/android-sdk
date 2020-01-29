@@ -322,7 +322,7 @@ class DeltaCacheTest {
         `when`<KinveyQueryCacheResponse<*>>(mockCacheGet.execute()).thenReturn(mockResponse)
         val spyNetworkManager: NetworkManager<Person> = spy(NetworkManager(Person.DELTA_SET_COLLECTION, Person::class.java, client))
         `when`(spyNetworkManager.queryCacheGetBlocking(query, lastRequestTime))
-                .thenReturn(mockCacheGet as NetworkManager.QueryCacheGet<Person>)
+               .thenReturn(mockCacheGet as NetworkManager.QueryCacheGet<Person>)
 
         val store = testManager?.mockBaseDataStore(client, Person.DELTA_SET_COLLECTION,
                 Person::class.java, StoreType.CACHE, spyNetworkManager)
@@ -559,7 +559,7 @@ class DeltaCacheTest {
         `when`<KinveyQueryCacheResponse<*>>(mockCacheGet.execute()).thenReturn(mockResponse)
         val spyNetworkManager = spy(NetworkManager(Person.DELTA_SET_COLLECTION, Person::class.java, client))
         `when`(spyNetworkManager.queryCacheGetBlocking(query, lastRequestTime))
-                .thenReturn(mockCacheGet as NetworkManager.QueryCacheGet<Person>)
+               .thenReturn(mockCacheGet as NetworkManager.QueryCacheGet<Person>)
 
         val store = testManager?.mockBaseDataStore(client, Person.DELTA_SET_COLLECTION,
                 Person::class.java, StoreType.CACHE, spyNetworkManager)

@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
+import com.google.api.client.http.HttpRequest
 import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.client.json.GenericJson
 import com.kinvey.android.Client
@@ -25,6 +26,7 @@ import com.kinvey.androidTest.util.RealmCacheManagerUtil
 import com.kinvey.androidTest.util.TableNameManagerUtil
 import com.kinvey.java.Constants
 import com.kinvey.java.Query
+import com.kinvey.java.cache.ICache
 import com.kinvey.java.cache.KinveyCachedClientCallback
 import com.kinvey.java.core.KinveyJsonResponseException
 import com.kinvey.java.model.KinveyPullResponse
@@ -32,6 +34,10 @@ import com.kinvey.java.model.KinveyReadResponse
 import com.kinvey.java.query.AbstractQuery.SortOrder
 import com.kinvey.java.store.StoreType
 import com.kinvey.java.sync.dto.SyncRequest.HttpVerb
+import io.realm.DynamicRealm
+import io.realm.RealmObjectSchema
+import io.realm.RealmSchema
+import org.junit.After
 import org.junit.Assert.*
 import org.junit.Ignore
 import org.junit.Test
@@ -41,6 +47,7 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.util.*
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
