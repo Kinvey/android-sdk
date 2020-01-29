@@ -42,7 +42,7 @@ class DeleteIdsRequest<T : GenericJson>(cache: ICache<T>?, networkManager: Netwo
     }
 
     @Throws(IOException::class)
-    override fun deleteNetwork(): NetworkManager<T>.Delete? {
+    override fun deleteNetwork(): NetworkManager.Delete<T>? {
         val q = Query(MongoQueryFilter.MongoQueryFilterBuilder())
         val idsArray = Iterables.toArray(ids, String::class.java)
         q.`in`("_id", idsArray as Array<Any>)

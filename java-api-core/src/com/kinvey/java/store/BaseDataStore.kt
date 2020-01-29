@@ -498,7 +498,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         val batchSize = BATCH_SIZE // batch size for concurrent push requests
         var executor: ExecutorService
         var tasks: MutableList<FutureTask<PullTaskResponse<T>>>
-        var pullRequest: NetworkManager<T>.Get?
+        var pullRequest: NetworkManager.Get<T>?
         var ft: FutureTask<PullTaskResponse<T>>
         cache?.delete(query?.setSkip(0)?.setLimit(0))// To be sure that skip and limit are 0,
         // because in next lines custom skip and limit are set anyway

@@ -38,7 +38,7 @@ class DeleteQueryRequest<T : GenericJson>(cache: ICache<T>?, networkManager: Net
     }
 
     @Throws(IOException::class)
-    override fun deleteNetwork(): NetworkManager<T>.Delete? {
+    override fun deleteNetwork(): NetworkManager.Delete<T>? {
         return networkManager?.deleteBlocking(query)
     }
 

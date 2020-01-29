@@ -17,9 +17,14 @@ package com.kinvey.java
 
 import com.google.api.client.json.GenericJson
 import com.google.api.client.util.Key
+import com.google.common.base.Joiner
 import com.kinvey.java.core.KinveyMockUnitTest
 import com.kinvey.java.core.KinveyMockUnitTest.MockQueryFilter.MockBuilder
 import com.kinvey.java.dto.BaseUser
+import com.kinvey.java.model.AggregateEntity
+import com.kinvey.java.model.AggregateType
+import com.kinvey.java.model.KinveySaveBatchResponse
+import com.kinvey.java.model.SaveMode
 import com.kinvey.java.network.NetworkManager
 import com.kinvey.java.network.NetworkManager.*
 import java.io.IOException
@@ -59,19 +64,187 @@ class NetworkManagerTest : KinveyMockUnitTest<BaseUser>() {
 
     }
 
+    fun testDeltaGetConstructor() {
+        val netManager = NetworkManager(null, Entity::class.java, client)
+        val query = Query()
+        val curItems = listOf(Entity(), Entity())
+        val deltaGet  = DeltaGet(netManager, client, query, Entity::class.java, curItems)
+
+        assertEquals(client, deltaGet.client)
+        assertEquals(netManager, deltaGet.networkManager)
+        assertEquals(query, deltaGet.query)
+        assertEquals(Entity::class.java, deltaGet.myClass)
+        assertEquals(curItems, deltaGet.currentItems)
+    }
+
+    fun testMetadataGetConstructor() {
+        val netManager = NetworkManager(null, Entity::class.java, client)
+        val query = Query()
+        val curItems = listOf(Entity(), Entity())
+        val deltaGet  = DeltaGet(netManager, client, query, Entity::class.java, curItems)
+        val get = MetadataGet(netManager, client, deltaGet)
+
+        assertEquals(client, get.client)
+        assertEquals(netManager, get.netManager)
+        assertEquals(deltaGet, get.getRequest)
+    }
+
+    fun testGetConstructor() {
+        val collection = "Entity"
+        val netManager = NetworkManager(collection, Entity::class.java, client)
+        val query = Query()
+        val curItems = listOf(Entity(), Entity())
+        val  queryString = "queryString"
+        val resolveDepth: Int = 1
+        val retain = true
+        val resolves = arrayOf("res1", "res2")
+        val resolve = Joiner.on(",").join(resolves)
+
+        val deltaGet1 = Get(netManager, client, query, Entity::class.java, resolves, resolveDepth, retain)
+        assertEquals(client, deltaGet1.abstractKinveyClient)
+        assertEquals(collection, deltaGet1.collectionName)
+        assertEquals(resolveDepth.toString(), deltaGet1.resolveDepth)
+        assertEquals(retain.toString(), deltaGet1.retainReferences)
+        assertEquals(resolve, deltaGet1.resolve)
+        assertEquals(Entity::class.java, deltaGet1.requestResponseClass)
+
+        val deltaGet2 = Get(netManager, client, query, Entity::class.java)
+        assertEquals(client, deltaGet2.abstractKinveyClient)
+        assertEquals(Entity::class.java, deltaGet2.requestResponseClass)
+
+        val deltaGet3 = Get(netManager, client, queryString, Entity::class.java)
+        assertEquals(client, deltaGet3.abstractKinveyClient)
+        assertEquals(queryString, deltaGet3.queryFilter)
+        assertEquals(Entity::class.java, deltaGet3.requestResponseClass)
+    }
+
+    fun testQueryCacheGetConstructor() {
+        val collection = "Entity"
+        val netManager = NetworkManager(collection, Entity::class.java, client)
+        val query = Query()
+        val since = "since"
+
+        val queryCacheGet1 = QueryCacheGet(netManager, client, query, Entity::class.java, since)
+        assertEquals(client, queryCacheGet1.abstractKinveyClient)
+        assertEquals(collection, queryCacheGet1.collectionName)
+        assertEquals(since, queryCacheGet1.since)
+    }
+
+    fun testGetEntityConstructor() {
+        val collection = "Entity"
+        val netManager = NetworkManager(collection, Entity::class.java, client)
+        val entityId = "entityId"
+
+        val resolveDepth: Int = 1
+        val retain = true
+        val resolves = arrayOf("res1", "res2")
+        val resolve = Joiner.on(",").join(resolves)
+
+        val getEntity1 = GetEntity(netManager, client, entityId, Entity::class.java)
+        assertEquals(client, getEntity1.abstractKinveyClient)
+        assertEquals(collection, getEntity1.collectionName)
+        assertEquals(entityId, getEntity1.entityID)
+        assertEquals(Entity::class.java, getEntity1.responseClass)
+
+        val queryCacheGet2 = GetEntity(netManager, client, entityId, Entity::class.java, resolves, resolveDepth, retain)
+        assertEquals(client, queryCacheGet2.abstractKinveyClient)
+        assertEquals(collection, queryCacheGet2.collectionName)
+        assertEquals(entityId, getEntity1.entityID)
+        assertEquals(resolveDepth.toString(), queryCacheGet2.resolveDepth)
+        assertEquals(retain.toString(), queryCacheGet2.retainReferences)
+        assertEquals(resolve, queryCacheGet2.resolve)
+    }
+
+    fun testGetCountConstructor() {
+        val collection = "Entity"
+        val netManager = NetworkManager(collection, Entity::class.java, client)
+        val query = Query()
+
+        val getCount1 = GetCount(netManager, client, query)
+        assertEquals(client, getCount1.abstractKinveyClient)
+        assertEquals(collection, getCount1.collectionName)
+        assertEquals(Entity::class.java, getCount1.responseClass)
+    }
+
+    fun testSaveConstructor() {
+        val collection = "Entity"
+        val entity = Entity("title")
+        val entityId = "entityId"
+        val saveMode = SaveMode.POST
+        val netManager = NetworkManager(collection, Entity::class.java, client)
+
+        val save1 = Save(netManager, client, entity, Entity::class.java, entityId, saveMode)
+
+        assertEquals(client, save1.abstractKinveyClient)
+        assertEquals(collection, save1.collectionName)
+        assertEquals(Entity::class.java, save1.responseClass)
+        assertEquals(entityId, save1.entityID)
+        assertEquals(entity, save1.jsonContent)
+        assertEquals(saveMode.name, save1.requestMethod)
+
+    }
+
+    fun testSaveBatchConstructor() {
+        val collection = "Entity"
+        val entityList = listOf(Entity("title"))
+        val saveMode = SaveMode.POST
+
+        val saveBatchResponse = KinveySaveBatchResponse::class.java
+
+        val netManager = NetworkManager(collection, Entity::class.java, client)
+
+        val saveBatch1 = SaveBatch(netManager, client, entityList,
+                saveBatchResponse as Class<KinveySaveBatchResponse<Entity>>, Entity::class.java, saveMode)
+
+        assertEquals(client, saveBatch1.abstractKinveyClient)
+        assertEquals(collection, saveBatch1.collectionName)
+        assertEquals(Entity::class.java, saveBatch1.responseClass)
+        assertEquals(entityList, saveBatch1.jsonContent)
+        assertEquals(saveMode.name, saveBatch1.requestMethod)
+    }
+
+    fun testDeleteConstructor() {
+        val collection = "Entity"
+        val saveMode = SaveMode.POST
+        val entityId = "entityId"
+
+        val netManager = NetworkManager(collection, Entity::class.java, client)
+
+        val delete1 = Delete(netManager, client, entityId)
+
+        assertEquals(client, delete1.abstractKinveyClient)
+        assertEquals(collection, delete1.collectionName)
+        assertEquals(Entity::class.java, delete1.responseClass)
+        assertEquals(saveMode.name, delete1.requestMethod)
+    }
+
+    fun testAggregateConstructor() {
+        val collection = "Entity"
+        val saveMode = SaveMode.POST
+        val entityId = "entityId"
+        val entity = AggregateEntity(null, AggregateType.COUNT, "field", Query(), null)
+        val netManager = NetworkManager(collection, Entity::class.java, client)
+
+        val delete1 = Aggregate(netManager, client, entity, Entity::class.java as Class<Array<Entity>>)
+
+        assertEquals(client, delete1.abstractKinveyClient)
+        assertEquals(collection, delete1.collectionName)
+        assertEquals(Entity::class.java, delete1.responseClass)
+        assertEquals(saveMode.name, delete1.requestMethod)
+    }
+
     fun testNewQuery() {
-        val myQuery = client!!.query()
-        assertEquals(0, myQuery.limit)
-        assertEquals(0, myQuery.skip)
-        assertEquals("", myQuery.sortString)
+        val myQuery = client?.query()
+        assertEquals(0, myQuery?.limit)
+        assertEquals(0, myQuery?.skip)
+        assertEquals("", myQuery?.sortString)
         val expected = LinkedHashMap<String?, Any?>()
-        assertEquals(expected, myQuery.queryFilterMap as LinkedHashMap<String?, Any?>?)
+        assertEquals(expected, myQuery?.queryFilterMap as LinkedHashMap<String?, Any?>?)
     }
 
     // String collectionName, Class<T> myClass, AbstractClient client,KinveyClientRequestInitializer initializer
     fun testAppdataInitialization() {
-        val appData = NetworkManager<Entity>("testCollection", Entity::class.java,
-                client)
+        val appData = NetworkManager<Entity>("testCollection", Entity::class.java, client)
         assertEquals("testCollection", appData.collectionName)
         assertEquals(Entity::class.java, appData.currentClass)
     }

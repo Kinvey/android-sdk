@@ -15,6 +15,7 @@
  */
 package com.kinvey.android.network
 
+import com.google.api.client.json.GenericJson
 import com.kinvey.android.AndroidMimeTypeFinder
 import com.kinvey.android.AsyncClientRequest
 import com.kinvey.android.Client
@@ -70,7 +71,7 @@ open class AsyncLinkedNetworkManager<T : LinkedGenericJson>(collectionName: Stri
      */
     fun getEntity(entityID: String?, callback: KinveyClientCallback<T>?,
                   download: DownloaderProgressListener?, storeType: StoreType = StoreType.SYNC) {
-        GetEntity(entityID, callback, download, null, storeType).execute()
+        GetEntity(this, entityID, callback, download, null, storeType).execute()
     }
 
     /**
@@ -93,7 +94,7 @@ open class AsyncLinkedNetworkManager<T : LinkedGenericJson>(collectionName: Stri
      */
     operator fun get(query: Query?, callback: KinveyListCallback<T>?,
                      download: DownloaderProgressListener?, storeType: StoreType = StoreType.SYNC) {
-        Get(query, callback, download, null, null, 0, false, storeType).execute()
+        Get(this, query, callback, download, null, null, 0, false, storeType).execute()
     }
 
     /**
@@ -117,7 +118,7 @@ open class AsyncLinkedNetworkManager<T : LinkedGenericJson>(collectionName: Stri
     operator fun get(query: Query?, callback: KinveyListCallback<T>?,
                      download: DownloaderProgressListener?, resolves: Array<String?>?,
                      resolve_depth: Int, retain: Boolean, storeType: StoreType = StoreType.SYNC) {
-        Get(query, callback, download, null, resolves, resolve_depth, retain, storeType).execute()
+        Get(this, query, callback, download, null, resolves, resolve_depth, retain, storeType).execute()
     }
 
     /**
@@ -138,7 +139,7 @@ open class AsyncLinkedNetworkManager<T : LinkedGenericJson>(collectionName: Stri
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
     operator fun get(callback: KinveyListCallback<T>?, download: DownloaderProgressListener?, storeType: StoreType = StoreType.SYNC) {
-        Get(Query(), callback, download, null, null, 0, false, storeType).execute()
+        Get(this, Query(), callback, download, null, null, 0, false, storeType).execute()
     }
 
     /**
@@ -155,39 +156,42 @@ open class AsyncLinkedNetworkManager<T : LinkedGenericJson>(collectionName: Stri
      * @throws java.io.IOException - if there is an issue executing the client requests
      */
     fun save(entity: T, callback: KinveyClientCallback<T>?, upload: UploaderProgressListener?, storeType: StoreType = StoreType.SYNC) {
-        Save(entity, callback, upload, null, storeType).execute()
+        Save(this, entity, callback, upload, null, storeType).execute()
     }
 
-    private inner class Get(val query: Query?,
-                            callback: KinveyListCallback<T>?,
-                            var progress: DownloaderProgressListener?,
-                            var attachments: Array<String>?,
-                            var resolves: Array<String?>?,
-                            var resolve_depth: Int,
-                            var retain: Boolean, val storeType: StoreType = StoreType.SYNC) : AsyncClientRequest<List<T>>(callback) {
+    class Get<T: LinkedGenericJson>(val networkManager: AsyncLinkedNetworkManager<T>?, val query: Query?,
+              callback: KinveyListCallback<T>?,
+              var progress: DownloaderProgressListener?,
+              var attachments: Array<String>?,
+              var resolves: Array<String?>?,
+              var resolve_depth: Int,
+              var retain: Boolean, val storeType: StoreType = StoreType.SYNC) : AsyncClientRequest<List<T>>(callback) {
+
         @Throws(IOException::class)
         override fun executeAsync(): List<T>? {
-            return this@AsyncLinkedNetworkManager.getBlocking(this.query, progress, attachments,
-                    resolves, resolve_depth, retain, storeType).execute()
+            return networkManager?.getBlocking(this.query, progress, attachments,
+                   resolves, resolve_depth, retain, storeType)?.execute()
         }
     }
 
-    private inner class GetEntity(val entityID: String?, callback: KinveyClientCallback<T>?,
-                                  val progress: DownloaderProgressListener?,
-                                  val attachments: Array<String>?, val storeType: StoreType = StoreType.SYNC) : AsyncClientRequest<T>(callback) {
+    class GetEntity<T: LinkedGenericJson>(val networkManager: AsyncLinkedNetworkManager<T>?,
+                    val entityID: String?, callback: KinveyClientCallback<T>?,
+                    val progress: DownloaderProgressListener?,
+                    val attachments: Array<String>?, val storeType: StoreType = StoreType.SYNC) : AsyncClientRequest<T>(callback) {
         @Throws(IOException::class)
         override fun executeAsync(): T? {
-            return this@AsyncLinkedNetworkManager.getEntityBlocking(entityID ?: "",
-                    progress, attachments, storeType).execute()
+            return networkManager?.getEntityBlocking(entityID ?: "",
+                   progress, attachments, storeType)?.execute()
         }
     }
 
-    private inner class Save(val entity: T, callback: KinveyClientCallback<T>?,
-                             val progress: UploaderProgressListener?,
-                             val attachments: Array<String?>?, val storeType: StoreType = StoreType.SYNC) : AsyncClientRequest<T>(callback) {
+    class Save<T: LinkedGenericJson>(val networkManager: AsyncLinkedNetworkManager<T>?,
+               val entity: T, callback: KinveyClientCallback<T>?,
+               val progress: UploaderProgressListener?,
+               val attachments: Array<String?>?, val storeType: StoreType = StoreType.SYNC) : AsyncClientRequest<T>(callback) {
         @Throws(IOException::class)
         override fun executeAsync(): T? {
-            return this@AsyncLinkedNetworkManager.saveBlocking(entity, progress, attachments, storeType).execute()
+            return networkManager?.saveBlocking(entity, progress, attachments, storeType)?.execute()
         }
     }
 

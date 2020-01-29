@@ -21,7 +21,7 @@ class MockMultiInsertNetworkManager<T : GenericJson>
     private val multiPostCountVal = AtomicInteger(0)
 
     @Throws(IOException::class)
-    override fun saveBlocking(entity: T?): Save? {
+    override fun saveBlocking(entity: T?): Save<T>? {
         val result = super.saveBlocking(entity)
         if (HttpVerb.POST.toString() == result?.requestMethod?.toUpperCase()) {
             useSingleSaveVal = true
@@ -30,7 +30,7 @@ class MockMultiInsertNetworkManager<T : GenericJson>
     }
 
     @Throws(IOException::class)
-    override fun saveBatchBlocking(list: List<T>?): SaveBatch? {
+    override fun saveBatchBlocking(list: List<T>?): SaveBatch<T>? {
         useMultiInsertSaveVal = true
         multiPostCountVal.incrementAndGet()
         return super.saveBatchBlocking(list)

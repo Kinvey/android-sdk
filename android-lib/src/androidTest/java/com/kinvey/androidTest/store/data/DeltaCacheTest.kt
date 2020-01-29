@@ -10,15 +10,10 @@ import com.kinvey.android.model.User
 import com.kinvey.android.store.DataStore
 import com.kinvey.android.store.DataStore.Companion.collection
 import com.kinvey.androidTest.TestManager
-import com.kinvey.androidTest.TestManager.*
 import com.kinvey.androidTest.TestManager.Companion.PASSWORD
 import com.kinvey.androidTest.TestManager.Companion.TEST_USERNAME
 import com.kinvey.androidTest.TestManager.Companion.TEST_USERNAME_2
 import com.kinvey.androidTest.TestManager.Companion.USERNAME
-import com.kinvey.androidTest.callback.CustomKinveyPullCallback
-import com.kinvey.androidTest.callback.CustomKinveySyncCallback
-import com.kinvey.androidTest.callback.DefaultKinveyClientCallback
-import com.kinvey.androidTest.callback.DefaultKinveyDeleteCallback
 import com.kinvey.androidTest.model.Person
 import com.kinvey.java.Constants
 import com.kinvey.java.Query
@@ -34,12 +29,9 @@ import com.kinvey.java.store.StoreType
 import junit.framework.Assert.*
 import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.*
-import org.mockito.junit.MockitoJUnit
-import org.mockito.junit.MockitoRule
 import java.io.IOException
 import java.lang.reflect.InvocationTargetException
 import java.util.*
@@ -132,7 +124,7 @@ class DeltaCacheTest {
 
         `when`<KinveyQueryCacheResponse<*>>(mockCacheGet.execute()).thenReturn(mockResponse)
         val spyNetworkManager = spy(NetworkManager(Person.DELTA_SET_COLLECTION, Person::class.java, client))
-        `when`(spyNetworkManager.queryCacheGetBlocking(query, lastRequestTime))?.thenReturn(mockCacheGet as NetworkManager<Person>.QueryCacheGet?)
+        `when`(spyNetworkManager.queryCacheGetBlocking(query, lastRequestTime))?.thenReturn(mockCacheGet as NetworkManager.QueryCacheGet<Person>?)
 
         val store = testManager?.mockBaseDataStore(client, Person.DELTA_SET_COLLECTION, Person::class.java, StoreType.SYNC, spyNetworkManager)
         store?.isDeltaSetCachingEnabled = true
@@ -322,7 +314,7 @@ class DeltaCacheTest {
         `when`<KinveyQueryCacheResponse<*>>(mockCacheGet.execute()).thenReturn(mockResponse)
         val spyNetworkManager: NetworkManager<Person> = spy(NetworkManager(Person.DELTA_SET_COLLECTION, Person::class.java, client))
         `when`(spyNetworkManager.queryCacheGetBlocking(query, lastRequestTime))
-                .thenReturn(mockCacheGet as NetworkManager<Person>.QueryCacheGet)
+               .thenReturn(mockCacheGet as NetworkManager.QueryCacheGet<Person>)
 
         val store = testManager?.mockBaseDataStore(client, Person.DELTA_SET_COLLECTION,
                 Person::class.java, StoreType.CACHE, spyNetworkManager)
@@ -559,7 +551,7 @@ class DeltaCacheTest {
         `when`<KinveyQueryCacheResponse<*>>(mockCacheGet.execute()).thenReturn(mockResponse)
         val spyNetworkManager = spy(NetworkManager(Person.DELTA_SET_COLLECTION, Person::class.java, client))
         `when`(spyNetworkManager.queryCacheGetBlocking(query, lastRequestTime))
-                .thenReturn(mockCacheGet as NetworkManager<Person>.QueryCacheGet)
+               .thenReturn(mockCacheGet as NetworkManager.QueryCacheGet<Person>)
 
         val store = testManager?.mockBaseDataStore(client, Person.DELTA_SET_COLLECTION,
                 Person::class.java, StoreType.CACHE, spyNetworkManager)
@@ -759,7 +751,7 @@ class DeltaCacheTest {
         `when`(exception.details).thenReturn(jsonError)
         `when`(mockCacheGet.execute()).thenThrow(exception)
         val spyNetworkManager = spy(NetworkManager(Person.DELTA_SET_COLLECTION, Person::class.java, client))
-        `when`(spyNetworkManager.queryCacheGetBlocking(query, lastRequestTime)).thenReturn(mockCacheGet as NetworkManager<Person>.QueryCacheGet)
+        `when`(spyNetworkManager.queryCacheGetBlocking(query, lastRequestTime)).thenReturn(mockCacheGet as NetworkManager.QueryCacheGet<Person>)
 
         val store = testManager?.mockBaseDataStore(client, Person.DELTA_SET_COLLECTION, Person::class.java, StoreType.SYNC, spyNetworkManager)
         store?.isDeltaSetCachingEnabled = true

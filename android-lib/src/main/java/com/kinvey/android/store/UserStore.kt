@@ -52,30 +52,30 @@ class UserStore {
     }
 
 
-    private class Login<T : BaseUser> : AsyncClientRequest<T> {
+    class Login<T : BaseUser> : AsyncClientRequest<T> {
 
-        internal lateinit var username: String
-        internal lateinit var password: String
-        internal lateinit var accessToken: String
-        internal lateinit var refreshToken: String
-        internal lateinit var accessSecret: String
-        internal lateinit var consumerKey: String
-        internal lateinit var consumerSecret: String
-        internal lateinit var credential: Credential
-        internal var type: UserStoreRequestManager.LoginType
-        internal var client: AbstractClient<T>
+        lateinit var username: String
+        lateinit var password: String
+        lateinit var accessToken: String
+        lateinit var refreshToken: String
+        lateinit var accessSecret: String
+        lateinit var consumerKey: String
+        lateinit var consumerSecret: String
+        lateinit var credential: Credential
+        var type: UserStoreRequestManager.LoginType
+        var client: AbstractClient<T>
 
         //Salesforce...
-        internal lateinit var id: String
-        internal lateinit var client_id: String
+        lateinit var id: String
+        lateinit var clientId: String
 
-        internal constructor(client: AbstractClient<T>, callback: KinveyClientCallback<T>) : super(callback) {
+        constructor(client: AbstractClient<T>, callback: KinveyClientCallback<T>?) : super(callback) {
 
             this.client = client
             this.type = UserStoreRequestManager.LoginType.IMPLICIT
         }
 
-        internal constructor(username: String, password: String, client: AbstractClient<T>, callback: KinveyClientCallback<T>) : super(callback) {
+        constructor(username: String, password: String, client: AbstractClient<T>, callback: KinveyClientCallback<T>?) : super(callback) {
             this.username = username
             this.password = password
 
@@ -83,14 +83,14 @@ class UserStore {
             this.type = UserStoreRequestManager.LoginType.KINVEY
         }
 
-        internal constructor(accessToken: String, type: UserStoreRequestManager.LoginType, client: AbstractClient<T>, callback: KinveyClientCallback<T>) : super(callback) {
+        constructor(accessToken: String, type: UserStoreRequestManager.LoginType, client: AbstractClient<T>, callback: KinveyClientCallback<T>?) : super(callback) {
             this.accessToken = accessToken
             this.type = type
 
             this.client = client
         }
 
-        internal constructor(accessToken: String, refreshToken: String, type: UserStoreRequestManager.LoginType, client: AbstractClient<T>, callback: KinveyClientCallback<T>) : super(callback) {
+        constructor(accessToken: String, refreshToken: String, type: UserStoreRequestManager.LoginType, client: AbstractClient<T>, callback: KinveyClientCallback<T>?) : super(callback) {
             this.accessToken = accessToken
             this.refreshToken = refreshToken
             this.type = type
@@ -98,8 +98,8 @@ class UserStore {
             this.client = client
         }
 
-        internal constructor(accessToken: String, accessSecret: String, consumerKey: String, consumerSecret: String, client: AbstractClient<T>,
-                            type: UserStoreRequestManager.LoginType, callback: KinveyClientCallback<T>) : super(callback) {
+        constructor(accessToken: String, accessSecret: String, consumerKey: String, consumerSecret: String, client: AbstractClient<T>,
+                            type: UserStoreRequestManager.LoginType, callback: KinveyClientCallback<T>?) : super(callback) {
             this.accessToken = accessToken
             this.accessSecret = accessSecret
             this.consumerKey = consumerKey
@@ -109,17 +109,17 @@ class UserStore {
         }
 
         //TODO edwardf method signature is ambiguous with above method if this one also took a login type, so hardcoded to salesforce.
-        internal constructor(accessToken: String, clientId: String, refresh: String, id: String, client: AbstractClient<T>, callback: KinveyClientCallback<T>) : super(callback) {
+        constructor(accessToken: String, clientId: String, refresh: String, id: String, client: AbstractClient<T>, callback: KinveyClientCallback<T>?) : super(callback) {
             this.accessToken = accessToken
             this.refreshToken = refresh
-            this.client_id = clientId
+            this.clientId = clientId
             this.id = id
 
             this.client = client
             this.type = UserStoreRequestManager.LoginType.SALESFORCE
         }
 
-        internal constructor(credential: Credential, client: AbstractClient<T>, callback: KinveyClientCallback<T>) : super(callback) {
+        constructor(credential: Credential, client: AbstractClient<T>, callback: KinveyClientCallback<T>?) : super(callback) {
             this.credential = credential
 
             this.client = client
@@ -136,7 +136,7 @@ class UserStore {
                 UserStoreRequestManager.LoginType.TWITTER -> return BaseUserStore.loginTwitter(accessToken, accessSecret, consumerKey, consumerSecret, client)
                 UserStoreRequestManager.LoginType.LINKED_IN -> return BaseUserStore.loginLinkedIn(accessToken, accessSecret, consumerKey, consumerSecret, client)
                 UserStoreRequestManager.LoginType.AUTH_LINK -> return BaseUserStore.loginAuthLink(accessToken, refreshToken, client)
-                UserStoreRequestManager.LoginType.SALESFORCE -> return BaseUserStore.loginSalesForce(accessToken, client_id, refreshToken, id, client)
+                UserStoreRequestManager.LoginType.SALESFORCE -> return BaseUserStore.loginSalesForce(accessToken, clientId, refreshToken, id, client)
                 UserStoreRequestManager.LoginType.MOBILE_IDENTITY -> return BaseUserStore.loginMobileIdentity(accessToken, client)
                 UserStoreRequestManager.LoginType.CREDENTIALSTORE -> return BaseUserStore.login(credential, client)
                 else -> {
@@ -147,7 +147,8 @@ class UserStore {
         }
     }
 
-    private class Create<T : User> internal constructor(internal var username: String, internal var password: String, private val user: T?, private val client: AbstractClient<T>, callback: KinveyClientCallback<T>) : AsyncClientRequest<T>(callback) {
+    class Create<T : User>(internal var username: String, internal var password: String,
+                           private val user: T?, val client: AbstractClient<T>, callback: KinveyClientCallback<T>?) : AsyncClientRequest<T>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): T? {
@@ -159,7 +160,8 @@ class UserStore {
         }
     }
 
-    private class Delete internal constructor(internal var hardDelete: Boolean, private val client: AbstractClient<BaseUser>, callback: KinveyUserDeleteCallback) : AsyncClientRequest<Void>(callback) {
+    class Delete(var hardDelete: Boolean, val client: AbstractClient<BaseUser>,
+                 callback: KinveyUserDeleteCallback?) : AsyncClientRequest<Void>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): Void? {
@@ -168,8 +170,7 @@ class UserStore {
         }
     }
 
-    private class Logout internal constructor(private val client: AbstractClient<BaseUser>, callback: KinveyClientCallback<Void>) : AsyncClientRequest<Void>(callback) {
-
+    class Logout(val client: AbstractClient<BaseUser>, callback: KinveyClientCallback<Void>?) : AsyncClientRequest<Void>(callback) {
         @Throws(IOException::class)
         override fun executeAsync(): Void? {
             BaseUserStore.logout(client)
@@ -177,7 +178,8 @@ class UserStore {
         }
     }
 
-    private class PostForAccessToken<T : User>(private val client: AbstractClient<T>, private val redirectURI: String?, private val token: String, private val clientId: String?, callback: KinveyClientCallback<T>) : AsyncClientRequest<T>(callback) {
+    class PostForAccessToken<T : User>(val client: AbstractClient<T>, val redirectURI: String?,
+                                       val token: String, val clientId: String?, callback: KinveyClientCallback<T>?) : AsyncClientRequest<T>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): T? {
@@ -186,11 +188,9 @@ class UserStore {
             val result = requestManager.getMICToken(token, clientId).execute()
             var ret: T? = null
             result?.let { res ->
-                ret = BaseUserStore.loginMobileIdentity(res["access_token"].toString(), client)
+                ret = BaseUserStore.loginMobileIdentity(res[ACCESS_TOKEN].toString(), client)
                 val currentCred = client.store?.load(client.activeUser?.id)
-                if (res[REFRESH_TOKEN] != null) {
-                    currentCred?.refreshToken = res["refresh_token"]?.toString()
-                }
+                currentCred?.refreshToken = res[REFRESH_TOKEN]?.toString()
                 currentCred?.clientId = clientId
                 client.store?.store(client.activeUser?.id ?: "", currentCred)
             }
@@ -198,7 +198,9 @@ class UserStore {
         }
     }
 
-    private class PostForOAuthToken<T : User>(private val client: AbstractClient<T>, private val clientId: String?, private val redirectURI: String?, internal var username: String, internal var password: String, callback: KinveyUserCallback<T>) : AsyncClientRequest<T>(callback) {
+    class PostForOAuthToken<T : User>(val client: AbstractClient<T>, val clientId: String?,
+                                      val redirectURI: String?, val username: String,
+                                      val password: String, callback: KinveyUserCallback<T>?) : AsyncClientRequest<T>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): T? {
@@ -209,9 +211,7 @@ class UserStore {
             result?.let { res ->
                 ret = BaseUserStore.loginMobileIdentity(res[ACCESS_TOKEN]?.toString() ?: "", client)
                 val currentCred = client.store?.load(client.activeUser?.id)
-                if (result[REFRESH_TOKEN] != null) {
-                    currentCred?.refreshToken = result[REFRESH_TOKEN]?.toString()
-                }
+                currentCred?.refreshToken = result[REFRESH_TOKEN]?.toString()
                 currentCred?.clientId = clientId
                 client.store?.store(client.activeUser?.id ?: "", currentCred)
             }
@@ -219,16 +219,16 @@ class UserStore {
         }
     }
 
-    private class Retrieve<T : User> : AsyncClientRequest<T> {
+    class Retrieve<T : User> : AsyncClientRequest<T> {
 
-        private var resolves: Array<String>? = null
-        private val client: AbstractClient<T>
+        var resolves: Array<String>? = null
+        val client: AbstractClient<T>
 
-        internal constructor(client: AbstractClient<T>, callback: KinveyClientCallback<T>) : super(callback) {
+        constructor(client: AbstractClient<T>, callback: KinveyClientCallback<T>?) : super(callback) {
             this.client = client
         }
 
-        internal constructor(resolves: Array<String>, client: AbstractClient<T>, callback: KinveyClientCallback<T>) : super(callback) {
+        constructor(resolves: Array<String>, client: AbstractClient<T>, callback: KinveyClientCallback<T>?) : super(callback) {
             this.resolves = resolves
             this.client = client
         }
@@ -243,18 +243,18 @@ class UserStore {
         }
     }
 
-    private class RetrieveUserList<T : BaseUser> : AsyncClientRequest<List<T>> {
+    class RetrieveUserList<T : BaseUser> : AsyncClientRequest<List<T>> {
 
-        private var query: Query? = null
-        private val client: AbstractClient<T>
-        private var resolves: Array<String>? = null
+        var query: Query? = null
+        val client: AbstractClient<T>
+        var resolves: Array<String>? = null
 
-        internal constructor(query: Query, client: AbstractClient<T>, callback: KinveyListCallback<T>) : super(callback) {
+        constructor(query: Query, client: AbstractClient<T>, callback: KinveyListCallback<T>?) : super(callback) {
             this.query = query
             this.client = client
         }
 
-        internal constructor(query: Query, resolves: Array<String>, client: AbstractClient<T>, callback: KinveyListCallback<T>) : super(callback) {
+        constructor(query: Query, resolves: Array<String>, client: AbstractClient<T>, callback: KinveyListCallback<T>?) : super(callback) {
             this.query = query
             this.resolves = resolves
             this.client = client
@@ -270,10 +270,11 @@ class UserStore {
         }
     }
 
-    private class RetrieveUserArray<T : User> internal constructor(query: Query, resolves: Array<String>, private val client: AbstractClient<T>, callback: KinveyClientCallback<Array<T>>) : AsyncClientRequest<Array<T>>(callback) {
+    class RetrieveUserArray<T : User> (query: Query, resolves: Array<String>,
+                                       val client: AbstractClient<T>, callback: KinveyClientCallback<Array<T>>?) : AsyncClientRequest<Array<T>>(callback) {
 
-        private var query: Query? = null
-        private var resolves: Array<String>? = null
+        var query: Query? = null
+        var resolves: Array<String>? = null
 
         init {
             this.query = query
@@ -282,12 +283,13 @@ class UserStore {
 
         @Throws(IOException::class)
         override fun executeAsync(): Array<T> {
-            val users =  BaseUserStore.retrieve(query!!, resolves!!, client).map { it as User }
+            val users = BaseUserStore.retrieve(query!!, resolves!!, client).map { it as User }
             return users.toTypedArray() as Array<T>
         }
     }
 
-    private class RetrieveMetaData<T : User> internal constructor(private val client: AbstractClient<T>, callback: KinveyClientCallback<T>) : AsyncClientRequest<T>(callback) {
+    class RetrieveMetaData<T : User>(val client: AbstractClient<T>,
+                                     callback: KinveyClientCallback<T>?) : AsyncClientRequest<T>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): T? {
@@ -295,10 +297,10 @@ class UserStore {
         }
     }
 
-    private class Update<T : User> internal constructor(client: AbstractClient<T>, callback: KinveyClientCallback<T>) : AsyncClientRequest<T>(callback) {
+    class Update<T : User>(client: AbstractClient<T>,
+                                   callback: KinveyClientCallback<T>?) : AsyncClientRequest<T>(callback) {
 
-        internal var client: AbstractClient<T>? = null
-
+        var client: AbstractClient<T>? = null
 
         init {
             this.client = client
@@ -311,8 +313,9 @@ class UserStore {
         }
     }
 
-    private class ChangePassword internal constructor(private val password: String, client: AbstractClient<*>, callback: KinveyClientCallback<Void>) : AsyncClientRequest<Void>(callback) {
-        internal var client: AbstractClient<*>? = null
+    class ChangePassword(val password: String, client: AbstractClient<*>,
+                         callback: KinveyClientCallback<Void>?) : AsyncClientRequest<Void>(callback) {
+        var client: AbstractClient<*>? = null
 
         init {
             this.client = client
@@ -325,7 +328,8 @@ class UserStore {
         }
     }
 
-    private class ResetPassword internal constructor(internal var usernameOrEmail: String, private val client: AbstractClient<*>, callback: KinveyClientCallback<Void>) : AsyncClientRequest<Void>(callback) {
+    class ResetPassword(var usernameOrEmail: String, val client: AbstractClient<*>,
+                        callback: KinveyClientCallback<Void>?) : AsyncClientRequest<Void>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): Void? {
@@ -334,7 +338,8 @@ class UserStore {
         }
     }
 
-    private class ExistsUser internal constructor(internal var username: String, private val client: AbstractClient<*>, callback: KinveyClientCallback<Boolean>) : AsyncClientRequest<Boolean>(callback) {
+    class ExistsUser(var username: String, val client: AbstractClient<*>,
+                     callback: KinveyClientCallback<Boolean>?) : AsyncClientRequest<Boolean>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): Boolean? {
@@ -342,15 +347,17 @@ class UserStore {
         }
     }
 
-    private class GetUser<T : User> internal constructor(internal var userId: String, private val client: AbstractClient<*>, callback: KinveyClientCallback<T>) : AsyncClientRequest<T>(callback) {
+    class GetUser<T : User>(var userId: String, val client: AbstractClient<*>,
+                            callback: KinveyClientCallback<T>?) : AsyncClientRequest<T>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): T {
-            return BaseUserStore.get(userId, client) as T
+            return BaseUserStore[userId, client] as T
         }
     }
 
-    private class EmailVerification internal constructor(private val client: AbstractClient<*>, callback: KinveyClientCallback<Void>) : AsyncClientRequest<Void>(callback) {
+    class EmailVerification(val client: AbstractClient<*>,
+                            callback: KinveyClientCallback<Void>?) : AsyncClientRequest<Void>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): Void? {
@@ -359,7 +366,8 @@ class UserStore {
         }
     }
 
-    private class ForgotUsername internal constructor(private val client: AbstractClient<*>, private val email: String, callback: KinveyClientCallback<Void>) : AsyncClientRequest<Void>(callback) {
+    class ForgotUsername(val client: AbstractClient<*>, val email: String,
+                          callback: KinveyClientCallback<Void>?) : AsyncClientRequest<Void>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): Void? {
@@ -368,7 +376,8 @@ class UserStore {
         }
     }
 
-    private inner class LoginKinveyAuth<T : User> internal constructor(private val userID: String, private val authToken: String, private val client: AbstractClient<T>, callback: KinveyClientCallback<T>) : AsyncClientRequest<T>(callback) {
+    class LoginKinveyAuth<T : User>(val userID: String, val authToken: String,
+                                    val client: AbstractClient<T>, callback: KinveyClientCallback<T>?) : AsyncClientRequest<T>(callback) {
 
         @Throws(IOException::class)
         override fun executeAsync(): T? {
