@@ -9,12 +9,14 @@ import com.kinvey.android.AndroidMimeTypeFinder
 import com.kinvey.android.Client
 import com.kinvey.android.Client.Builder
 import com.kinvey.android.callback.KinveyDeleteCallback
+import com.kinvey.android.callback.KinveyListCallback
 import com.kinvey.android.model.User
 import com.kinvey.android.network.AsyncLinkedNetworkManager
 import com.kinvey.android.store.UserStore.Companion.login
 import com.kinvey.androidTest.LooperThread
 import com.kinvey.androidTest.TestManager.Companion.PASSWORD
 import com.kinvey.androidTest.TestManager.Companion.USERNAME
+import com.kinvey.androidTest.store.datastore.BaseDataStoreTest
 import com.kinvey.java.Query
 import com.kinvey.java.core.*
 import com.kinvey.java.linkedResources.LinkedFile
@@ -90,6 +92,25 @@ class AsyncLinkedNetworkManagerTest {
             latch.countDown()
         }
 
+    }
+
+    private class DefaultKinveyListCallback<T>(private val latch: CountDownLatch) : KinveyListCallback<T> {
+        var result: List<T>? = null
+        var error: Throwable? = null
+
+        override fun onSuccess(result: List<T>?) {
+            this.result = result
+            finish()
+        }
+
+        override fun onFailure(error: Throwable?) {
+            this.error = error
+            finish()
+        }
+
+        internal fun finish() {
+            latch.countDown()
+        }
     }
 
     @Test
@@ -282,6 +303,61 @@ class AsyncLinkedNetworkManagerTest {
     }
 
     @Throws(InterruptedException::class)
+    private fun <T : LinkedGenericJson> get(query: Query?,
+                                                  netMan: AsyncLinkedNetworkManager<T>, storeType: StoreType): DefaultKinveyListCallback<*> {
+        val latch = CountDownLatch(1)
+        val callback: DefaultKinveyListCallback<T> = DefaultKinveyListCallback<T>(latch)
+        val looperThread = LooperThread(Runnable {
+            netMan.get(query, callback, object : DownloaderProgressListener {
+                @Throws(IOException::class)
+                override fun progressChanged(downloader: MediaHttpDownloader?) {
+                }
+            }, storeType)
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
+    private fun <T : LinkedGenericJson> getMoreParam(query: Query?,
+                                            netMan: AsyncLinkedNetworkManager<T>, resolves: Array<String?>?,
+                                                     resolve_depth: Int, retain: Boolean, storeType: StoreType): DefaultKinveyListCallback<*> {
+        val latch = CountDownLatch(1)
+        val callback: DefaultKinveyListCallback<T> = DefaultKinveyListCallback<T>(latch)
+        val looperThread = LooperThread(Runnable {
+            netMan.get(query, callback, object : DownloaderProgressListener {
+                @Throws(IOException::class)
+                override fun progressChanged(downloader: MediaHttpDownloader?) {
+                }
+            }, resolves, resolve_depth, retain, storeType)
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
+    private fun <T : LinkedGenericJson> getAll(netMan: AsyncLinkedNetworkManager<T>,
+                                               storeType: StoreType): DefaultKinveyListCallback<*> {
+        val latch = CountDownLatch(1)
+        val callback: DefaultKinveyListCallback<T> = DefaultKinveyListCallback<T>(latch)
+        val looperThread = LooperThread(Runnable {
+            netMan.get(callback, object : DownloaderProgressListener {
+                @Throws(IOException::class)
+                override fun progressChanged(downloader: MediaHttpDownloader?) {
+                }
+            }, storeType)
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
     private fun <T : LinkedGenericJson> save(entity: T, netMan: AsyncLinkedNetworkManager<T>, storeType: StoreType): DefaultKinveyClientCallback<*> {
         val latch = CountDownLatch(1)
         val callback: DefaultKinveyClientCallback<T> = DefaultKinveyClientCallback<T>(latch)
@@ -300,7 +376,7 @@ class AsyncLinkedNetworkManagerTest {
 
     @Test
     @Throws(InterruptedException::class)
-    fun testGetEntity() {
+    fun testSaveEntity() {
         val linkedNetworkManager = AsyncLinkedNetworkManager(LinkedPerson.COLLECTION, LinkedPerson::class.java, client)
         assertNotNull(linkedNetworkManager)
         clearBackend(linkedNetworkManager)
@@ -310,9 +386,24 @@ class AsyncLinkedNetworkManagerTest {
         val file = LinkedFile()
         file.id = "ba14f983-9391-43b7-b7b6-337b7e41cc37"
         file.fileName = "test.xml"
-
         file.input = ByteArrayInputStream("123456789".toByteArray())
         person.putFile("attachment", file)
+        val saveCallback = save(person, linkedNetworkManager, StoreType.NETWORK)
+        assertNotNull(saveCallback)
+        assertNull(saveCallback.error)
+        val result = saveCallback.result as LinkedPerson
+        assertNotNull(result)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testGetEntity() {
+        val linkedNetworkManager = AsyncLinkedNetworkManager(LinkedPerson.COLLECTION, LinkedPerson::class.java, client)
+        assertNotNull(linkedNetworkManager)
+        clearBackend(linkedNetworkManager)
+        val entityId = "testId"
+        val person = LinkedPerson()
+        person.id = entityId
         val saveCallback = save(person, linkedNetworkManager, StoreType.NETWORK)
         assertNotNull(saveCallback)
         assertNull(saveCallback.error)
@@ -322,5 +413,77 @@ class AsyncLinkedNetworkManagerTest {
         assertNotNull(getCallback)
         assertNull(getCallback.error)
         assertNotNull(getCallback.result)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testGet() {
+        val linkedNetworkManager = AsyncLinkedNetworkManager(LinkedPerson.COLLECTION, LinkedPerson::class.java, client)
+        assertNotNull(linkedNetworkManager)
+        clearBackend(linkedNetworkManager)
+        val entityId = "testId"
+        val userName = "user"
+        val person = LinkedPerson()
+        person.id = entityId
+        person.username = userName
+        val saveCallback = save(person, linkedNetworkManager, StoreType.NETWORK)
+        assertNotNull(saveCallback)
+        assertNull(saveCallback.error)
+        val result = saveCallback.result as LinkedPerson
+        assertNotNull(result)
+        val entitySecId = "testSecId"
+        val personSec = LinkedPerson()
+        personSec.id = entitySecId
+        personSec.username = userName
+        val saveCallbackSec = save(personSec, linkedNetworkManager, StoreType.NETWORK)
+        assertNotNull(saveCallbackSec)
+        assertNull(saveCallbackSec.error)
+        val resultSec = saveCallbackSec.result as LinkedPerson
+        assertNotNull(resultSec)
+        var query = client?.query()
+        query = query?.equals("username", userName)
+        val getCallback = get(query, linkedNetworkManager, StoreType.NETWORK)
+        assertNotNull(getCallback)
+        assertNull(getCallback.error)
+        assertNotNull(getCallback.result)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testGetAll() {
+        val linkedNetworkManager = AsyncLinkedNetworkManager(LinkedPerson.COLLECTION, LinkedPerson::class.java, client)
+        assertNotNull(linkedNetworkManager)
+        clearBackend(linkedNetworkManager)
+        val entityId = "testId"
+        val userName = "user"
+        val person = LinkedPerson()
+        person.id = entityId
+        person.username = userName
+        val saveCallback = save(person, linkedNetworkManager, StoreType.NETWORK)
+        assertNotNull(saveCallback)
+        assertNull(saveCallback.error)
+        val result = saveCallback.result as LinkedPerson
+        assertNotNull(result)
+        val entitySecId = "testSecId"
+        val personSec = LinkedPerson()
+        personSec.id = entitySecId
+        val saveCallbackSec = save(personSec, linkedNetworkManager, StoreType.NETWORK)
+        assertNotNull(saveCallbackSec)
+        assertNull(saveCallbackSec.error)
+        val resultSec = saveCallbackSec.result as LinkedPerson
+        assertNotNull(resultSec)
+        var query = client?.query()
+        query = query?.equals("username", userName)
+        val getCallbackMoreParam = getMoreParam(query, linkedNetworkManager, null,
+                0, false, StoreType.NETWORK)
+        assertNotNull(getCallbackMoreParam)
+        assertNull(getCallbackMoreParam.error)
+        assertNotNull(getCallbackMoreParam.result)
+        assertEquals(getCallbackMoreParam.result?.size, 1)
+        val getCallbackAll = getAll(linkedNetworkManager, StoreType.NETWORK)
+        assertNotNull(getCallbackAll)
+        assertNull(getCallbackAll.error)
+        assertNotNull(getCallbackAll.result)
+        assertEquals(getCallbackAll.result?.size, 2)
     }
 }

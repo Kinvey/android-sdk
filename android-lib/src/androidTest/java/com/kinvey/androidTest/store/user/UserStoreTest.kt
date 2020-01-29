@@ -41,6 +41,7 @@ import com.kinvey.android.store.UserStore.Companion.retrieve
 import com.kinvey.android.store.UserStore.Companion.sendEmailConfirmation
 import com.kinvey.android.store.UserStore.Companion.signUp
 import com.kinvey.androidTest.LooperThread
+import com.kinvey.androidTest.TestManager
 import com.kinvey.androidTest.TestManager.Companion.PASSWORD
 import com.kinvey.androidTest.TestManager.Companion.USERNAME
 import com.kinvey.androidTest.model.EntitySet
@@ -57,6 +58,7 @@ import com.kinvey.java.core.KinveyClientCallback
 import com.kinvey.java.core.KinveyJsonResponseException
 import com.kinvey.java.dto.BaseUser
 import com.kinvey.java.model.KinveyMetaData.Companion.KMD
+import com.kinvey.java.store.LiveServiceRouter
 import com.kinvey.java.store.StoreType
 import com.kinvey.java.store.UserStoreRequestManager
 import junit.framework.Assert.*
@@ -1768,6 +1770,57 @@ class UserStoreTest {
         val latch = CountDownLatch(1)
         val callback = DefaultKinveyUserListCallback(latch)
         val looperThread = LooperThread(Runnable { asyncUserDiscovery?.lookupByFacebookID(id, callback) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Test
+    fun testLiveServiceUser() {
+        if (client?.activeUser == null) {
+            login(TestManager.USERNAME, TestManager.PASSWORD)
+        }
+        liveServiceCustomUser(client)
+        Assert.assertTrue(LiveServiceRouter.instance?.isInitialized!!)
+        liveServiceCustomUserUnregister(client)
+        Assert.assertFalse(LiveServiceRouter.instance?.isInitialized!!)
+    }
+
+    @Throws(InterruptedException::class)
+    private fun liveServiceCustomUserUnregister(client: Client<*>?): KinveyClientCallback<Void> {
+        val latch = CountDownLatch(1)
+        val callback = object: KinveyClientCallback<Void> {
+            override fun onSuccess(result: Void?) {
+                latch.countDown()
+            }
+            override fun onFailure(error: Throwable?) {
+                latch.countDown()
+            }
+        }
+        val looperThread = LooperThread(Runnable {
+            client?.activeUser?.unregisterLiveService(callback)
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
+    private fun liveServiceCustomUser(client: Client<*>?): KinveyClientCallback<Void> {
+        val latch = CountDownLatch(1)
+        val callback = object: KinveyClientCallback<Void> {
+            override fun onSuccess(result: Void?) {
+                latch.countDown()
+            }
+            override fun onFailure(error: Throwable?) {
+                latch.countDown()
+            }
+        }
+        val looperThread = LooperThread(Runnable {
+            client?.activeUser?.registerLiveService(callback)
+        })
         looperThread.start()
         latch.await()
         looperThread.mHandler?.sendMessage(Message())

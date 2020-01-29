@@ -31,6 +31,8 @@ import com.kinvey.java.linkedResources.SaveLinkedResourceClientRequest
 import com.kinvey.java.model.SaveMode
 import com.kinvey.java.store.StoreType
 import java.io.IOException
+import java.util.ArrayList
+
 
 /**
  * Subset of the NetworkManager API, offering support for downloading and uploading associated files with an entity.
@@ -154,8 +156,8 @@ open class LinkedNetworkManager<T : LinkedGenericJson>
     fun getBlocking(query: Query?, download: DownloaderProgressListener?, attachments: Array<String>?,
                     resolves: Array<String?>?, resolve_depth: Int, retain: Boolean, storeType: StoreType = StoreType.SYNC): Get<T> {
         Preconditions.checkNotNull(query)
-        val javaClass = currentClass as Class<List<T>>
-        val get = Get(this, client, query, javaClass, attachments, resolves, resolve_depth, retain, storeType)
+        val ret: List<T> = ArrayList();
+        val get = Get(this, client, query, ret::class.java as Class<List<T>>, attachments, resolves, resolve_depth, retain, storeType)
         get.downloadProgressListener = download
         client?.initializeRequest(get)
         return get
