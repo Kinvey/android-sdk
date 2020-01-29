@@ -6,14 +6,12 @@ import android.util.Log
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
-import com.google.api.client.http.HttpRequest
 import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.client.json.GenericJson
 import com.kinvey.android.Client
 import com.kinvey.android.Client.Builder
 import com.kinvey.android.async.AsyncPullRequest
 import com.kinvey.android.model.User
-import com.kinvey.android.network.AsyncLinkedNetworkManager
 import com.kinvey.android.store.DataStore
 import com.kinvey.android.store.DataStore.Companion.collection
 import com.kinvey.androidTest.LooperThread
@@ -21,12 +19,10 @@ import com.kinvey.androidTest.TestManager
 import com.kinvey.androidTest.callback.*
 import com.kinvey.androidTest.model.*
 import com.kinvey.androidTest.model.Person.Companion.LONG_NAME
-import com.kinvey.androidTest.store.data.network.LinkedPerson
 import com.kinvey.androidTest.util.RealmCacheManagerUtil
 import com.kinvey.androidTest.util.TableNameManagerUtil
 import com.kinvey.java.Constants
 import com.kinvey.java.Query
-import com.kinvey.java.cache.ICache
 import com.kinvey.java.cache.KinveyCachedClientCallback
 import com.kinvey.java.core.KinveyJsonResponseException
 import com.kinvey.java.model.KinveyPullResponse
@@ -34,10 +30,6 @@ import com.kinvey.java.model.KinveyReadResponse
 import com.kinvey.java.query.AbstractQuery.SortOrder
 import com.kinvey.java.store.StoreType
 import com.kinvey.java.sync.dto.SyncRequest.HttpVerb
-import io.realm.DynamicRealm
-import io.realm.RealmObjectSchema
-import io.realm.RealmSchema
-import org.junit.After
 import org.junit.Assert.*
 import org.junit.Ignore
 import org.junit.Test
@@ -47,7 +39,6 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.util.*
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
