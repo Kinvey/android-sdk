@@ -586,6 +586,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable {
             retrieve1 = UserStore.Retrieve(client as Client<User>, null)
             retrieve2 = UserStore.Retrieve(resolves, client as Client<User>, null)
+            retrieve2?.resolves = resolves
             latch.countDown()
         })
 
@@ -611,6 +612,8 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable {
             retrieve1 = UserStore.RetrieveUserList(query, client as Client<User>, null)
             retrieve2 = UserStore.RetrieveUserList(query, resolves, client as Client<User>, null)
+            retrieve2?.query = query
+            retrieve2?.resolves = resolves
             latch.countDown()
         })
 
@@ -733,6 +736,63 @@ class UserStoreTest {
 
     @Test
     @Throws(RuntimeException::class)
+    fun LoginKinveyAuthError() {
+        var isExceptionThrown = false
+        val latch = CountDownLatch(1)
+        val looperThread: LooperThread
+        looperThread = LooperThread(Runnable {
+            try {
+                UserStore.LoginKinveyAuth("id", "token",
+                        client as AbstractClient<User>, object : KinveyClientCallback<User> {
+                    override fun onSuccess(result: User?) {
+                        latch.countDown()
+                    }
+
+                    override fun onFailure(error: Throwable?) {
+                        isExceptionThrown = true
+                        latch.countDown()
+                    }
+                }).execute()
+            } catch (e: RuntimeException) {
+                e.printStackTrace()
+            }
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        Assert.assertTrue(isExceptionThrown)
+    }
+
+    @Test
+    fun testUserStoreGetUser() {
+        var isExceptionThrown = false
+        if (client?.isUserLoggedIn == false) {
+            val callback = login(TestManager.USERNAME, TestManager.PASSWORD)
+            assertNull(callback.error)
+        }
+        val userId = client?.activeUser?.id ?: ""
+        val latch = CountDownLatch(1)
+        val looperThread = LooperThread(Runnable {
+            UserStore.GetUser(userId, client as Client<User>, object : KinveyClientCallback<User> {
+                override fun onSuccess(result: User?) {
+                    Assert.assertNotNull(result)
+                    latch.countDown()
+                }
+
+                override fun onFailure(error: Throwable?) {
+                    isExceptionThrown = true
+                    latch.countDown()
+                }
+            }).execute()
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        Assert.assertFalse(isExceptionThrown)
+    }
+
+    @Test
+    @Throws(RuntimeException::class)
     fun testUpdateSuccess() {
         login(TestManager.USERNAME, TestManager.PASSWORD)
         var isExceptionThrown = false
@@ -769,6 +829,7 @@ class UserStoreTest {
 
         val looperThread = LooperThread(Runnable {
             resetPassword = UserStore.ResetPassword(usernameOrEmail, client as Client<User>, null)
+            resetPassword?.usernameOrEmail = usernameOrEmail
             latch.countDown()
         })
 
@@ -788,6 +849,7 @@ class UserStoreTest {
 
         val looperThread = LooperThread(Runnable {
             existsUser = UserStore.ExistsUser(username, client as Client<User>, null)
+            existsUser?.username  = username
             latch.countDown()
         })
 
@@ -807,6 +869,7 @@ class UserStoreTest {
 
         val looperThread = LooperThread(Runnable {
             getUser = UserStore.GetUser(userId, client as Client<User>, null)
+            getUser?.userId = userId
             latch.countDown()
         })
 

@@ -87,7 +87,7 @@ class PaginationTest {
         assertTrue(pullCallback?.result?.count == 3)
         assertTrue(pullCallback?.result?.count?.toLong() == testManager?.getCacheSize(StoreType.CACHE, client))
     }
-/*
+
     @Test
     @Throws(InterruptedException::class, IOException::class)
     fun syncErrorPaginationAsync() {
@@ -117,7 +117,8 @@ class PaginationTest {
                 ?.or(client?.query()?.equals("username", TestManager.TEST_USERNAME + 1)), 1)
         cancelMockInvalidConnection()
         assertNull(syncCallback?.kinveyPushResponse)
-    }*/
+    }
+
     fun mockInvalidConnection() {
         var field: Field? = null
         try {
