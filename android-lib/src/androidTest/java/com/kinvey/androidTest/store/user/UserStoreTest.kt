@@ -10,12 +10,9 @@ import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
 import com.google.api.client.http.HttpResponseException
-import com.kinvey.android.Client
+import com.kinvey.android.*
 import com.kinvey.android.Client.Builder
 import com.kinvey.android.Client.Companion.sharedInstance
-import com.kinvey.android.AsyncUserDiscovery
-import com.kinvey.android.AsyncUserGroup
-import com.kinvey.android.SharedPrefCredentialStore
 import com.kinvey.android.callback.*
 import com.kinvey.android.model.User
 import com.kinvey.android.store.DataStore
@@ -60,9 +57,7 @@ import com.kinvey.java.core.KinveyClientCallback
 import com.kinvey.java.core.KinveyJsonResponseException
 import com.kinvey.java.dto.BaseUser
 import com.kinvey.java.model.KinveyMetaData.Companion.KMD
-import com.kinvey.java.store.LiveServiceRouter
-import com.kinvey.java.store.StoreType
-import com.kinvey.java.store.UserStoreRequestManager
+import com.kinvey.java.store.*
 import junit.framework.Assert.*
 import org.junit.*
 import org.junit.Assert.assertNotEquals
@@ -638,6 +633,8 @@ class UserStoreTest {
 
         val looperThread = LooperThread(Runnable {
             retrieve1 = UserStore.RetrieveUserArray(query, resolves, client as Client<User>, null)
+            retrieve1?.query = query
+            retrieve1?.resolves = resolves
             latch.countDown()
         })
 
@@ -1370,6 +1367,149 @@ class UserStoreTest {
         latch.await()
         looperThread.mHandler?.sendMessage(Message())
         return callback
+    }
+
+    @Test
+    @Throws(InterruptedException::class, IOException::class)
+    fun testAddAddUserToGroupWrong() {
+        val asyncUserGroup = client?.userGroup()
+        login(TestManager.USERNAME, TestManager.PASSWORD)
+        val callback = addAddUserToGroupWrong(asyncUserGroup)
+        Assert.assertEquals((callback.error as KinveyJsonResponseException?)?.details?.error, UserStoreTest.INSUFFICIENT_CREDENTIAL_TYPE)
+    }
+
+    @Throws(InterruptedException::class)
+    private fun addAddUserToGroupWrong(asyncUserGroup: AsyncUserGroup?): UserStoreTest.UserGroupResponseCallback {
+        val ids = ArrayList<String>()
+        ids.add("first")
+        val latch = CountDownLatch(1)
+        val callback = UserStoreTest.UserGroupResponseCallback(latch)
+        val looperThread = LooperThread(Runnable {
+            asyncUserGroup?.addUserToGroup("group","user", "group", callback) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Test
+    @Throws(InterruptedException::class, IOException::class)
+    fun testAddUsersIdsGroupIdWrong() {
+        val asyncUserGroup = client?.userGroup()
+        login(TestManager.USERNAME, TestManager.PASSWORD)
+        val callback = addUsersIdsGroupIdWrong(asyncUserGroup)
+        Assert.assertEquals((callback.error as KinveyJsonResponseException?)?.details?.error, UserStoreTest.INSUFFICIENT_CREDENTIAL_TYPE)
+    }
+
+    @Throws(InterruptedException::class)
+    private fun addUsersIdsGroupIdWrong(asyncUserGroup: AsyncUserGroup?): UserStoreTest.UserGroupResponseCallback {
+        val ids = ArrayList<String>()
+        ids.add("first")
+        val latch = CountDownLatch(1)
+        val callback = UserStoreTest.UserGroupResponseCallback(latch)
+        val looperThread = LooperThread(Runnable {
+            asyncUserGroup?.addUserListToGroup("group", ids, "group", callback) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Test
+    @Throws(InterruptedException::class, IOException::class)
+    fun testAddUsersGroupAndUserWrong() {
+        val asyncUserGroup = client?.userGroup()
+        login(TestManager.USERNAME, TestManager.PASSWORD)
+        val callback = addUsersGroupAndUserWrong(asyncUserGroup)
+        Assert.assertEquals((callback.error as KinveyJsonResponseException?)?.details?.error, UserStoreTest.INSUFFICIENT_CREDENTIAL_TYPE)
+    }
+
+    @Throws(InterruptedException::class)
+    private fun addUsersGroupAndUserWrong(asyncUserGroup: AsyncUserGroup?): UserStoreTest.UserGroupResponseCallback {
+        val ids = ArrayList<String>()
+        ids.add("first")
+        val latch = CountDownLatch(1)
+        val callback = UserStoreTest.UserGroupResponseCallback(latch)
+        val looperThread = LooperThread(Runnable {
+            asyncUserGroup?.addUserToGroupList("group", "user", ids, callback) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Test
+    @Throws(InterruptedException::class, IOException::class)
+    fun testAddUsersGroupToGroupWrongCredentials() {
+        val asyncUserGroup = client?.userGroup()
+        login(TestManager.USERNAME, TestManager.PASSWORD)
+        val callback = addUsersGroupWrongCredentials(asyncUserGroup)
+        Assert.assertEquals((callback.error as KinveyJsonResponseException?)?.details?.error, UserStoreTest.INSUFFICIENT_CREDENTIAL_TYPE)
+    }
+
+    @Throws(InterruptedException::class)
+    private fun addUsersGroupWrongCredentials(asyncUserGroup: AsyncUserGroup?): UserStoreTest.UserGroupResponseCallback {
+        val ids = ArrayList<String>()
+        ids.add("first")
+        val latch = CountDownLatch(1)
+        val callback = UserStoreTest.UserGroupResponseCallback(latch)
+        val looperThread = LooperThread(Runnable {
+            asyncUserGroup?.addUserListToGroupList("group", ids, ids, callback) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Test
+    @Throws(InterruptedException::class, IOException::class)
+    fun testAddUsersGroupWrongCred() {
+        val asyncUserGroup = client?.userGroup()
+        login(TestManager.USERNAME, TestManager.PASSWORD)
+        val callback = addUsersGroupWrongCred(asyncUserGroup)
+        Assert.assertEquals((callback.error as KinveyJsonResponseException?)?.details?.error, UserStoreTest.INSUFFICIENT_CREDENTIAL_TYPE)
+    }
+
+    @Throws(InterruptedException::class)
+    private fun addUsersGroupWrongCred(asyncUserGroup: AsyncUserGroup?): UserStoreTest.UserGroupResponseCallback {
+        val ids = ArrayList<String>()
+        ids.add("first")
+        val latch = CountDownLatch(1)
+        val callback = UserStoreTest.UserGroupResponseCallback(latch)
+        val looperThread = LooperThread(Runnable {
+            asyncUserGroup?.addAllUsersToGroupList("group", ids, callback) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Test
+    fun testKinveyLiveServiceCallbackHandler() {
+        val person = Person()
+        val latch = CountDownLatch(1)
+        val looperThread: LooperThread
+        val callback =  object : KinveyDataStoreLiveServiceCallback<Person> {
+            override fun onNext(next: Person) {
+                person.intVal = 3
+                latch.countDown()
+            }
+            override fun onError(e: Exception) {
+
+            }
+            override fun onStatus(status: KinveyLiveServiceStatus) {
+
+            }
+        }
+        looperThread = LooperThread(Runnable {
+            Assert.assertEquals(person.intVal, 0)
+            val handler = KinveyLiveServiceCallbackHandler<Person>()
+            handler.onNext(person, callback)
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        Assert.assertEquals(person.intVal, 3)
     }
 
     @Test
