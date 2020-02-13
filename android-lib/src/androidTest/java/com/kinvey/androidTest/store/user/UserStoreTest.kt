@@ -47,10 +47,8 @@ import com.kinvey.androidTest.model.EntitySet
 import com.kinvey.androidTest.model.InternalUserEntity
 import com.kinvey.androidTest.model.Person
 import com.kinvey.androidTest.model.TestUser
-import com.kinvey.java.AbstractClient
+import com.kinvey.java.*
 import com.kinvey.java.Constants.AUTH_TOKEN
-import com.kinvey.java.KinveyException
-import com.kinvey.java.Query
 import com.kinvey.java.UserGroup.UserGroupResponse
 import com.kinvey.java.auth.Credential
 import com.kinvey.java.core.KinveyClientCallback
@@ -151,8 +149,8 @@ class UserStoreTest {
         }
     }
 
-    private class UserGroupResponseCallback(private val latch: CountDownLatch) : KinveyClientCallback<UserGroupResponse> {
-        private var result: UserGroupResponse? = null
+    class UserGroupResponseCallback(private val latch: CountDownLatch) : KinveyClientCallback<UserGroupResponse> {
+        var result: UserGroupResponse? = null
         var error: Throwable? = null
 
         override fun onSuccess(user: UserGroupResponse?) {
@@ -1510,6 +1508,70 @@ class UserStoreTest {
         latch.await()
         looperThread.mHandler?.sendMessage(Message())
         Assert.assertEquals(person.intVal, 3)
+    }
+
+    @Test
+    @Throws(InterruptedException::class, IOException::class)
+    fun testCreateGroup() {
+        val asyncUserGroup = client?.userGroup()
+        login(TestManager.USERNAME, TestManager.PASSWORD)
+        val callback = createGroup(asyncUserGroup)
+        assertNull(callback.error)
+        Logger.INFO("CREATED group")
+    }
+
+    @Throws(InterruptedException::class)
+    private fun createGroup(asyncUserGroup: AsyncUserGroup?): UserStoreTest.UserGroupResponseCallback {
+        val latch = CountDownLatch(1)
+        val callback = UserStoreTest.UserGroupResponseCallback(latch)
+        val looperThread = LooperThread(Runnable { asyncUserGroup?.create(UserGroup.UserGroupRequest(), callback) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Test
+    @Throws(InterruptedException::class, IOException::class)
+    fun testRetrieveGroup() {
+        val asyncUserGroup = client?.userGroup()
+        login(TestManager.USERNAME, TestManager.PASSWORD)
+        val callback = retrieveGroup(asyncUserGroup)
+        assertNull(callback.error)
+        Assert.assertEquals(callback.result?.id, "group")
+        Logger.DEBUG("DEBUG group")
+    }
+
+    @Throws(InterruptedException::class)
+    private fun retrieveGroup(asyncUserGroup: AsyncUserGroup?): UserStoreTest.UserGroupResponseCallback {
+        val latch = CountDownLatch(1)
+        val callback = UserStoreTest.UserGroupResponseCallback(latch)
+        val looperThread = LooperThread(Runnable { asyncUserGroup?.retrieve("group", callback) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Test
+    @Throws(InterruptedException::class, IOException::class)
+    fun testDeleteGroup() {
+        val asyncUserGroup = client?.userGroup()
+        login(TestManager.USERNAME, TestManager.PASSWORD)
+        val callback = deleteGroup(asyncUserGroup)
+        Assert.assertEquals((callback.error as KinveyJsonResponseException?)?.details?.error, UserStoreTest.INSUFFICIENT_CREDENTIAL_TYPE)
+        Logger.TRACE("INSUFFICIENT_CREDENTIAL FOR DELETING group")
+    }
+
+    @Throws(InterruptedException::class)
+    private fun deleteGroup(asyncUserGroup: AsyncUserGroup?): UserStoreTest.UserGroupResponseCallback {
+        val latch = CountDownLatch(1)
+        val callback = UserStoreTest.UserGroupResponseCallback(latch)
+        val looperThread = LooperThread(Runnable { asyncUserGroup?.delete("group", callback) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
     }
 
     @Test
