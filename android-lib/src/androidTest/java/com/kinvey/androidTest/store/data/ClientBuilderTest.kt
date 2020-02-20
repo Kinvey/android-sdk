@@ -1,21 +1,36 @@
 package com.kinvey.androidTest.store.data
 
 import android.content.Context
+import android.os.Message
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
 import com.google.api.client.testing.http.MockHttpTransport
+import com.kinvey.android.AndroidMimeTypeFinder
 import com.kinvey.android.Client
 import com.kinvey.android.Client.Builder
+import com.kinvey.android.callback.KinveyClientBuilderCallback
 import com.kinvey.android.model.User
+import com.kinvey.android.push.FCMPush
+import com.kinvey.android.store.UserStore
+import com.kinvey.androidTest.LooperThread
 import com.kinvey.androidTest.model.TestUser
+import com.kinvey.java.AbstractClient
 import com.kinvey.java.Constants
 import com.kinvey.java.KinveyException
+import com.kinvey.java.core.KinveyClientCallback
+import com.kinvey.java.model.FileMetaData
+import com.kinvey.java.store.UserStoreRequestManager
 import junit.framework.Assert.*
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.io.InputStream
+import java.lang.RuntimeException
+import java.util.concurrent.CountDownLatch
 
 /**
  * Created by yuliya on 08/02/17.
@@ -42,6 +57,14 @@ class ClientBuilderTest {
     fun testSetDeltaSetCacheTrue() {
         client = Builder<User>(mContext).setDeltaSetCache(true).build()
         assertTrue(client!!.isUseDeltaCache)
+    }
+
+    @Test
+    @Throws(IOException::class)
+    fun testSetDeltaSetCacheBuilder() {
+        val builder = Builder<User>(mContext)
+        builder.setDeltaSetCache(true)
+        assertTrue(builder.isDeltaSetCache())
     }
 
     @Test
@@ -91,6 +114,41 @@ class ClientBuilderTest {
             assertNotNull(e.message?.contains("Kinvey requires `https` as the protocol when setting a base URL"))
         }
         assertNull(client)
+    }
+
+    @Test
+    @Throws(IOException::class)
+    fun testSetGcmInProduction() {
+        val builder = Builder<User>("", "", mContext)
+        client = builder.setGcmInProduction(true).enableFCM(true)
+                .setSenderIDs("test").build()
+        assertEquals(client?.context?.getSharedPreferences(FCMPush.SHARED_PREF, Context.MODE_PRIVATE)
+                ?.getString(FCMPush.PREF_REG_ID, ""), "")
+    }
+
+    @Test
+    @Throws(IOException::class)
+    fun testBuilderBuildClass() {
+        val builder = Builder<User>(mContext)
+        val latch = CountDownLatch(1)
+        val looperThread: LooperThread
+        looperThread = LooperThread(Runnable {
+            builder.build(object : KinveyClientBuilderCallback {
+                override fun onSuccess(result: Client<*>?) {
+                    client = result
+                    latch.countDown()
+                }
+
+                override fun onFailure(error: Throwable?) {
+                    latch.countDown()
+                }
+
+            })
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        assertNotNull(client)
     }
 
     @Test

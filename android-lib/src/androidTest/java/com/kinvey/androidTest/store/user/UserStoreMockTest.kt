@@ -9,6 +9,7 @@ import com.kinvey.android.AndroidJson
 import com.kinvey.android.Client
 import com.kinvey.android.Client.Builder
 import com.kinvey.android.KinveySocketFactory
+import com.kinvey.android.callback.KinveyUserCallback
 import com.kinvey.android.model.User
 import com.kinvey.android.store.UserStore.Companion.login
 import com.kinvey.android.store.UserStore.Companion.logout
@@ -30,6 +31,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
+
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
@@ -88,11 +90,31 @@ class UserStoreMockTest {
     @Test
     @Throws(InterruptedException::class)
     fun testLoginError() {
-        val mockedClient = MockClient.Builder<User>(mMockContext!!).build(MockHttpErrorTransport())
+        var isExceptionThrown = false
+        val mockedBuilder = MockClient.Builder<User>(mMockContext!!)
+        val latch = CountDownLatch(1)
+        val looperThread: LooperThread
+        looperThread = LooperThread(Runnable {
+            mockedBuilder.setRetrieveUserCallback(object : KinveyUserCallback<User> {
+                override fun onSuccess(result: User?) {
+
+                }
+
+                override fun onFailure(t: Throwable?) {
+                    isExceptionThrown = true
+                }
+            })
+            latch.countDown()
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        val mockedClient = mockedBuilder.build(MockHttpErrorTransport())
         val callback = login(USERNAME, PASSWORD, mockedClient)
         assertNotNull(callback.error)
         assertNull(callback.result)
         assertEquals(500, (callback.error as KinveyJsonResponseException?)?.statusCode)
+        Assert.assertTrue(isExceptionThrown)
     }
 
     @Test

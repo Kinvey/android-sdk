@@ -228,6 +228,43 @@ class AsyncLinkedNetworkManagerTest {
     }
 
     @Test
+    fun testMimeTypeAlreadySet() {
+        val androidMimeTypeFinder = AndroidMimeTypeFinder()
+        val fileMetaData = FileMetaData()
+        fileMetaData.mimetype = "test"
+        val file = File("")
+        androidMimeTypeFinder.getMimeType(fileMetaData, file)
+        assertEquals(fileMetaData.mimetype, "test")
+    }
+
+    @Test
+    fun testMimeTypeSet() {
+        val androidMimeTypeFinder = AndroidMimeTypeFinder()
+        val fileMetaData = FileMetaData()
+        val file = File("")
+        androidMimeTypeFinder.getMimeType(fileMetaData, file)
+        assertEquals(fileMetaData.mimetype, "application/octet-stream")
+    }
+
+    @Test
+    fun testMimeTypeOnly() {
+        val androidMimeTypeFinder = AndroidMimeTypeFinder()
+        val fileMetaData = FileMetaData()
+        fileMetaData.mimetype = "test"
+        androidMimeTypeFinder.getMimeType(fileMetaData)
+        assertEquals(fileMetaData.mimetype, "test")
+    }
+
+    @Test
+    fun testMimeTypeName() {
+        val androidMimeTypeFinder = AndroidMimeTypeFinder()
+        val fileMetaData = FileMetaData()
+        fileMetaData.fileName = "testName "
+        androidMimeTypeFinder.getMimeType(fileMetaData)
+        assertEquals(fileMetaData.mimetype, "application/octet-stream")
+    }
+
+    @Test
     fun testMimeTypeFinderNullFile() {
         val androidMimeTypeFinder = AndroidMimeTypeFinder()
         val fileMetaData = FileMetaData()
