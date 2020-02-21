@@ -6,6 +6,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
 import com.kinvey.android.AsyncClientRequest
 import com.kinvey.android.Client
+import com.kinvey.android.KinveyCallbackHandler
 import com.kinvey.android.model.User
 import com.kinvey.java.core.KinveyClientCallback
 import junit.framework.Assert.assertEquals
@@ -28,6 +29,11 @@ class AsyncTaskTest {
     var currentLooper: Looper? = null
 
     class AsyncTest(private val result: Int, callback: KinveyClientCallback<Int>) : AsyncClientRequest<Int>(callback) {
+
+        fun initKinveyCallbackHandler() {
+            kinveyCallbackHandler = KinveyCallbackHandler()
+        }
+
         @Throws(IOException::class, InvocationTargetException::class, IllegalAccessException::class)
         override fun executeAsync(): Int {
             return result
@@ -59,6 +65,33 @@ class AsyncTaskTest {
                     latch.countDown()
                 }
             }).execute()
+            Looper.loop()
+        }).start()
+        latch.await()
+        assertEquals(currentLooper, resultingLooper)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testNotifyOnLooper() {
+        val latch = CountDownLatch(1);
+        Thread(Runnable {
+            Looper.prepare()
+            currentLooper = Looper.myLooper()
+            val async = AsyncTest(1, object: KinveyClientCallback<Int> {
+                override fun onSuccess(result: Int?) {
+                    finish()
+                }
+                override fun onFailure(error: Throwable?) {
+                    finish()
+                }
+                fun finish() {
+                    resultingLooper = Looper.myLooper()
+                    latch.countDown()
+                }
+            })
+            async.initKinveyCallbackHandler()
+            async.notify(1)
             Looper.loop()
         }).start()
         latch.await()

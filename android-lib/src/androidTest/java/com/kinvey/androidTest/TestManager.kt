@@ -431,9 +431,9 @@ class TestManager<T : GenericJson> {
     companion object {
         const val TEST_USERNAME = "Test_UserName"
         const val TEST_USERNAME_2 = "Test_UserName_2"
-        const val USERNAME = "test"
+        const val USERNAME = "testSecond"
         const val USERNAME_USER = "test_user"
         const val USERNAME_FILE = "test_file"
-        const val PASSWORD = "test"
+        const val PASSWORD = "testSecond"
     }
 }

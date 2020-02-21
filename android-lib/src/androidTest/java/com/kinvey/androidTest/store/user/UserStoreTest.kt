@@ -10,12 +10,9 @@ import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
 import com.google.api.client.http.HttpResponseException
-import com.kinvey.android.Client
+import com.kinvey.android.*
 import com.kinvey.android.Client.Builder
 import com.kinvey.android.Client.Companion.sharedInstance
-import com.kinvey.android.AsyncUserDiscovery
-import com.kinvey.android.AsyncUserGroup
-import com.kinvey.android.SharedPrefCredentialStore
 import com.kinvey.android.callback.*
 import com.kinvey.android.model.User
 import com.kinvey.android.store.DataStore
@@ -50,25 +47,22 @@ import com.kinvey.androidTest.model.EntitySet
 import com.kinvey.androidTest.model.InternalUserEntity
 import com.kinvey.androidTest.model.Person
 import com.kinvey.androidTest.model.TestUser
-import com.kinvey.java.AbstractClient
+import com.kinvey.java.*
 import com.kinvey.java.Constants.AUTH_TOKEN
-import com.kinvey.java.KinveyException
-import com.kinvey.java.Query
 import com.kinvey.java.UserGroup.UserGroupResponse
 import com.kinvey.java.auth.Credential
 import com.kinvey.java.core.KinveyClientCallback
 import com.kinvey.java.core.KinveyJsonResponseException
 import com.kinvey.java.dto.BaseUser
 import com.kinvey.java.model.KinveyMetaData.Companion.KMD
-import com.kinvey.java.store.LiveServiceRouter
-import com.kinvey.java.store.StoreType
-import com.kinvey.java.store.UserStoreRequestManager
+import com.kinvey.java.store.*
 import junit.framework.Assert.*
 import org.junit.*
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
 import org.junit.runner.RunWith
 import java.io.IOException
+import java.lang.RuntimeException
 import java.lang.reflect.InvocationTargetException
 import java.util.*
 import java.util.concurrent.CountDownLatch
@@ -155,8 +149,8 @@ class UserStoreTest {
         }
     }
 
-    private class UserGroupResponseCallback(private val latch: CountDownLatch) : KinveyClientCallback<UserGroupResponse> {
-        private var result: UserGroupResponse? = null
+    class UserGroupResponseCallback(private val latch: CountDownLatch) : KinveyClientCallback<UserGroupResponse> {
+        var result: UserGroupResponse? = null
         var error: Throwable? = null
 
         override fun onSuccess(user: UserGroupResponse?) {
@@ -413,6 +407,8 @@ class UserStoreTest {
 
         val looperThread = LooperThread(Runnable {
             create = UserStore.Create(userName, userPass, client?.activeUser, client as AbstractClient<User>, null)
+            create?.username = userName
+            create?.password = userPass
             latch.countDown()
         })
 
@@ -426,6 +422,65 @@ class UserStoreTest {
     }
 
     @Test
+    @Throws(RuntimeException::class)
+    fun loginKinveyAuth() {
+        var isExceptionThrown = false
+        val latch = CountDownLatch(1)
+        val looperThread: LooperThread
+        looperThread = LooperThread(Runnable {
+            try {
+                UserStore().loginKinveyAuthToken("userId", "authToken",
+                        client as AbstractClient<User>, object : KinveyClientCallback<User> {
+                    override fun onSuccess(result: User?) {
+                        latch.countDown()
+                    }
+
+                    override fun onFailure(error: Throwable?) {
+                        isExceptionThrown = true
+                        latch.countDown()
+                    }
+                })
+            } catch (e: RuntimeException) {
+                e.printStackTrace()
+            }
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        Assert.assertTrue(isExceptionThrown)
+    }
+
+    @Test
+    @Throws(RuntimeException::class)
+    fun testUpdateObject() {
+        login(TestManager.USERNAME, TestManager.PASSWORD)
+        var isExceptionThrown = false
+        val latch = CountDownLatch(1)
+        val looperThread: LooperThread
+        looperThread = LooperThread(Runnable {
+            try {
+                UserStore().save(client as AbstractClient<User>, object : KinveyClientCallback<User> {
+                    override fun onSuccess(result: User?) {
+                        Assert.assertNotNull(result)
+                        latch.countDown()
+                    }
+
+                    override fun onFailure(error: Throwable?) {
+                        isExceptionThrown = true
+                        latch.countDown()
+                    }
+                })
+            } catch (e: RuntimeException) {
+                e.printStackTrace()
+            }
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        Assert.assertFalse(isExceptionThrown)
+    }
+
+    @Test
     fun testUserStoreDeleteClassConstructors() {
         val hardDel = true
         val latch = CountDownLatch(1)
@@ -433,6 +488,7 @@ class UserStoreTest {
 
         val looperThread = LooperThread(Runnable {
             delete = UserStore.Delete(true, client as AbstractClient<BaseUser>, null)
+            delete?.hardDelete = true
             latch.countDown()
         })
 
@@ -523,6 +579,7 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable {
             retrieve1 = UserStore.Retrieve(client as Client<User>, null)
             retrieve2 = UserStore.Retrieve(resolves, client as Client<User>, null)
+            retrieve2?.resolves = resolves
             latch.countDown()
         })
 
@@ -548,6 +605,8 @@ class UserStoreTest {
         val looperThread = LooperThread(Runnable {
             retrieve1 = UserStore.RetrieveUserList(query, client as Client<User>, null)
             retrieve2 = UserStore.RetrieveUserList(query, resolves, client as Client<User>, null)
+            retrieve2?.query = query
+            retrieve2?.resolves = resolves
             latch.countDown()
         })
 
@@ -572,6 +631,8 @@ class UserStoreTest {
 
         val looperThread = LooperThread(Runnable {
             retrieve1 = UserStore.RetrieveUserArray(query, resolves, client as Client<User>, null)
+            retrieve1?.query = query
+            retrieve1?.resolves = resolves
             latch.countDown()
         })
 
@@ -608,6 +669,7 @@ class UserStoreTest {
 
         val looperThread = LooperThread(Runnable {
             retrieve1 = UserStore.Update(client as Client<User>, null)
+            retrieve1?.client = client as Client<User>
             latch.countDown()
         })
 
@@ -626,6 +688,7 @@ class UserStoreTest {
 
         val looperThread = LooperThread(Runnable {
             changePassword = UserStore.ChangePassword(password, client as Client<User>, null)
+            changePassword?.client = client as Client<User>
             latch.countDown()
         })
 
@@ -638,6 +701,122 @@ class UserStoreTest {
     }
 
     @Test
+    @Throws(RuntimeException::class)
+    fun loginKinveyAuthError() {
+        var isExceptionThrown = false
+        val latch = CountDownLatch(1)
+        val looperThread: LooperThread
+        looperThread = LooperThread(Runnable {
+            try {
+                UserStore().loginKinveyAuthToken("userId", "authToken",
+                        client as AbstractClient<User>, object : KinveyClientCallback<User> {
+                    override fun onSuccess(result: User?) {
+                        latch.countDown()
+                    }
+
+                    override fun onFailure(error: Throwable?) {
+                        isExceptionThrown = true
+                        latch.countDown()
+                    }
+                })
+            } catch (e: RuntimeException) {
+                e.printStackTrace()
+            }
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        Assert.assertTrue(isExceptionThrown)
+    }
+
+    @Test
+    @Throws(RuntimeException::class)
+    fun LoginKinveyAuthError() {
+        var isExceptionThrown = false
+        val latch = CountDownLatch(1)
+        val looperThread: LooperThread
+        looperThread = LooperThread(Runnable {
+            try {
+                UserStore.LoginKinveyAuth("id", "token",
+                        client as AbstractClient<User>, object : KinveyClientCallback<User> {
+                    override fun onSuccess(result: User?) {
+                        latch.countDown()
+                    }
+
+                    override fun onFailure(error: Throwable?) {
+                        isExceptionThrown = true
+                        latch.countDown()
+                    }
+                }).execute()
+            } catch (e: RuntimeException) {
+                e.printStackTrace()
+            }
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        Assert.assertTrue(isExceptionThrown)
+    }
+
+    @Test
+    fun testUserStoreGetUser() {
+        var isExceptionThrown = false
+        if (client?.isUserLoggedIn == false) {
+            val callback = login(TestManager.USERNAME, TestManager.PASSWORD)
+            assertNull(callback.error)
+        }
+        val userId = client?.activeUser?.id ?: ""
+        val latch = CountDownLatch(1)
+        val looperThread = LooperThread(Runnable {
+            UserStore.GetUser(userId, client as Client<User>, object : KinveyClientCallback<User> {
+                override fun onSuccess(result: User?) {
+                    Assert.assertNotNull(result)
+                    latch.countDown()
+                }
+
+                override fun onFailure(error: Throwable?) {
+                    isExceptionThrown = true
+                    latch.countDown()
+                }
+            }).execute()
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        Assert.assertFalse(isExceptionThrown)
+    }
+
+    @Test
+    @Throws(RuntimeException::class)
+    fun testUpdateSuccess() {
+        login(TestManager.USERNAME, TestManager.PASSWORD)
+        var isExceptionThrown = false
+        val latch = CountDownLatch(1)
+        val looperThread: LooperThread
+        looperThread = LooperThread(Runnable {
+            try {
+                UserStore().save(client as AbstractClient<User>, object : KinveyClientCallback<User> {
+                    override fun onSuccess(result: User?) {
+                        Assert.assertNotNull(result)
+                        latch.countDown()
+                    }
+
+                    override fun onFailure(error: Throwable?) {
+                        isExceptionThrown = true
+                        latch.countDown()
+                    }
+                })
+            } catch (e: RuntimeException) {
+                e.printStackTrace()
+            }
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        Assert.assertFalse(isExceptionThrown)
+    }
+
+    @Test
     fun testUserStoreResetPasswordConstructors() {
         val usernameOrEmail = "test@test.com"
         val latch = CountDownLatch(1)
@@ -645,6 +824,7 @@ class UserStoreTest {
 
         val looperThread = LooperThread(Runnable {
             resetPassword = UserStore.ResetPassword(usernameOrEmail, client as Client<User>, null)
+            resetPassword?.usernameOrEmail = usernameOrEmail
             latch.countDown()
         })
 
@@ -664,6 +844,7 @@ class UserStoreTest {
 
         val looperThread = LooperThread(Runnable {
             existsUser = UserStore.ExistsUser(username, client as Client<User>, null)
+            existsUser?.username  = username
             latch.countDown()
         })
 
@@ -683,6 +864,7 @@ class UserStoreTest {
 
         val looperThread = LooperThread(Runnable {
             getUser = UserStore.GetUser(userId, client as Client<User>, null)
+            getUser?.userId = userId
             latch.countDown()
         })
 
@@ -1179,6 +1361,213 @@ class UserStoreTest {
         val latch = CountDownLatch(1)
         val callback = UserGroupResponseCallback(latch)
         val looperThread = LooperThread(Runnable { asyncUserGroup?.addAllUsersToGroup("group", "group", callback) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Test
+    @Throws(InterruptedException::class, IOException::class)
+    fun testAddAddUserToGroupWrong() {
+        val asyncUserGroup = client?.userGroup()
+        login(TestManager.USERNAME, TestManager.PASSWORD)
+        val callback = addAddUserToGroupWrong(asyncUserGroup)
+        Assert.assertEquals((callback.error as KinveyJsonResponseException?)?.details?.error, UserStoreTest.INSUFFICIENT_CREDENTIAL_TYPE)
+    }
+
+    @Throws(InterruptedException::class)
+    private fun addAddUserToGroupWrong(asyncUserGroup: AsyncUserGroup?): UserStoreTest.UserGroupResponseCallback {
+        val ids = ArrayList<String>()
+        ids.add("first")
+        val latch = CountDownLatch(1)
+        val callback = UserStoreTest.UserGroupResponseCallback(latch)
+        val looperThread = LooperThread(Runnable {
+            asyncUserGroup?.addUserToGroup("group","user", "group", callback) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Test
+    @Throws(InterruptedException::class, IOException::class)
+    fun testAddUsersIdsGroupIdWrong() {
+        val asyncUserGroup = client?.userGroup()
+        login(TestManager.USERNAME, TestManager.PASSWORD)
+        val callback = addUsersIdsGroupIdWrong(asyncUserGroup)
+        Assert.assertEquals((callback.error as KinveyJsonResponseException?)?.details?.error, UserStoreTest.INSUFFICIENT_CREDENTIAL_TYPE)
+    }
+
+    @Throws(InterruptedException::class)
+    private fun addUsersIdsGroupIdWrong(asyncUserGroup: AsyncUserGroup?): UserStoreTest.UserGroupResponseCallback {
+        val ids = ArrayList<String>()
+        ids.add("first")
+        val latch = CountDownLatch(1)
+        val callback = UserStoreTest.UserGroupResponseCallback(latch)
+        val looperThread = LooperThread(Runnable {
+            asyncUserGroup?.addUserListToGroup("group", ids, "group", callback) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Test
+    @Throws(InterruptedException::class, IOException::class)
+    fun testAddUsersGroupAndUserWrong() {
+        val asyncUserGroup = client?.userGroup()
+        login(TestManager.USERNAME, TestManager.PASSWORD)
+        val callback = addUsersGroupAndUserWrong(asyncUserGroup)
+        Assert.assertEquals((callback.error as KinveyJsonResponseException?)?.details?.error, UserStoreTest.INSUFFICIENT_CREDENTIAL_TYPE)
+    }
+
+    @Throws(InterruptedException::class)
+    private fun addUsersGroupAndUserWrong(asyncUserGroup: AsyncUserGroup?): UserStoreTest.UserGroupResponseCallback {
+        val ids = ArrayList<String>()
+        ids.add("first")
+        val latch = CountDownLatch(1)
+        val callback = UserStoreTest.UserGroupResponseCallback(latch)
+        val looperThread = LooperThread(Runnable {
+            asyncUserGroup?.addUserToGroupList("group", "user", ids, callback) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Test
+    @Throws(InterruptedException::class, IOException::class)
+    fun testAddUsersGroupToGroupWrongCredentials() {
+        val asyncUserGroup = client?.userGroup()
+        login(TestManager.USERNAME, TestManager.PASSWORD)
+        val callback = addUsersGroupWrongCredentials(asyncUserGroup)
+        Assert.assertEquals((callback.error as KinveyJsonResponseException?)?.details?.error, UserStoreTest.INSUFFICIENT_CREDENTIAL_TYPE)
+    }
+
+    @Throws(InterruptedException::class)
+    private fun addUsersGroupWrongCredentials(asyncUserGroup: AsyncUserGroup?): UserStoreTest.UserGroupResponseCallback {
+        val ids = ArrayList<String>()
+        ids.add("first")
+        val latch = CountDownLatch(1)
+        val callback = UserStoreTest.UserGroupResponseCallback(latch)
+        val looperThread = LooperThread(Runnable {
+            asyncUserGroup?.addUserListToGroupList("group", ids, ids, callback) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Test
+    @Throws(InterruptedException::class, IOException::class)
+    fun testAddUsersGroupWrongCred() {
+        val asyncUserGroup = client?.userGroup()
+        login(TestManager.USERNAME, TestManager.PASSWORD)
+        val callback = addUsersGroupWrongCred(asyncUserGroup)
+        Assert.assertEquals((callback.error as KinveyJsonResponseException?)?.details?.error, UserStoreTest.INSUFFICIENT_CREDENTIAL_TYPE)
+    }
+
+    @Throws(InterruptedException::class)
+    private fun addUsersGroupWrongCred(asyncUserGroup: AsyncUserGroup?): UserStoreTest.UserGroupResponseCallback {
+        val ids = ArrayList<String>()
+        ids.add("first")
+        val latch = CountDownLatch(1)
+        val callback = UserStoreTest.UserGroupResponseCallback(latch)
+        val looperThread = LooperThread(Runnable {
+            asyncUserGroup?.addAllUsersToGroupList("group", ids, callback) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Test
+    fun testKinveyLiveServiceCallbackHandler() {
+        val person = Person()
+        val latch = CountDownLatch(1)
+        val looperThread: LooperThread
+        val callback =  object : KinveyDataStoreLiveServiceCallback<Person> {
+            override fun onNext(next: Person) {
+                person.intVal = 3
+                latch.countDown()
+            }
+            override fun onError(e: Exception) {
+
+            }
+            override fun onStatus(status: KinveyLiveServiceStatus) {
+
+            }
+        }
+        looperThread = LooperThread(Runnable {
+            Assert.assertEquals(person.intVal, 0)
+            val handler = KinveyLiveServiceCallbackHandler<Person>()
+            handler.onNext(person, callback)
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        Assert.assertEquals(person.intVal, 3)
+    }
+
+    @Test
+    @Throws(InterruptedException::class, IOException::class)
+    fun testCreateGroup() {
+        val asyncUserGroup = client?.userGroup()
+        login(TestManager.USERNAME, TestManager.PASSWORD)
+        val callback = createGroup(asyncUserGroup)
+        assertNull(callback.error)
+        Logger.INFO("CREATED group")
+    }
+
+    @Throws(InterruptedException::class)
+    private fun createGroup(asyncUserGroup: AsyncUserGroup?): UserStoreTest.UserGroupResponseCallback {
+        val latch = CountDownLatch(1)
+        val callback = UserStoreTest.UserGroupResponseCallback(latch)
+        val looperThread = LooperThread(Runnable { asyncUserGroup?.create(UserGroup.UserGroupRequest(), callback) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Test
+    @Throws(InterruptedException::class, IOException::class)
+    fun testRetrieveGroup() {
+        val asyncUserGroup = client?.userGroup()
+        login(TestManager.USERNAME, TestManager.PASSWORD)
+        val callback = retrieveGroup(asyncUserGroup)
+        assertNull(callback.error)
+        Assert.assertEquals(callback.result?.id, "group")
+        Logger.DEBUG("DEBUG group")
+    }
+
+    @Throws(InterruptedException::class)
+    private fun retrieveGroup(asyncUserGroup: AsyncUserGroup?): UserStoreTest.UserGroupResponseCallback {
+        val latch = CountDownLatch(1)
+        val callback = UserStoreTest.UserGroupResponseCallback(latch)
+        val looperThread = LooperThread(Runnable { asyncUserGroup?.retrieve("group", callback) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Test
+    @Throws(InterruptedException::class, IOException::class)
+    fun testDeleteGroup() {
+        val asyncUserGroup = client?.userGroup()
+        login(TestManager.USERNAME, TestManager.PASSWORD)
+        val callback = deleteGroup(asyncUserGroup)
+        Assert.assertEquals((callback.error as KinveyJsonResponseException?)?.details?.error, UserStoreTest.INSUFFICIENT_CREDENTIAL_TYPE)
+        Logger.TRACE("INSUFFICIENT_CREDENTIAL FOR DELETING group")
+    }
+
+    @Throws(InterruptedException::class)
+    private fun deleteGroup(asyncUserGroup: AsyncUserGroup?): UserStoreTest.UserGroupResponseCallback {
+        val latch = CountDownLatch(1)
+        val callback = UserStoreTest.UserGroupResponseCallback(latch)
+        val looperThread = LooperThread(Runnable { asyncUserGroup?.delete("group", callback) })
         looperThread.start()
         latch.await()
         looperThread.mHandler?.sendMessage(Message())

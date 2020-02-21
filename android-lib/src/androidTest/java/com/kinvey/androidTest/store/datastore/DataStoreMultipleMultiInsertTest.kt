@@ -46,9 +46,9 @@ class DataStoreMultipleMultiInsertTest : BaseDataStoreMultiInsertTest() {
         client.syncManager.clear(Person.COLLECTION)
         val itemsList = createPersonsListErr(200, 50, 50)
         val saveCallback = saveList(store, itemsList)
-        assertNotNull(saveCallback.result)
-        assertNull(saveCallback.error)
+        assertNull(saveCallback.result)
+        assertNotNull(saveCallback.error)
 
-        Assert.assertEquals(netManager.multiPostCount, 3)
+        Assert.assertEquals(netManager.multiPostCount, 1)
     }
 }

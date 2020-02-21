@@ -54,6 +54,7 @@ class DataStoreTest() : BaseDataStoreTest() {
 
         val looperThread = LooperThread(Runnable {
             save = DataStore.SaveRequest(store, person, null)
+            (save as DataStore.SaveRequest<Person>).entity = person
             latch.countDown()
         })
 
@@ -75,6 +76,7 @@ class DataStoreTest() : BaseDataStoreTest() {
 
         val looperThread = LooperThread(Runnable {
             save = DataStore.SaveListRequest(store, entities, null)
+            (save as DataStore.SaveListRequest<Person>).entities = entities
             latch.countDown()
         })
 
@@ -96,6 +98,7 @@ class DataStoreTest() : BaseDataStoreTest() {
 
         val looperThread = LooperThread(Runnable {
             save = DataStore.SaveListBatchRequest(store, entities, null)
+            (save as DataStore.SaveListBatchRequest<Person>).entities = entities
             latch.countDown()
         })
 

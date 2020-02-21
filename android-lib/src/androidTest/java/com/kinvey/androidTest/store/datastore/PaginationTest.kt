@@ -16,6 +16,8 @@ import com.kinvey.androidTest.TestManager.Companion.TEST_USERNAME_2
 import com.kinvey.androidTest.TestManager.Companion.USERNAME
 import com.kinvey.androidTest.callback.CustomKinveyPullCallback
 import com.kinvey.androidTest.model.Person
+import com.kinvey.java.AbstractClient
+import com.kinvey.java.core.AbstractKinveyClient
 import com.kinvey.java.store.StoreType
 import org.junit.After
 import org.junit.Assert.*
@@ -23,6 +25,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
+import java.lang.reflect.Field
 import java.util.*
 
 @RunWith(AndroidJUnit4::class)
@@ -83,6 +86,69 @@ class PaginationTest {
         assertNotNull(pullCallback?.result)
         assertTrue(pullCallback?.result?.count == 3)
         assertTrue(pullCallback?.result?.count?.toLong() == testManager?.getCacheSize(StoreType.CACHE, client))
+    }
+
+    @Test
+    @Throws(InterruptedException::class, IOException::class)
+    fun syncErrorPaginationAsync() {
+        val store = collection(COLLECTION, Person::class.java, StoreType.SYNC, client)
+        testManager?.cleanBackend(store, StoreType.SYNC)
+        client?.syncManager?.clear(COLLECTION)
+
+        testManager?.createPersons(store, 10)
+        assertTrue(client?.syncManager?.getCount(COLLECTION) == 10L)
+        mockInvalidConnection()
+        val syncCallback = testManager?.sync(store, null, false)
+        cancelMockInvalidConnection()
+        assertNull(syncCallback?.kinveyPushResponse)
+    }
+
+    @Test
+    @Throws(InterruptedException::class, IOException::class)
+    fun testSyncPagedError() {
+        val store = collection(COLLECTION, Person::class.java, StoreType.SYNC, client)
+        testManager?.cleanBackend(store, StoreType.SYNC)
+        client?.syncManager?.clear(COLLECTION)
+
+        testManager?.createPersons(store, 10)
+        assertTrue(client?.syncManager?.getCount(COLLECTION) == 10L)
+        mockInvalidConnection()
+        val syncCallback = testManager?.sync(store, client?.query()?.equals("username", TestManager.TEST_USERNAME + 0)
+                ?.or(client?.query()?.equals("username", TestManager.TEST_USERNAME + 1)), 1)
+        cancelMockInvalidConnection()
+        assertNull(syncCallback?.kinveyPushResponse)
+    }
+
+    fun mockInvalidConnection() {
+        var field: Field? = null
+        try {
+            field = AbstractKinveyClient::class.java.getDeclaredField("rootUrl")
+        } catch (e: NoSuchFieldException) {
+            e.printStackTrace()
+        }
+        assert(field != null)
+        field?.isAccessible = true
+        try {
+            field?.set(client, "https://bmock.kinvey.com/")
+        } catch (e: IllegalAccessException) {
+            e.printStackTrace()
+        }
+    }
+
+    fun cancelMockInvalidConnection() {
+        var field: Field? = null
+        try {
+            field = AbstractKinveyClient::class.java.getDeclaredField("rootUrl")
+        } catch (e: NoSuchFieldException) {
+            e.printStackTrace()
+        }
+        assert(field != null)
+        field?.isAccessible = true
+        try {
+            field?.set(client, AbstractClient.DEFAULT_BASE_URL)
+        } catch (e: IllegalAccessException) {
+            e.printStackTrace()
+        }
     }
 
     @Test

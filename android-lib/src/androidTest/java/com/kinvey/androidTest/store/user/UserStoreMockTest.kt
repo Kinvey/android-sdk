@@ -5,8 +5,11 @@ import android.os.Message
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
+import com.kinvey.android.AndroidJson
 import com.kinvey.android.Client
 import com.kinvey.android.Client.Builder
+import com.kinvey.android.KinveySocketFactory
+import com.kinvey.android.callback.KinveyUserCallback
 import com.kinvey.android.model.User
 import com.kinvey.android.store.UserStore.Companion.login
 import com.kinvey.android.store.UserStore.Companion.logout
@@ -28,6 +31,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
+
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
@@ -86,11 +90,31 @@ class UserStoreMockTest {
     @Test
     @Throws(InterruptedException::class)
     fun testLoginError() {
-        val mockedClient = MockClient.Builder<User>(mMockContext!!).build(MockHttpErrorTransport())
+        var isExceptionThrown = false
+        val mockedBuilder = MockClient.Builder<User>(mMockContext!!)
+        val latch = CountDownLatch(1)
+        val looperThread: LooperThread
+        looperThread = LooperThread(Runnable {
+            mockedBuilder.setRetrieveUserCallback(object : KinveyUserCallback<User> {
+                override fun onSuccess(result: User?) {
+
+                }
+
+                override fun onFailure(t: Throwable?) {
+                    isExceptionThrown = true
+                }
+            })
+            latch.countDown()
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        val mockedClient = mockedBuilder.build(MockHttpErrorTransport())
         val callback = login(USERNAME, PASSWORD, mockedClient)
         assertNotNull(callback.error)
         assertNull(callback.result)
         assertEquals(500, (callback.error as KinveyJsonResponseException?)?.statusCode)
+        Assert.assertTrue(isExceptionThrown)
     }
 
     @Test
@@ -156,6 +180,36 @@ class UserStoreMockTest {
         latch.await()
         looperThread.mHandler?.sendMessage(Message())
         return callback
+    }
+
+    @Test
+    fun testMimeTypeFinderInputStream() {
+        val shared = Client.sharedInstance()
+        val ex = AndroidJson.JSONPARSER.GSON.name + ", " +
+                AndroidJson.JSONPARSER.JACKSON.name + ", " + AndroidJson.JSONPARSER.RAW.name
+        Assert.assertEquals(AndroidJson.JSONPARSER.options, ex)
+        val ad = AndroidJson()
+        val jacksonFactory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.JACKSON)
+        val rawFactory = AndroidJson.newCompatibleJsonFactory(AndroidJson.JSONPARSER.RAW)
+        Assert.assertNotNull(shared)
+        Assert.assertNotNull(ad)
+        Assert.assertNotNull(jacksonFactory)
+        Assert.assertNotNull(rawFactory)
+        Assert.assertEquals(AndroidJson.JSONPARSER.valueOf("GSON"), AndroidJson.JSONPARSER.GSON)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun socketFactoryConstructorTest() {
+        val factory = KinveySocketFactory()
+        Assert.assertNotNull(factory)
+        Assert.assertNotNull(factory.defaultCipherSuites)
+        Assert.assertEquals(factory.defaultCipherSuites.size, 15)
+        Assert.assertNotNull(factory.supportedCipherSuites)
+        Assert.assertEquals(factory.supportedCipherSuites.size, 28)
+        val socket = factory.createSocket()
+        Assert.assertNotNull(socket)
+        socket?.close()
     }
 
     @Throws(InterruptedException::class)
