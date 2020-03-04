@@ -24,6 +24,7 @@ import com.kinvey.java.core.KinveyClientCallback
 import com.kinvey.java.model.KinveyBatchInsertError
 import com.kinvey.java.model.KinveyPullResponse
 import com.kinvey.java.model.KinveyReadResponse
+import com.kinvey.java.model.KinveySaveBatchResponse
 import com.kinvey.java.store.StoreType
 import com.kinvey.java.sync.dto.SyncItem
 import com.kinvey.java.sync.dto.SyncRequest
@@ -111,6 +112,26 @@ open class BaseDataStoreMultiInsertTest {
         var error: Throwable? = null
 
         override fun onSuccess(result: List<T>?) {
+            this.result = result
+            finish()
+        }
+
+        override fun onFailure(error: Throwable?) {
+            this.error = error
+            finish()
+        }
+
+        internal fun finish() {
+            latch.countDown()
+        }
+    }
+
+    protected class DefaultKinveyClientListCreateCallback<T : GenericJson> (private val latch: CountDownLatch)
+        : KinveyClientCallback<KinveySaveBatchResponse<T>> {
+        var result: KinveySaveBatchResponse<T>? = null
+        var error: Throwable? = null
+
+        override fun onSuccess(result: KinveySaveBatchResponse<T>?) {
             this.result = result
             finish()
         }
@@ -274,6 +295,23 @@ open class BaseDataStoreMultiInsertTest {
     fun print(msg: String) {
         Logger.INFO(msg)
         println(msg)
+    }
+
+    @Throws(InterruptedException::class)
+    protected fun <T : GenericJson> createList(store: DataStore<T>, items: List<T>): DefaultKinveyClientListCreateCallback<T> {
+        val latch = CountDownLatch(1)
+        val callback = DefaultKinveyClientListCreateCallback<T>(latch)
+        val looperThread = LooperThread(Runnable {
+            try {
+                store.create(items, callback)
+            } catch (e: Exception) {
+                callback.onFailure(e)
+            }
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
     }
 
     @Throws(InterruptedException::class)

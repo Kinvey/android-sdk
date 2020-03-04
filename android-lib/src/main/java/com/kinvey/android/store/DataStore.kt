@@ -29,7 +29,6 @@ import com.kinvey.android.callback.KinveyDeleteCallback
 import com.kinvey.android.callback.KinveyReadCallback
 import com.kinvey.android.callback.KinveyPurgeCallback
 import com.kinvey.android.sync.KinveyPullCallback
-import com.kinvey.java.model.KinveyPullResponse
 import com.kinvey.android.sync.KinveyPushCallback
 import com.kinvey.android.sync.KinveyPushResponse
 import com.kinvey.android.sync.KinveySyncCallback
@@ -40,9 +39,7 @@ import com.kinvey.java.cache.KinveyCachedClientCallback
 import com.kinvey.java.core.KinveyAggregateCallback
 import com.kinvey.java.core.KinveyCachedAggregateCallback
 import com.kinvey.java.core.KinveyClientCallback
-import com.kinvey.java.model.AggregateType
-import com.kinvey.java.model.Aggregation
-import com.kinvey.java.model.KinveyReadResponse
+import com.kinvey.java.model.*
 import com.kinvey.java.network.NetworkManager
 import com.kinvey.java.query.MongoQueryFilter
 import com.kinvey.java.store.BaseDataStore
@@ -391,6 +388,47 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
         Preconditions.checkNotNull(entity, "Entity cannot be null.")
         Logger.INFO("Calling DataStore#save(object)")
         SaveRequest(this, entity, callback).execute()
+    }
+
+    /**
+     * Asynchronous request to create an list of entities to a collection.
+     *
+     *
+     * Constructs an asynchronous request to save a list of entities <T> to a collection.
+     * Creates the entity if it doesn't exist, return error in error list of response for entity if it does exist.
+     * If an "_id" property is not present, the Kinvey backend will generate one.
+    </T> *
+     *
+     *
+     * Sample Usage:
+     * <pre>
+     * `DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, StoreType.SYNC, myClient);
+     * myAppData.create(entities, new KinveyClientCallback<KinveySaveBatchResponse<EventEntity>> {
+     * public void onFailure(Throwable t) { ... }
+     * public void onSuccess(KinveySaveBatchResponse<EventEntity> entities) { ... }
+     * });
+    ` *
+    </pre> *
+     *
+     *
+     * @param entities The list of entities to create
+     * @param callback KinveyClientCallback<KinveySaveBatchResponse<T>>
+    </T> */
+    fun create(entities: List<T>, callback: KinveyClientCallback<KinveySaveBatchResponse<T>>) {
+        if (kinveyApiVersion >= KINVEY_API_VERSION_5) {
+            createBatch(entities, callback)
+        } /*else {
+            saveV4(entities, callback)
+        }*/
+    }
+
+    private fun createBatch(entities: List<T>, callback: KinveyClientCallback<KinveySaveBatchResponse<T>>) {
+        Preconditions.checkNotNull(client, "client must not be null")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
+        Preconditions.checkNotNull(entities, "Entity cannot be null.")
+        Preconditions.checkState(entities.size > 0, "Entity list cannot be empty.")
+        Logger.INFO("Calling DataStore#createBatch(listObjects)")
+        CreateListBatchRequest(this, entities, callback).execute()
     }
 
     /**
@@ -1072,6 +1110,16 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
         override fun executeAsync(): List<T>? {
             Logger.INFO("Calling SaveListRequest#executeAsync()")
             return store.save(entities)
+        }
+    }
+
+    class CreateListBatchRequest<T: GenericJson>(val store: DataStore<T>, var entities: List<T>, callback: KinveyClientCallback<KinveySaveBatchResponse<T>>?)
+        : AsyncClientRequest<KinveySaveBatchResponse<T>>(callback) {
+
+        @Throws(IOException::class)
+        override fun executeAsync(): KinveySaveBatchResponse<T> {
+            Logger.INFO("Calling CreateListBatchRequest#executeAsync()")
+            return store.createBatch(entities)
         }
     }
 

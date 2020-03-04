@@ -4,9 +4,9 @@ import com.google.api.client.util.Key
 
 data class KinveySaveBatchResponse<T>(
     @Key
-    var entities: List<T>? = null,
+    var entities: MutableList<T>? = null,
     @Key
-    var errors: List<KinveyBatchInsertError>? = null
+    var errors: MutableList<KinveyBatchInsertError>? = null
 ) : KinveyErrorResponse() {
     val haveErrors: Boolean
         get() {

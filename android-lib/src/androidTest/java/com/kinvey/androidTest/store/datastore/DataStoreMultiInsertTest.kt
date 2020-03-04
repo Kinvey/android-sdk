@@ -28,6 +28,51 @@ import org.junit.Assert.assertTrue
 @LargeTest
 class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
 
+    @Test
+    @Throws(InterruptedException::class)
+    fun createMultiInsertListNetwork() {
+        createMultiInsertList(StoreType.NETWORK)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun createMultiInsertListAuto() {
+        createMultiInsertList(StoreType.AUTO)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun createMultiInsertListSync() {
+        createMultiInsertList(StoreType.SYNC)
+    }
+
+    @Throws(InterruptedException::class)
+    fun createMultiInsertList(storeType: StoreType) {
+        val personList = createPersonsList(false)
+
+        val personStore = DataStore.collection(Person.COLLECTION, Person::class.java, storeType, client)
+        clearBackend(personStore)
+        client?.syncManager?.clear(Person.COLLECTION)
+
+        val saveCallback = createList(personStore, personList)
+        assertNull(saveCallback.error)
+        assertNotNull(saveCallback.result)
+
+        val findCallback = find(personStore, LONG_TIMEOUT)
+        assertNotNull(findCallback.result)
+        assertTrue(checkPersonIfSameObjects(personList, findCallback.result?.result))
+        val personListSecond = ArrayList<Person>()
+        personListSecond.addAll(findCallback.result?.result!!)
+        personListSecond.add(Person())
+        val saveCallbackSecond = createList(personStore, personListSecond)
+        assertNull(saveCallbackSecond.error)
+        assertNotNull(saveCallbackSecond.result)
+        if (!storeType.equals(StoreType.SYNC)) {
+            assertNotNull(saveCallbackSecond.result?.errors)
+            assertEquals(saveCallbackSecond.result?.errors?.size, 5)
+        }
+    }
+
     // NETWORK STORE
     @Test
     @Throws(InterruptedException::class)
