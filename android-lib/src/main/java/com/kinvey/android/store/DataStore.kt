@@ -415,11 +415,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      * @param callback KinveyClientCallback<KinveySaveBatchResponse<T>>
     </T> */
     fun create(entities: List<T>, callback: KinveyClientCallback<KinveySaveBatchResponse<T>>) {
-        if (kinveyApiVersion >= KINVEY_API_VERSION_5) {
-            createBatch(entities, callback)
-        } /*else {
-            saveV4(entities, callback)
-        }*/
+        createBatch(entities, callback)
     }
 
     private fun createBatch(entities: List<T>, callback: KinveyClientCallback<KinveySaveBatchResponse<T>>) {
@@ -427,6 +423,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
         Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         Preconditions.checkNotNull(entities, "Entity cannot be null.")
         Preconditions.checkState(entities.size > 0, "Entity list cannot be empty.")
+        Preconditions.checkState(kinveyApiVersion == KINVEY_API_VERSION_5, "Kinvey api version cannot be less than 5.")
         Logger.INFO("Calling DataStore#createBatch(listObjects)")
         CreateListBatchRequest(this, entities, callback).execute()
     }
@@ -455,6 +452,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      * @param entities The list of entities to save
      * @param callback KinveyClientCallback<List></List><T>>
     </T> */
+    @Deprecated("use {@link DataStore#create(List<T>, KinveyClientCallback<KinveySaveBatchResponse<T>>)}")
     fun save(entities: List<T>, callback: KinveyClientCallback<List<T>>) {
         if (kinveyApiVersion >= KINVEY_API_VERSION_5) {
             saveBatch(entities, callback)

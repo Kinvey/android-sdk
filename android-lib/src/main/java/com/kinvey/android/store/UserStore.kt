@@ -1110,6 +1110,7 @@ class UserStore {
          * @param redirectURI redirectURI
          * @param callback KinveyMICCallback
          */
+        @JvmStatic
         fun loginWithMIC(client: Client<*>, clientId: String?, /*Class userClass, */
                          redirectURI: String, callback: KinveyMICCallback<*>) {
             //return URL for login page
@@ -1210,6 +1211,7 @@ class UserStore {
          * @param password [String] the password of Kinvey user.
          * @param callback [KinveyUserCallback]
          */
+        @JvmStatic
         fun <T: User> loginWithMIC(client: AbstractClient<T>, username: String,
                          password: String, clientId: String, callback: KinveyUserCallback<T>) {
             MICCallback = callback
@@ -1226,6 +1228,7 @@ class UserStore {
          * @param callback [KinveyUserCallback]
          */
         @Deprecated("Use {@link #loginWithMIC(AbstractClient, String, String, String, KinveyUserCallback)}")
+        @JvmStatic
         fun loginWithMIC(client: AbstractClient<User>, username: String,
                          password: String, clientId: String?,
                          redirectURI: String, callback: KinveyUserCallback<User>) {
