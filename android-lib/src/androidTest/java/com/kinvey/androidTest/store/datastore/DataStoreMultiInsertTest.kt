@@ -28,6 +28,7 @@ import org.junit.Assert.assertTrue
 @LargeTest
 class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
 
+    // CREATE METHOD TESTS
     @Test
     @Throws(InterruptedException::class)
     fun createMultiInsertListNetwork() {
@@ -72,6 +73,109 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
             assertEquals(saveCallbackSecond.result?.errors?.size, 5)
         }
     }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun createMultiListWithId() {
+        val personList = createPersonsList(true)
+
+        val personStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.NETWORK, client)
+        clearBackend(personStore)
+        client?.syncManager?.clear(Person.COLLECTION)
+
+        val saveCallback = createList(personStore, personList)
+        assertNull(saveCallback.error)
+        assertNotNull(saveCallback.result)
+
+        val findCallback = find(personStore, LONG_TIMEOUT)
+        assertNotNull(findCallback.result)
+        assertTrue(checkPersonIfSameObjects(personList, findCallback.result?.result))
+        val personListSecond = ArrayList<Person>()
+        personListSecond.addAll(findCallback.result?.result!!)
+        personListSecond.add(Person())
+        val saveCallbackSecond = createList(personStore, personListSecond)
+        assertNull(saveCallbackSecond.error)
+        assertNotNull(saveCallbackSecond.result)
+        assertNotNull(saveCallbackSecond.result?.errors)
+        assertEquals(saveCallbackSecond.result?.errors?.size, 5)
+    }
+
+    @Throws(InterruptedException::class)
+    fun testCreateListReturnErrorForInvalidCredentialsNetwork() {
+        val entityList = createEntityList(2)
+        val store = DataStore.collection(EntitySet.COLLECTION, EntitySet::class.java, StoreType.NETWORK, client)
+        clearBackend(store)
+        val defaultKinveyListCallback = createList(store, entityList)
+        assertNotNull(defaultKinveyListCallback.error)
+        assertEquals(defaultKinveyListCallback.error?.javaClass, KinveyJsonResponseException::class.java)
+    }
+
+    @Throws(InterruptedException::class)
+    fun testCreateListCombineWithIdAndWithoutIdSync() {
+        val personList = createCombineList()
+
+        val syncStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
+
+        clearBackend(syncStore)
+        client?.syncManager?.clear(Person.COLLECTION)
+
+        val saveCallback = createList(syncStore, personList)
+        assertNull(saveCallback.error)
+        assertNotNull(saveCallback.result)
+        assertTrue(checkPersonIfSameObjects(personList, saveCallback.result?.entities, false))
+
+        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        assertNotNull(syncItems)
+        assertEquals(syncItems!!.size.toLong(), personList.size.toLong())
+        assertEquals(syncItems[0].requestMethod, SyncRequest.HttpVerb.POST)
+        assertEquals(syncItems[1].requestMethod, SyncRequest.HttpVerb.PUT)
+        assertEquals(syncItems[2].requestMethod, SyncRequest.HttpVerb.POST)
+        assertEquals(syncItems[3].requestMethod, SyncRequest.HttpVerb.PUT)
+
+        val findCallbackSync = find(syncStore, LONG_TIMEOUT)
+        assertNotNull(findCallbackSync.result)
+        assertTrue(checkPersonIfSameObjects(personList, findCallbackSync.result?.result))
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testCreateListCombineWithIdAndWithoutIdAuto() {
+        val personList = createCombineList()
+
+        val mockNetManager = MockMultiInsertNetworkManager(Person.COLLECTION, Person::class.java, client as Client)
+        val autoStore = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.AUTO, mockNetManager)
+        val syncStore = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.SYNC, mockNetManager)
+        val netStore = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.NETWORK, mockNetManager)
+
+        clearBackend(autoStore)
+        clearBackend(syncStore)
+        clearBackend(netStore)
+        client?.syncManager?.clear(Person.COLLECTION)
+
+        mockNetManager.clear()
+        val saveCallback = createList(autoStore, personList)
+        assertNull(saveCallback.error)
+        assertNotNull(saveCallback.result)
+        assertTrue(checkPersonIfSameObjects(personList, saveCallback.result?.entities))
+        assertTrue(mockNetManager.useMultiInsertSave)
+
+        val findCallbackSync = find(syncStore, LONG_TIMEOUT)
+        assertNotNull(findCallbackSync.result)
+        assertTrue(checkPersonIfSameObjects(personList, findCallbackSync.result?.result))
+
+        val findCallbackNet = find(netStore, LONG_TIMEOUT)
+        assertNotNull(findCallbackNet.result)
+        assertTrue(checkPersonIfSameObjects(personList, findCallbackNet.result?.result))
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testCreateListReturnErrorForEmptyListSync() {
+        val list = ArrayList<Person>()
+        testCreateEmptyList(list, Person::class.java, Person.COLLECTION, StoreType.SYNC)
+    }
+
+    // SAVE METHOD TESTS
 
     // NETWORK STORE
     @Test

@@ -625,6 +625,20 @@ open class BaseDataStoreMultiInsertTest {
     }
 
     @Throws(InterruptedException::class)
+    fun <T : GenericJson> testCreateEmptyList(list: List<T>, cls: Class<T>, collection: String, storeType: StoreType) {
+        val personStore = DataStore.collection(collection, cls, storeType, client)
+        clearBackend(personStore)
+        client?.syncManager?.clear(Person.COLLECTION)
+
+        val saveCallback = createList(personStore, list)
+        Assert.assertNull(saveCallback.result)
+        val error = saveCallback.error
+        Assert.assertNotNull(error)
+        Assert.assertEquals(error?.javaClass, IllegalStateException::class.java)
+        Assert.assertTrue(error?.message?.contains(ERR_EMPTY_LIST_MSG) == true)
+    }
+
+    @Throws(InterruptedException::class)
     fun <T : GenericJson> testSaveEmptyList(list: List<T>, cls: Class<T>, collection: String, storeType: StoreType) {
         val personStore = DataStore.collection(collection, cls, storeType, client)
         clearBackend(personStore)
