@@ -12,6 +12,7 @@ import com.kinvey.android.store.DataStore
 import com.kinvey.android.store.DataStore.Companion.collection
 import com.kinvey.androidTest.TestManager
 import com.kinvey.androidTest.TestManager.Companion.PASSWORD
+import com.kinvey.androidTest.TestManager.Companion.TEST_USERNAME
 import com.kinvey.androidTest.TestManager.Companion.USERNAME
 import com.kinvey.androidTest.model.LiveModel
 import com.kinvey.java.AbstractClient
@@ -47,7 +48,7 @@ class LiveServiceTest {
     @Before
     @Throws(InterruptedException::class, IOException::class)
     fun setUp() {
-        val mMockContext = InstrumentationRegistry.getInstrumentation().targetContext
+        val mMockContext: Context? = InstrumentationRegistry.getInstrumentation().targetContext
         client = Builder<User>(mMockContext).build()
         client?.enableDebugLogging()
         testManager = TestManager()

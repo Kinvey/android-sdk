@@ -13,6 +13,7 @@ import org.junit.runner.RunWith
 
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Ignore
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
@@ -36,6 +37,7 @@ class DataStoreMultipleMultiInsertTest : BaseDataStoreMultiInsertTest() {
         Assert.assertEquals(netManager.multiPostCount, 2)
     }
 
+    @Ignore("Currently fail because of KCS issue: https://kinvey.atlassian.net/browse/KDEV-365")
     @Test
     @Throws(InterruptedException::class)
     fun testSaveMultipleBatchRequestsIfWasErrors() {

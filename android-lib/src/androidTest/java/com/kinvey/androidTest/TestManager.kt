@@ -1,6 +1,9 @@
 package com.kinvey.androidTest
 
+import android.content.Context
+import android.os.Looper
 import android.os.Message
+import androidx.test.platform.app.InstrumentationRegistry
 import com.google.api.client.json.GenericJson
 import com.kinvey.android.Client
 import com.kinvey.android.model.User
@@ -36,14 +39,14 @@ import java.util.concurrent.TimeUnit
 
 class TestManager<T : GenericJson> {
 
-    @Throws(InterruptedException::class)
+    @Throws(InterruptedException::class, IOException::class)
     fun login(userName: String?, password: String?, client: Client<*>?) {
+        val latch = CountDownLatch(1)
         if (client?.isUserLoggedIn == false) {
-            val latch = CountDownLatch(1)
-            val looperThread: LooperThread
-            looperThread = LooperThread(Runnable {
+            Thread(Runnable {
+                Looper.prepare()
                 try {
-                    login<User>(userName!!, password!!, client as AbstractClient<User>, object : KinveyClientCallback<User> {
+                    login<User>(userName ?: "", password ?: "", client as AbstractClient<User>, object : KinveyClientCallback<User> {
                         override fun onSuccess(result: User?) {
                             assertNotNull(result)
                             latch.countDown()
@@ -57,11 +60,12 @@ class TestManager<T : GenericJson> {
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
-            })
-            looperThread.start()
-            latch.await()
-            looperThread.mHandler?.sendMessage(Message())
+                Looper.loop()
+            }).start()
+        } else {
+            latch.countDown()
         }
+        latch.await()
     }
 
     @Throws(InterruptedException::class)
