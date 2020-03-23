@@ -33,7 +33,7 @@ android {
     minSdkVersion 16
     targetSdkVersion 29
     multiDexEnabled true
-    testInstrumentationRunner "com.kinvey.androidTest.store.data.cache.TestRunner"
+    testInstrumentationRunner "com.kinvey.androidTest.TestRunner"
   }
   buildTypes {
     release {
@@ -142,16 +142,22 @@ dependencies {
 
   // Required -- JUnit 4 framework
   androidTestImplementation 'junit:junit:4.12'
+
   // Optional -- Mockito framework
-  androidTestImplementation group: 'org.mockito', name: 'mockito-core', version: '3.0.0'
-  androidTestImplementation group: 'com.linkedin.dexmaker', name: 'dexmaker-mockito', version: '2.25.0'
+  androidTestImplementation "org.powermock:powermock-core:2.0.2"
+  androidTestImplementation "org.powermock:powermock-module-junit4:1.7.3"
+  androidTestImplementation "org.powermock:powermock-api-mockito2:2.0.2"
+
+  //androidTestImplementation group: 'com.linkedin.dexmaker', name: 'dexmaker-mockito', version: '2.25.0'
+
+  // Android Unit Testing
   androidTestImplementation group: 'androidx.test', name: 'runner', version: androidx_version
   androidTestImplementation group: 'androidx.test', name: 'rules', version: androidx_version
 
   // Unit Testing
   testImplementation 'io.reactivex:rxjava:1.3.8'
   testImplementation 'junit:junit:4.12'
-  testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.0.0'
+  //testImplementation "org.powermock:powermock-core:2.0.2"
 
   // Optional -- Hamcrest library
   androidTestImplementation 'org.hamcrest:hamcrest-library:2.1'

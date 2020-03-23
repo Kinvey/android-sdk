@@ -24,9 +24,12 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.any
+import org.powermock.reflect.Whitebox
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.util.concurrent.CountDownLatch
+
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
@@ -252,6 +255,20 @@ class PushTest {
         looperThread.start()
         latch.await()
         looperThread.mHandler?.sendMessage(Message())
+    }
+
+    @Test
+    fun testAsyncRegisterFCMConstructor() {
+        val asyncRegisterFCMClass = Whitebox.getInnerClassType(FCMPush::class.java, "AsyncRegisterFCM")
+        val asyncRegisterFCMInstance = Whitebox.newInstance(asyncRegisterFCMClass)
+        assertNotNull(asyncRegisterFCMInstance)
+    }
+
+    @Test
+    fun testAsyncUnRegisterFCMConstructor() {
+        val asyncUnRegisterFCMClass = Whitebox.getInnerClassType(FCMPush::class.java, "AsyncUnRegisterFCM")
+        val asyncUnRegisterFCMInstance = Whitebox.newInstance(asyncUnRegisterFCMClass)
+        assertNotNull(asyncUnRegisterFCMInstance)
     }
 
     companion object {

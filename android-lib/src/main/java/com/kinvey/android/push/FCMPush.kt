@@ -244,6 +244,9 @@ class FCMPush(client: Client<*>?, inProduction: Boolean, senderIDs: Array<String
     }
 
     private inner class AsyncRegisterFCM(callback: KinveyClientCallback<Any?>?) : AsyncClientRequest<Any?>(callback) {
+
+        constructor() : this(null)
+
         @Throws(IOException::class)
         override fun executeAsync(): User? {
             try {
@@ -269,8 +272,10 @@ class FCMPush(client: Client<*>?, inProduction: Boolean, senderIDs: Array<String
         }
     }
 
-    private inner class AsyncUnRegisterFCM(callback: KinveyClientCallback<Any?>?)
-        : AsyncClientRequest<Any?>(callback) {
+    private inner class AsyncUnRegisterFCM(callback: KinveyClientCallback<Any?>?) : AsyncClientRequest<Any?>(callback) {
+
+        constructor() : this(null)
+
         @Throws(IOException::class)
         override fun executeAsync(): User? {
             try {
