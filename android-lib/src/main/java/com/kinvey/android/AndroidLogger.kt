@@ -27,7 +27,7 @@ import com.kinvey.java.Logger.KinveyLogger
  * @since 2.9.1
  */
 //Creates an instance of the Android Specific loggin mechanism
-class AndroidLogger : KinveyLogger {
+open class AndroidLogger : KinveyLogger {
 
     /**
      * Delegate an info message to Log.i
