@@ -45,14 +45,14 @@ import com.kinvey.java.auth.CredentialStore
  *
  * @author edwardf
  */
-class SharedPrefCredentialStore(private val context: Context) : CredentialStore {
+class SharedPrefCredentialStore(private val context: Context?) : CredentialStore {
 
     @Throws(IOException::class)
     override fun load(userId: String?): Credential? {
-        val pref = context.getSharedPreferences(PREF_STORE + userId, Activity.MODE_PRIVATE)
-        val id = pref.getString(PREF_ID, null)
-        val auth = pref.getString(PREF_AUTH, null)
-        val refresh = pref.getString(PREF_REFRESH, null)
+        val pref = context?.getSharedPreferences(PREF_STORE + userId, Activity.MODE_PRIVATE)
+        val id = pref?.getString(PREF_ID, null)
+        val auth = pref?.getString(PREF_AUTH, null)
+        val refresh = pref?.getString(PREF_REFRESH, null)
         return if (id != null && auth != null) {
             Credential(id, auth, refresh)
         } else null
@@ -60,21 +60,19 @@ class SharedPrefCredentialStore(private val context: Context) : CredentialStore 
 
     @Throws(IOException::class)
     override fun store(userId: String?, credential: Credential?) {
-        val edit = context.getSharedPreferences(PREF_STORE + userId, Activity.MODE_PRIVATE).edit()
-        edit.putString(PREF_ID, userId)
-        edit.putString(PREF_AUTH, credential?.authToken)
-        edit.putString(PREF_REFRESH, credential?.refreshToken)
-        edit.commit()
+        val edit = context?.getSharedPreferences(PREF_STORE + userId, Activity.MODE_PRIVATE)?.edit()
+        edit?.putString(PREF_ID, userId)
+        edit?.putString(PREF_AUTH, credential?.authToken)
+        edit?.putString(PREF_REFRESH, credential?.refreshToken)
+        edit?.apply()
     }
 
     override fun delete(userId: String?) {
-        val edit = context.getSharedPreferences(PREF_STORE + userId, Activity.MODE_PRIVATE).edit()
-        edit.remove(PREF_ID)
-        edit.remove(PREF_AUTH)
-        edit.remove(PREF_REFRESH)
-        edit.commit()
-
-
+        val edit = context?.getSharedPreferences(PREF_STORE + userId, Activity.MODE_PRIVATE)?.edit()
+        edit?.remove(PREF_ID)
+        edit?.remove(PREF_AUTH)
+        edit?.remove(PREF_REFRESH)
+        edit?.apply()
     }
 
     companion object {
