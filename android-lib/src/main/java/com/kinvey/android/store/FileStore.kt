@@ -49,7 +49,7 @@ class FileStore(networkFileManager: NetworkFileManager,
                 cacheManager: ICacheManager?, ttl: Long?, storeType: StoreType?, cacheFolder: String?) : BaseFileStore(networkFileManager, cacheManager, ttl, storeType, cacheFolder) {
 
 
-    private enum class FileMethods(val method: Method) {
+    enum class FileMethods(val method: Method) {
 
         //UPLOAD METHODS
         UPLOAD_FILE(BaseFileStore::class.java.getDeclaredMethod("upload", File::class.java, UploaderProgressListener::class.java)),
@@ -72,17 +72,23 @@ class FileStore(networkFileManager: NetworkFileManager,
 
     }
 
+    private fun getAsyncUploadRequest(file: File, listener: AsyncUploaderProgressListener<FileMetaData>): AsyncUploadRequest<*> {
+        return AsyncUploadRequest(this, FileMethods.UPLOAD_FILE.method, listener, file)
+    }
+
+    private fun runAsyncUploadRequest(scope: Any, method: Method?, file: File?, metadata: FileMetaData?,
+                                      listener: AsyncUploaderProgressListener<FileMetaData>) {
+        return AsyncUploadRequest(scope, method, listener, file, metadata).execute()
+    }
+
     @Throws(IOException::class, KinveyException::class)
     fun upload(file: File, listener: AsyncUploaderProgressListener<FileMetaData>) {
-        AsyncUploadRequest(this, FileMethods.UPLOAD_FILE.method, listener, file).execute()
+        getAsyncUploadRequest(file, listener).execute()
     }
 
     @Throws(IOException::class)
-    fun upload(file: File?, metadata: FileMetaData?,
-               listener: AsyncUploaderProgressListener<FileMetaData>) {
-
-        AsyncUploadRequest(this, FileMethods.UPLOAD_FILE_METADATA.method, listener,
-                file, metadata).execute()
+    fun upload(file: File?, metadata: FileMetaData?, listener: AsyncUploaderProgressListener<FileMetaData>) {
+        runAsyncUploadRequest(this, FileMethods.UPLOAD_FILE_METADATA.method, file, metadata, listener)
     }
 
     @Throws(IOException::class)

@@ -34,8 +34,8 @@ class AndroidLoggerTest {
     @Test
     fun testDebug() {
         val logger: AndroidLogger = spyk(AndroidLogger())
-        logger.info(loggerMsg)
-        verify { logger.info(loggerMsg) }
+        logger.debug(loggerMsg)
+        verify { logger.debug(loggerMsg) }
     }
 
     @Test
@@ -49,13 +49,13 @@ class AndroidLoggerTest {
     fun testWarning() {
         val logger: AndroidLogger = spyk(AndroidLogger())
         logger.warning(loggerMsg)
-        verify { logger.info(loggerMsg) }
+        verify { logger.warning(loggerMsg) }
     }
 
     @Test
     fun testError() {
         val logger: AndroidLogger = spyk(AndroidLogger())
         logger.error(loggerMsg)
-        verify { logger.info(loggerMsg) }
+        verify { logger.error(loggerMsg) }
     }
 }
