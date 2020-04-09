@@ -27,8 +27,11 @@ import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.IOException
+import java.io.InputStream
+import java.lang.reflect.Method
 import java.util.concurrent.CountDownLatch
 
 @RunWith(AndroidJUnit4::class)
@@ -96,55 +99,134 @@ class FileStoreMockTest {
         return fileStore
     }
 
+    private val asyncUploaderProgressListener =
+    object: AsyncUploaderProgressListener<FileMetaData> {
+        override fun progressChanged(uploader: MediaHttpUploader?) {}
+        override fun onCancelled() {}
+        override fun onSuccess(result: FileMetaData?) {}
+        override fun onFailure(error: Throwable?) {}
+        override var isCancelled: Boolean = false
+    }
+
     @Test
-    fun uploadTest() {
+    fun uploadTestFile() {
+
+        assertNotNull(networkFileManager)
+
+        val fileStore = getFileStore(StoreType.NETWORK)
+        val file = File(testFileName)
+        val testPrivateMethodName = "runAsyncUploadRequestUploadFile"
+
+        val latch = CountDownLatch(1)
+
+        val looperThread = LooperThread(Runnable {
+
+            every { fileStore[testPrivateMethodName](file, asyncUploaderProgressListener)
+            } returns true
+
+            fileStore?.upload(file, asyncUploaderProgressListener)
+
+            verify {
+                fileStore[testPrivateMethodName](file, asyncUploaderProgressListener)
+            }
+
+            latch.countDown()
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+    }
+
+    @Test
+    fun uploadTestFileMetadata() {
 
         assertNotNull(networkFileManager)
 
         val fileStore = getFileStore(StoreType.NETWORK)
         val fileMetaData = FileMetaData()
         val file = File(testFileName)
-
-        val listener = object: AsyncUploaderProgressListener<FileMetaData> {
-
-            var flagCancelled: Boolean = false
-
-            override fun onSuccess(result: FileMetaData?) {}
-
-            override fun onFailure(error: Throwable?) {}
-
-            override fun progressChanged(uploader: MediaHttpUploader?) {}
-
-            override fun onCancelled() {
-                isCancelled = true
-            }
-
-            override var isCancelled: Boolean
-                get() = flagCancelled
-                set(value) { flagCancelled = value }
-        }
+        val testPrivateMethodName = "runAsyncUploadRequestFileMetadata"
 
         val latch = CountDownLatch(1)
+
         val looperThread = LooperThread(Runnable {
 
-            every { fileStore?.get("runAsyncUploadRequest")(fileStore, FileStore.FileMethods.UPLOAD_FILE_METADATA.method,
-                    file, fileMetaData, listener)
-            }.throws(Exception("test"))
+            every { fileStore[testPrivateMethodName](file, fileMetaData, asyncUploaderProgressListener)
+            } returns true
 
-            fileStore?.upload(file, fileMetaData, listener)
+            fileStore?.upload(file, fileMetaData, asyncUploaderProgressListener)
 
             verify {
-                fileStore?.get("runAsyncUploadRequest")(fileStore, FileStore.FileMethods.UPLOAD_FILE_METADATA.method,
-                        file, fileMetaData, listener)
+                fileStore[testPrivateMethodName](file, fileMetaData, asyncUploaderProgressListener)
             }
 
             latch.countDown()
         })
-
         looperThread.start()
         latch.await()
         looperThread.mHandler?.sendMessage(Message())
     }
+
+    @Test
+    fun uploadTestStreamMetadata() {
+
+        assertNotNull(networkFileManager)
+
+        val fileStore = getFileStore(StoreType.NETWORK)
+        val fileMetaData = FileMetaData()
+        val stream = ByteArrayInputStream(byteArrayOf())
+        val testPrivateMethodName = "runAsyncUploadRequestStreamMetadata"
+
+        val latch = CountDownLatch(1)
+
+        val looperThread = LooperThread(Runnable {
+
+            every { fileStore[testPrivateMethodName](stream, fileMetaData, asyncUploaderProgressListener)
+            } returns true
+
+            fileStore?.upload(stream, fileMetaData, asyncUploaderProgressListener)
+
+            verify {
+                fileStore[testPrivateMethodName](stream, fileMetaData, asyncUploaderProgressListener)
+            }
+
+            latch.countDown()
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+    }
+
+    @Test
+    fun uploadTestStreamFilename() {
+
+        assertNotNull(networkFileManager)
+
+        val fileStore = getFileStore(StoreType.NETWORK)
+        val fileName = "test_file.txt"
+        val stream = ByteArrayInputStream(byteArrayOf())
+        val testPrivateMethodName = "runAsyncUploadRequestStreamFilename"
+
+        val latch = CountDownLatch(1)
+
+        val looperThread = LooperThread(Runnable {
+
+            every { fileStore[testPrivateMethodName](fileName, stream, asyncUploaderProgressListener)
+            } returns true
+
+            fileStore?.upload(fileName, stream, asyncUploaderProgressListener)
+
+            verify {
+                fileStore[testPrivateMethodName](fileName, stream, asyncUploaderProgressListener)
+            }
+
+            latch.countDown()
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+    }
+
 
     @Test
     fun removeTest() {

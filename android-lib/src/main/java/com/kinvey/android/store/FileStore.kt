@@ -40,12 +40,11 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.lang.reflect.Method
-import java.util.HashMap
 
 /**
  * Created by Prots on 2/22/16.
  */
-class FileStore(networkFileManager: NetworkFileManager,
+open class FileStore(networkFileManager: NetworkFileManager,
                 cacheManager: ICacheManager?, ttl: Long?, storeType: StoreType?, cacheFolder: String?) : BaseFileStore(networkFileManager, cacheManager, ttl, storeType, cacheFolder) {
 
 
@@ -72,36 +71,45 @@ class FileStore(networkFileManager: NetworkFileManager,
 
     }
 
-    private fun getAsyncUploadRequest(file: File, listener: AsyncUploaderProgressListener<FileMetaData>): AsyncUploadRequest<*> {
-        return AsyncUploadRequest(this, FileMethods.UPLOAD_FILE.method, listener, file)
+    protected open fun runAsyncUploadRequestUploadFile(file: File,
+                                                       listener: AsyncUploaderProgressListener<FileMetaData>) {
+        AsyncUploadRequest(this, FileMethods.UPLOAD_FILE.method, listener, file).execute()
     }
 
-    private fun runAsyncUploadRequest(scope: Any, method: Method?, file: File?, metadata: FileMetaData?,
-                                      listener: AsyncUploaderProgressListener<FileMetaData>) {
-        return AsyncUploadRequest(scope, method, listener, file, metadata).execute()
+    protected open fun runAsyncUploadRequestFileMetadata(file: File?, metadata: FileMetaData?,
+                                                         listener: AsyncUploaderProgressListener<FileMetaData>) {
+        AsyncUploadRequest(this, FileMethods.UPLOAD_FILE_METADATA.method, listener, file, metadata).execute()
+    }
+
+    protected open fun runAsyncUploadRequestStreamMetadata(`is`: InputStream?, metadata: FileMetaData?,
+                                                           listener: AsyncUploaderProgressListener<FileMetaData>) {
+        AsyncUploadRequest(this, FileMethods.UPLOAD_STREAM_METADATA.method, listener, `is`, metadata).execute()
+    }
+
+    protected open fun runAsyncUploadRequestStreamFilename(filename: String, `is`: InputStream,
+                                                           listener: AsyncUploaderProgressListener<FileMetaData>) {
+        AsyncUploadRequest(this, FileMethods.UPLOAD_STREAM_FILENAME.method, listener,
+                filename, `is`).execute()
     }
 
     @Throws(IOException::class, KinveyException::class)
     fun upload(file: File, listener: AsyncUploaderProgressListener<FileMetaData>) {
-        getAsyncUploadRequest(file, listener).execute()
+        runAsyncUploadRequestUploadFile(file, listener)
     }
 
     @Throws(IOException::class)
     fun upload(file: File?, metadata: FileMetaData?, listener: AsyncUploaderProgressListener<FileMetaData>) {
-        runAsyncUploadRequest(this, FileMethods.UPLOAD_FILE_METADATA.method, file, metadata, listener)
+        runAsyncUploadRequestFileMetadata(file, metadata, listener)
     }
 
     @Throws(IOException::class)
     fun upload(`is`: InputStream, metadata: FileMetaData, listener: AsyncUploaderProgressListener<FileMetaData>) {
-        AsyncUploadRequest(this, FileMethods.UPLOAD_STREAM_METADATA.method, listener,
-                `is`, metadata).execute()
+        runAsyncUploadRequestStreamMetadata(`is`, metadata, listener)
     }
 
     @Throws(IOException::class)
-    fun upload(filename: String, `is`: InputStream,
-               listener: AsyncUploaderProgressListener<FileMetaData>) {
-        AsyncUploadRequest(this, FileMethods.UPLOAD_STREAM_FILENAME.method, listener,
-                filename, `is`).execute()
+    fun upload(filename: String, `is`: InputStream, listener: AsyncUploaderProgressListener<FileMetaData>) {
+        runAsyncUploadRequestStreamFilename(filename, `is`, listener)
     }
 
     @Throws(IOException::class)
