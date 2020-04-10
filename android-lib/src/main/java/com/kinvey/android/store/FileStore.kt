@@ -92,6 +92,27 @@ open class FileStore(networkFileManager: NetworkFileManager,
                 filename, `is`).execute()
     }
 
+    protected open fun runAsyncRequestRemoveId(metadata: FileMetaData?, callback: KinveyDeleteCallback?) {
+        AsyncRequest(this, FileMethods.REMOVE_ID.method, callback, metadata).execute()
+    }
+
+    protected open fun runAsyncDownloadRequestMetadata(metadata: FileMetaData?, os: OutputStream,
+                 progressListener: AsyncDownloaderProgressListener<FileMetaData>, cachedOs: OutputStream? = null,
+                 cachedClientCallback: KinveyCachedClientCallback<FileMetaData>? = null) {
+        AsyncDownloadRequest(this, FileMethods.CACHED_DOWNLOAD_METADATA.method, progressListener,
+                metadata, os, cachedOs, getWrappedCacheCallback(cachedClientCallback)).execute()
+    }
+
+    protected open fun runAsyncRequestRefreshFile(metadata: FileMetaData?, metaCallback: KinveyClientCallback<FileMetaData>?,
+                cachedClientCallback: KinveyCachedClientCallback<FileMetaData>? = null) {
+        AsyncRequest(this, FileMethods.REFRESH_FILE.method, metaCallback, metadata, cachedClientCallback).execute()
+    }
+
+    protected open fun runAsyncRequestFindQuery(q: Query, metaCallback: KinveyClientCallback<Array<FileMetaData>>,
+                                 cachedClientCallback: KinveyCachedClientCallback<Array<FileMetaData>>?) {
+        AsyncRequest(this, FileMethods.FIND_QUERY.method, metaCallback, q, cachedClientCallback).execute()
+    }
+
     @Throws(IOException::class, KinveyException::class)
     fun upload(file: File, listener: AsyncUploaderProgressListener<FileMetaData>) {
         runAsyncUploadRequestUploadFile(file, listener)
@@ -114,33 +135,35 @@ open class FileStore(networkFileManager: NetworkFileManager,
 
     @Throws(IOException::class)
     fun remove(metadata: FileMetaData?, callback: KinveyDeleteCallback?) {
-        AsyncRequest(this, FileMethods.REMOVE_ID.method, callback,
-                metadata).execute()
+        runAsyncRequestRemoveId(metadata, callback)
     }
 
     @Throws(IOException::class)
     fun download(metadata: FileMetaData?, os: OutputStream,
-                 progressListener: AsyncDownloaderProgressListener<FileMetaData>, cachedClientCallback: KinveyCachedClientCallback<FileMetaData>?) {
+                 progressListener: AsyncDownloaderProgressListener<FileMetaData>,
+                 cachedClientCallback: KinveyCachedClientCallback<FileMetaData>?) {
         download(metadata, os, progressListener, null, cachedClientCallback)
     }
 
     @Throws(IOException::class)
     @JvmOverloads
     fun download(metadata: FileMetaData?, os: OutputStream,
-                 progressListener: AsyncDownloaderProgressListener<FileMetaData>, cachedOs: OutputStream? = null, cachedClientCallback: KinveyCachedClientCallback<FileMetaData>? = null) {
-        AsyncDownloadRequest(this, FileMethods.CACHED_DOWNLOAD_METADATA.method, progressListener,
-                metadata, os, cachedOs, getWrappedCacheCallback(cachedClientCallback)).execute()
+                 progressListener: AsyncDownloaderProgressListener<FileMetaData>, cachedOs: OutputStream? = null,
+                 cachedClientCallback: KinveyCachedClientCallback<FileMetaData>? = null) {
+        runAsyncDownloadRequestMetadata(metadata, os, progressListener, cachedOs, cachedClientCallback)
     }
 
     @Throws(IOException::class)
     @JvmOverloads
-    fun refresh(metadata: FileMetaData?, metaCallback: KinveyClientCallback<FileMetaData>?, cachedClientCallback: KinveyCachedClientCallback<FileMetaData>? = null) {
-        AsyncRequest(this, FileMethods.REFRESH_FILE.method, metaCallback, metadata, cachedClientCallback).execute()
+    fun refresh(metadata: FileMetaData?, metaCallback: KinveyClientCallback<FileMetaData>?,
+                cachedClientCallback: KinveyCachedClientCallback<FileMetaData>? = null) {
+        runAsyncRequestRefreshFile(metadata, metaCallback, cachedClientCallback)
     }
 
     @JvmOverloads
-    fun find(q: Query, metaCallback: KinveyClientCallback<Array<FileMetaData>>, cachedClientCallback: KinveyCachedClientCallback<Array<FileMetaData>>? = null) {
-        AsyncRequest(this, FileMethods.FIND_QUERY.method, metaCallback, q, cachedClientCallback).execute()
+    fun find(q: Query, metaCallback: KinveyClientCallback<Array<FileMetaData>>,
+             cachedClientCallback: KinveyCachedClientCallback<Array<FileMetaData>>? = null) {
+        runAsyncRequestFindQuery(q, metaCallback, cachedClientCallback)
     }
 
     fun cachedFile(fileId: String): FileMetaData? {

@@ -6,14 +6,19 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.kinvey.android.Client
+import com.kinvey.android.callback.AsyncDownloaderProgressListener
 import com.kinvey.android.callback.AsyncUploaderProgressListener
+import com.kinvey.android.callback.KinveyDeleteCallback
 import com.kinvey.android.model.User
 import com.kinvey.android.store.FileStore
 import com.kinvey.android.store.UserStore
 import com.kinvey.androidTest.LooperThread
 import com.kinvey.androidTest.TestManager
 import com.kinvey.java.AbstractClient
+import com.kinvey.java.Query
+import com.kinvey.java.cache.KinveyCachedClientCallback
 import com.kinvey.java.core.KinveyClientCallback
+import com.kinvey.java.core.MediaHttpDownloader
 import com.kinvey.java.core.MediaHttpUploader
 import com.kinvey.java.model.FileMetaData
 import com.kinvey.java.network.NetworkFileManager
@@ -27,11 +32,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.ByteArrayInputStream
-import java.io.File
-import java.io.IOException
-import java.io.InputStream
-import java.lang.reflect.Method
+import java.io.*
 import java.util.concurrent.CountDownLatch
 
 @RunWith(AndroidJUnit4::class)
@@ -106,6 +107,44 @@ class FileStoreMockTest {
         override fun onSuccess(result: FileMetaData?) {}
         override fun onFailure(error: Throwable?) {}
         override var isCancelled: Boolean = false
+    }
+
+    private val kinveyDeleteCallback = object: KinveyDeleteCallback {
+        override fun onSuccess(result: Int?) {}
+        override fun onFailure(error: Throwable?) {}
+    }
+
+    private val asyncDownloaderProgressListener =
+    object: AsyncDownloaderProgressListener<FileMetaData> {
+        override fun onSuccess(result: FileMetaData?) {}
+        override fun onFailure(error: Throwable?) {}
+        override fun progressChanged(downloader: MediaHttpDownloader?) {}
+        override fun onCancelled() {}
+        override var isCancelled: Boolean = false
+    }
+
+    val refreshKinveyClientCallback =
+    object: KinveyClientCallback<FileMetaData> {
+        override fun onSuccess(result: FileMetaData?) {}
+        override fun onFailure(error: Throwable?) {}
+    }
+
+    val findQueryKinveyClientCallback =
+    object: KinveyClientCallback<Array<FileMetaData>> {
+        override fun onSuccess(result: Array<FileMetaData>?) {}
+        override fun onFailure(error: Throwable?) {}
+    }
+
+    val kinveyCachedClientCallback =
+    object: KinveyCachedClientCallback<FileMetaData> {
+        override fun onSuccess(result: FileMetaData?) {}
+        override fun onFailure(error: Throwable?) {}
+    }
+
+    val findKinveyCachedClientCallback =
+    object: KinveyCachedClientCallback<Array<FileMetaData>> {
+        override fun onSuccess(result: Array<FileMetaData>?) {}
+        override fun onFailure(error: Throwable?) {}
     }
 
     @Test
@@ -203,7 +242,6 @@ class FileStoreMockTest {
         assertNotNull(networkFileManager)
 
         val fileStore = getFileStore(StoreType.NETWORK)
-        val fileName = "test_file.txt"
         val stream = ByteArrayInputStream(byteArrayOf())
         val testPrivateMethodName = "runAsyncUploadRequestStreamFilename"
 
@@ -211,13 +249,13 @@ class FileStoreMockTest {
 
         val looperThread = LooperThread(Runnable {
 
-            every { fileStore[testPrivateMethodName](fileName, stream, asyncUploaderProgressListener)
+            every { fileStore[testPrivateMethodName](testFileName, stream, asyncUploaderProgressListener)
             } returns true
 
-            fileStore?.upload(fileName, stream, asyncUploaderProgressListener)
+            fileStore?.upload(testFileName, stream, asyncUploaderProgressListener)
 
             verify {
-                fileStore[testPrivateMethodName](fileName, stream, asyncUploaderProgressListener)
+                fileStore[testPrivateMethodName](testFileName, stream, asyncUploaderProgressListener)
             }
 
             latch.countDown()
@@ -227,28 +265,121 @@ class FileStoreMockTest {
         looperThread.mHandler?.sendMessage(Message())
     }
 
-
     @Test
     fun removeTest() {
+
+        assertNotNull(networkFileManager)
+
+        val fileStore = getFileStore(StoreType.NETWORK)
+        val fileMetaData = FileMetaData()
+        val testPrivateMethodName = "runAsyncRequestRemoveId"
+
+        val latch = CountDownLatch(1)
+
+        val looperThread = LooperThread(Runnable {
+
+            every { fileStore[testPrivateMethodName](fileMetaData, kinveyDeleteCallback)
+            } returns true
+
+            fileStore?.remove(fileMetaData, kinveyDeleteCallback)
+
+            verify {
+                fileStore[testPrivateMethodName](fileMetaData, kinveyDeleteCallback)
+            }
+
+            latch.countDown()
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
     }
 
     @Test
     fun downloadTest() {
+        assertNotNull(networkFileManager)
+
+        val fileStore = getFileStore(StoreType.NETWORK)
+        val fileMetaData = FileMetaData()
+        val stream = ByteArrayOutputStream()
+        val cachedStream = ByteArrayOutputStream()
+
+        val testPrivateMethodName = "runAsyncDownloadRequestMetadata"
+
+        val latch = CountDownLatch(1)
+
+        val looperThread = LooperThread(Runnable {
+
+            every { fileStore[testPrivateMethodName](fileMetaData, stream, asyncDownloaderProgressListener, cachedStream, kinveyCachedClientCallback)
+            } returns true
+
+            fileStore?.download(fileMetaData, stream, asyncDownloaderProgressListener, cachedStream, kinveyCachedClientCallback)
+
+            verify {
+                fileStore[testPrivateMethodName](fileMetaData, stream, asyncDownloaderProgressListener, cachedStream, kinveyCachedClientCallback)
+            }
+
+            latch.countDown()
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
     }
 
     @Test
     fun refreshTest() {
+        assertNotNull(networkFileManager)
+
+        val fileStore = getFileStore(StoreType.NETWORK)
+        val fileMetaData = FileMetaData()
+
+        val testPrivateMethodName = "runAsyncRequestRefreshFile"
+
+        val latch = CountDownLatch(1)
+
+        val looperThread = LooperThread(Runnable {
+
+            every { fileStore[testPrivateMethodName](fileMetaData, refreshKinveyClientCallback, kinveyCachedClientCallback)
+            } returns true
+
+            fileStore?.refresh(fileMetaData, refreshKinveyClientCallback, kinveyCachedClientCallback)
+
+            verify {
+                fileStore[testPrivateMethodName](fileMetaData, refreshKinveyClientCallback, kinveyCachedClientCallback)
+            }
+
+            latch.countDown()
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
     }
 
     @Test
     fun findTest() {
-    }
+        assertNotNull(networkFileManager)
 
-    @Test
-    fun cachedFileTest() {
-    }
+        val fileStore = getFileStore(StoreType.NETWORK)
+        val query = Query()
 
-    @Test
-    fun clearCacheTest() {
+        val testPrivateMethodName = "runAsyncRequestFindQuery"
+
+        val latch = CountDownLatch(1)
+
+        val looperThread = LooperThread(Runnable {
+
+            every { fileStore[testPrivateMethodName](query, findQueryKinveyClientCallback, findKinveyCachedClientCallback)
+            } returns true
+
+            fileStore?.find(query, findQueryKinveyClientCallback, findKinveyCachedClientCallback)
+
+            verify {
+                fileStore[testPrivateMethodName](query, findQueryKinveyClientCallback, findKinveyCachedClientCallback)
+            }
+
+            latch.countDown()
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
     }
 }
