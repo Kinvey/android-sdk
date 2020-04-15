@@ -93,7 +93,7 @@ abstract class AsyncClientRequest<Result>(callback: KinveyClientCallback<Result>
      */
 
     @Throws(IOException::class, InvocationTargetException::class, IllegalAccessException::class, InstantiationException::class, KinveyException::class)
-    protected abstract fun executeAsync(): Result?
+    abstract fun executeAsync(): Result?
 
     override fun notify(obj: Result) {
         INFO("notifying async client request")

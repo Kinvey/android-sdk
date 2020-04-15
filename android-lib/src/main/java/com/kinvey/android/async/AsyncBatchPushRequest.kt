@@ -29,7 +29,6 @@ import com.kinvey.java.Constants._ID
 import com.kinvey.java.KinveyException
 import com.kinvey.java.Logger
 import com.kinvey.java.cache.ICache
-import com.kinvey.java.core.KinveyClientCallback
 import com.kinvey.java.core.KinveyJsonResponseException
 import com.kinvey.java.model.KinveySyncSaveBatchResponse
 import com.kinvey.java.model.KinveyUpdateSingleItemError
@@ -46,7 +45,7 @@ import java.security.AccessControlException
 /**
  * Class represents internal implementation of Async push request that is used to create push
  */
-class AsyncBatchPushRequest<T : GenericJson>(
+open class AsyncBatchPushRequest<T : GenericJson>(
     private val collection: String,
     private val manager: SyncManager?,
     private val client: AbstractClient<*>?,
@@ -98,7 +97,7 @@ class AsyncBatchPushRequest<T : GenericJson>(
     }
 
     @Throws(IOException::class)
-    private fun processSingleSyncItems(pushResponse: KinveyPushBatchResponse, syncItems: List<SyncItem>?): List<GenericJson> {
+    protected open fun processSingleSyncItems(pushResponse: KinveyPushBatchResponse, syncItems: List<SyncItem>?): List<GenericJson> {
         var item: T? = null
         var syncRequest: SyncRequest? = null
         val resultSingleItems = mutableListOf<GenericJson>()
@@ -144,7 +143,7 @@ class AsyncBatchPushRequest<T : GenericJson>(
     }
 
     @Throws(IOException::class)
-    private fun processBatchSyncRequest(syncItems: List<SyncItem>, saveItems: List<T>): KinveySyncSaveBatchResponse<*>? {
+    protected open fun processBatchSyncRequest(syncItems: List<SyncItem>, saveItems: List<T>): KinveySyncSaveBatchResponse<*>? {
         val syncRequest = manager?.createSaveBatchSyncRequest(collection, networkManager, saveItems)
         var resultList: KinveySyncSaveBatchResponse<T>? = null
         try {
@@ -158,7 +157,7 @@ class AsyncBatchPushRequest<T : GenericJson>(
     }
 
     @Throws(IOException::class)
-    private fun runSingleSyncRequest(syncRequest: SyncRequest?): GenericJson? {
+    protected open fun runSingleSyncRequest(syncRequest: SyncRequest?): GenericJson? {
         var resultItem: GenericJson? = null
         try {
             if (syncRequest?.httpVerb == SyncRequest.HttpVerb.POST) {
@@ -180,7 +179,7 @@ class AsyncBatchPushRequest<T : GenericJson>(
         return resultItem
     }
 
-    private fun removeBatchTempItems(batchSyncItems: List<SyncItem>, result: KinveySyncSaveBatchResponse<T>?) {
+    protected open fun removeBatchTempItems(batchSyncItems: List<SyncItem>, result: KinveySyncSaveBatchResponse<T>?) {
         batchSyncItems.onEach { item ->
             val tempID = item[_ID] as String?
             val entityID = item.entityID?.id
@@ -191,14 +190,14 @@ class AsyncBatchPushRequest<T : GenericJson>(
     }
 
     @Throws(IOException::class)
-    private fun getSaveItems(syncItems: List<SyncItem>): List<T> {
+    protected open fun getSaveItems(syncItems: List<SyncItem>): List<T> {
         return syncItems.mapNotNull { s ->
             val id = s.entityID?.id
             if (id?.isNotEmpty() == true) { cache?.get(id) } else null
         }
     }
 
-    private fun processQueuedSyncRequests(requests: List<SyncRequest>?, pushResponse: KinveyPushResponse) {
+    protected open fun processQueuedSyncRequests(requests: List<SyncRequest>?, pushResponse: KinveyPushResponse) {
         if (requests != null) {
             for (syncRequest in requests) {
                 try {

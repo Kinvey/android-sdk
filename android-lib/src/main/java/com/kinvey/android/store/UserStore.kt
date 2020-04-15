@@ -28,6 +28,15 @@ import java.lang.RuntimeException
 
 class UserStore {
 
+    protected open fun <T : User> runLoginKinveyAuth(userId: String, authToken: String,
+                                          client: AbstractClient<T>, callback: KinveyClientCallback<T>) {
+        LoginKinveyAuth(userId, authToken, client, callback).execute()
+    }
+
+    protected open fun <T : User> runSave(client: AbstractClient<T>, callback: KinveyClientCallback<T>) {
+        Update(client, callback).execute()
+    }
+
     /**
      * Login to Kinvey services using a Kinvey user's _id and their valid Kinvey Auth Token.  This method is provided
      * to allow for cross-platform login, by reusing a session provided with another client library (or the REST api).
@@ -39,7 +48,7 @@ class UserStore {
     @Deprecated("use {@link UserStore#login(String, String, AbstractClient, KinveyClientCallback<T>)}")
     fun <T : User> loginKinveyAuthToken(userId: String, authToken: String,
                                         client: AbstractClient<T>, callback: KinveyClientCallback<T>) {
-        LoginKinveyAuth(userId, authToken, client, callback).execute()
+        runLoginKinveyAuth(userId, authToken, client, callback)
     }
 
     /**
@@ -48,7 +57,7 @@ class UserStore {
      */
     @Deprecated("use {@link User#update(KinveyClientCallback)} ()} instead.")
     fun <T : User> save(client: AbstractClient<T>, callback: KinveyClientCallback<T>) {
-        Update(client, callback).execute()
+        runSave(client, callback)
     }
 
 
