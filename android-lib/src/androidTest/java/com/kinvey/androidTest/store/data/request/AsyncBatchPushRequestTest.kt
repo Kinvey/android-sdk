@@ -3,6 +3,7 @@ package com.kinvey.androidTest.store.data.request
 import android.content.Context
 import android.content.SyncRequest
 import android.os.Message
+import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
@@ -26,9 +27,11 @@ import io.mockk.spyk
 import io.mockk.verifySequence
 import org.junit.After
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.lang.reflect.Field
 import java.util.concurrent.CountDownLatch
 
 @RunWith(AndroidJUnit4::class)
@@ -79,7 +82,7 @@ class AsyncBatchPushRequestTest {
     }
 
     @Test
-    fun testAsyncBatchPushRequestSequenceExecution() {
+    fun testAsyncBatchPushRequestSequenceExecutionNoSyncItems() {
 
         assertNotNull(spyNetworkManager)
 
@@ -100,8 +103,6 @@ class AsyncBatchPushRequestTest {
                 asyncBatchPushRequest.executeAsync()
                 asyncBatchPushRequest["processQueuedSyncRequests"](any<List<SyncRequest>>(), any<KinveyPushBatchResponse>())
                 asyncBatchPushRequest["processSingleSyncItems"](any<KinveyPushBatchResponse>(), any<List<SyncItem>>())
-                //asyncBatchPushRequest["getSaveItems"](any<List<SyncItem>>())
-                //asyncBatchPushRequest["processBatchSyncRequest"](any<List<SyncItem>>(), arrayListOf<GenericJson>())
             }
 
             latch.countDown()
@@ -110,5 +111,52 @@ class AsyncBatchPushRequestTest {
         looperThread.start()
         latch.await()
         looperThread.mHandler?.sendMessage(Message())
+    }
+
+    @Test
+    fun testAsyncBatchPushRequestSequenceExecutionExistSyncItems() {
+
+        assertNotNull(spyNetworkManager)
+
+        val latch = CountDownLatch(1)
+
+        val looperThread = LooperThread(Runnable {
+
+            val asyncBatchPushRequest = getAsyncBatchPushRequest()
+
+            setPrivateField(asyncBatchPushRequest, AsyncBatchPushRequest::class.java,
+            "batchSyncItems", arrayListOf(SyncItem(), SyncItem()))
+
+            every { asyncBatchPushRequest["processQueuedSyncRequests"](any<List<SyncRequest>>(), any<KinveyPushBatchResponse>()) } returns Unit
+            every { asyncBatchPushRequest["processSingleSyncItems"](any<KinveyPushBatchResponse>(), any<List<SyncItem>>()) } returns arrayListOf<GenericJson>()
+            every { asyncBatchPushRequest["getSaveItems"](any<List<SyncItem>>()) } returns arrayListOf<GenericJson>()
+            every { asyncBatchPushRequest["processBatchSyncRequest"](any<List<SyncItem>>(), arrayListOf<GenericJson>()) } returns KinveySyncSaveBatchResponse(arrayListOf<GenericJson>(), arrayListOf<KinveyBatchInsertError>())
+
+            asyncBatchPushRequest.executeAsync()
+
+            verifySequence {
+                asyncBatchPushRequest.executeAsync()
+                asyncBatchPushRequest["processQueuedSyncRequests"](any<List<SyncRequest>>(), any<KinveyPushBatchResponse>())
+                asyncBatchPushRequest["processSingleSyncItems"](any<KinveyPushBatchResponse>(), any<List<SyncItem>>())
+                asyncBatchPushRequest["getSaveItems"](any<List<SyncItem>>())
+                asyncBatchPushRequest["processBatchSyncRequest"](any<List<SyncItem>>(), arrayListOf<GenericJson>())
+            }
+
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+    }
+
+    private fun setPrivateField(mainClassObj: Any, mainClsType: Class<*>, fieldNameStr: String, fieldValue: Any) {
+        try {
+            val fieldName = mainClsType.getDeclaredField(fieldNameStr)
+            fieldName.isAccessible = true
+            fieldName.set(mainClassObj, fieldValue)
+        } catch (e: Exception) {
+            Log.e("setPrivateField", "", e)
+        }
     }
 }
