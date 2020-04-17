@@ -2,8 +2,8 @@ package com.kinvey.androidTest.store.data;
 
 import android.content.Context
 import android.os.Looper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
 import com.kinvey.android.AsyncClientRequest
 import com.kinvey.android.Client
 import com.kinvey.android.KinveyCallbackHandler

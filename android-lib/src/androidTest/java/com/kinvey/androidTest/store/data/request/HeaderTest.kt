@@ -1,8 +1,8 @@
 package com.kinvey.androidTest.store.data.request
 
 import android.content.Context
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
 import com.google.api.client.json.GenericJson
 import com.kinvey.android.Client
 import com.kinvey.android.Client.Builder
@@ -11,7 +11,6 @@ import com.kinvey.androidTest.TestManager
 import com.kinvey.java.auth.KinveyAuthRequest
 import com.kinvey.java.core.KinveyHeaders
 import com.kinvey.java.store.UserStoreRequestManager
-import com.kinvey.java.store.UserStoreRequestManager.LoginRequest
 import junit.framework.Assert.assertNotNull
 import junit.framework.Assert.assertTrue
 import org.junit.After

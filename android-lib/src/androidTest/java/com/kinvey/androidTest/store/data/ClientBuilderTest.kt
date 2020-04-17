@@ -2,34 +2,24 @@ package com.kinvey.androidTest.store.data
 
 import android.content.Context
 import android.os.Message
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
 import com.google.api.client.testing.http.MockHttpTransport
-import com.kinvey.android.AndroidMimeTypeFinder
 import com.kinvey.android.Client
 import com.kinvey.android.Client.Builder
 import com.kinvey.android.callback.KinveyClientBuilderCallback
 import com.kinvey.android.model.User
 import com.kinvey.android.push.FCMPush
-import com.kinvey.android.store.UserStore
 import com.kinvey.androidTest.LooperThread
 import com.kinvey.androidTest.model.TestUser
-import com.kinvey.java.AbstractClient
 import com.kinvey.java.Constants
 import com.kinvey.java.KinveyException
-import com.kinvey.java.core.KinveyClientCallback
-import com.kinvey.java.model.FileMetaData
-import com.kinvey.java.store.UserStoreRequestManager
 import junit.framework.Assert.*
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
-import java.io.InputStream
-import java.lang.RuntimeException
 import java.util.concurrent.CountDownLatch
 
 /**

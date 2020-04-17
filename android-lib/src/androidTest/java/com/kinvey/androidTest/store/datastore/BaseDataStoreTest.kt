@@ -36,8 +36,6 @@ import com.kinvey.java.model.KinveyReadResponse
 import com.kinvey.java.store.StoreType
 import com.kinvey.java.sync.dto.SyncItem
 import io.realm.DynamicRealm
-import io.realm.RealmObjectSchema
-import io.realm.RealmSchema
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before

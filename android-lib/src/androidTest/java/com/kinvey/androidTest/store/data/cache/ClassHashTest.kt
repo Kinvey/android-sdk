@@ -1,10 +1,9 @@
 package com.kinvey.androidTest.store.data.cache
 
-import android.app.Person
 import android.content.Context
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
 import com.google.api.client.json.GenericJson
 import com.google.api.client.util.FieldInfo
 import com.google.api.client.util.Key
@@ -13,18 +12,15 @@ import com.kinvey.android.cache.ClassHash.createScheme
 import com.kinvey.android.cache.ClassHash.getClassHash
 import com.kinvey.android.cache.ClassHash.isAllowed
 import com.kinvey.android.cache.ClassHash.migration
-import com.kinvey.android.cache.RealmCacheManager
 
 import io.realm.DynamicRealm
 import io.realm.Realm
-import io.realm.RealmConfiguration
 import io.realm.RealmConfiguration.Builder
 import io.realm.RealmSchema
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.lang.reflect.Field
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest

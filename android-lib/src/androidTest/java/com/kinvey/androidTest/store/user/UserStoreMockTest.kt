@@ -2,9 +2,9 @@ package com.kinvey.androidTest.store.user
 
 import android.content.Context
 import android.os.Message
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
 import com.kinvey.android.AndroidJson
 import com.kinvey.android.Client
 import com.kinvey.android.Client.Builder
@@ -21,7 +21,7 @@ import com.kinvey.androidTest.store.user.MockHttpErrorTransport.Companion.ERROR_
 import com.kinvey.java.AbstractClient
 import com.kinvey.java.core.KinveyJsonResponseException
 import com.kinvey.java.dto.BaseUser
-import junit.framework.Assert.assertNotNull
+import org.junit.Assert.assertNotNull
 import org.junit.After
 import org.junit.Assert
 import org.junit.Assert.assertEquals
@@ -31,7 +31,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
-
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest

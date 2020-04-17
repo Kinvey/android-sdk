@@ -1,11 +1,10 @@
 package com.kinvey.androidTest.store.file
 
-import android.content.Context
 import android.os.Message
 import android.util.Log
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
 import com.kinvey.android.Client
 import com.kinvey.android.Client.Builder
 import com.kinvey.android.callback.AsyncDownloaderProgressListener
@@ -24,7 +23,6 @@ import com.kinvey.java.model.FileMetaData
 import com.kinvey.java.model.KinveyMetaData.AccessControlList
 import com.kinvey.java.query.MongoQueryFilter.MongoQueryFilterBuilder
 import com.kinvey.java.store.StoreType
-import junit.framework.Assert.assertFalse
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before

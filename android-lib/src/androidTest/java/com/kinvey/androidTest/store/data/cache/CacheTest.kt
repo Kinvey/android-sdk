@@ -1,13 +1,12 @@
 package com.kinvey.androidTest.store.data.cache
 
 import android.content.Context
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
 import com.kinvey.android.Client.Builder
 import com.kinvey.android.Client.Companion.sharedInstance
 import com.kinvey.android.model.User
-import com.kinvey.java.cache.ICache
 import com.kinvey.java.cache.ICacheManager
 import org.junit.Assert.*
 import org.junit.Before

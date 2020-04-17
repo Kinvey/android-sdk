@@ -2,9 +2,9 @@ package com.kinvey.androidTest.store.data
 
 import android.content.Context
 import android.os.Message
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
 import com.kinvey.android.Client
 import com.kinvey.android.callback.KinveyUserCallback
 import com.kinvey.android.model.User

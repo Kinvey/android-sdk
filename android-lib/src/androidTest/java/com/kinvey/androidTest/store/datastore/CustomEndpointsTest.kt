@@ -2,9 +2,9 @@ package com.kinvey.androidTest.store.datastore
 
 import android.content.Context
 import android.os.Looper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
 import com.google.api.client.json.GenericJson
 import com.kinvey.android.AsyncCustomEndpoints
 import com.kinvey.android.Client
@@ -16,10 +16,8 @@ import com.kinvey.androidTest.TestManager
 import com.kinvey.androidTest.model.Person
 import com.kinvey.java.AbstractClient
 import com.kinvey.java.CustomEndpoints
-import com.kinvey.java.CustomEndpoints.CustomCommand
 import com.kinvey.java.core.KinveyClientCallback
 import com.kinvey.java.core.KinveyJsonResponseException
-import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before

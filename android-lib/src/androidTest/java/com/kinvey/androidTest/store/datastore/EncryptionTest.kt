@@ -2,9 +2,9 @@ package com.kinvey.androidTest.store.datastore
 
 import android.content.Context
 import android.os.Message
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
 import com.kinvey.android.Client
 import com.kinvey.android.Client.Builder
 import com.kinvey.android.callback.AsyncDownloaderProgressListener

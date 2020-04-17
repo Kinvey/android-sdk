@@ -1,15 +1,14 @@
 package com.kinvey.androidTest.store.datastore
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
 import com.kinvey.android.AndroidCredentialStoreException
 import com.kinvey.android.Client
 import com.kinvey.android.Client.Builder
 import com.kinvey.android.model.User
 import com.kinvey.android.store.DataStore.Companion.collection
 import com.kinvey.androidTest.TestManager
-import com.kinvey.androidTest.TestManager.*
 import com.kinvey.androidTest.TestManager.Companion.PASSWORD
 import com.kinvey.androidTest.TestManager.Companion.TEST_USERNAME
 import com.kinvey.androidTest.TestManager.Companion.USERNAME
@@ -17,7 +16,7 @@ import com.kinvey.androidTest.callback.DefaultKinveyAggregateCallback
 import com.kinvey.androidTest.model.Person
 import com.kinvey.java.model.AggregateType
 import com.kinvey.java.store.StoreType
-import junit.framework.Assert.*
+import org.junit.Assert.*
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

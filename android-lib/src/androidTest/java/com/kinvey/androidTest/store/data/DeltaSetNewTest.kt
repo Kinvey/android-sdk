@@ -1,8 +1,8 @@
 package com.kinvey.androidTest.store.data
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
 import com.kinvey.android.Client
 import com.kinvey.android.Client.Builder
 import com.kinvey.android.Client.Companion.kinveyHandlerThread
@@ -21,10 +21,9 @@ import com.kinvey.java.model.KinveyCountResponse
 import com.kinvey.java.store.BaseDataStore
 import com.kinvey.java.store.QueryCacheItem
 import com.kinvey.java.store.StoreType
-import junit.framework.Assert.*
+import org.junit.Assert.*
 import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException

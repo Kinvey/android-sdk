@@ -2,19 +2,17 @@ package com.kinvey.androidTest.store.data
 
 import android.content.Context
 import android.os.Message
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
 import com.kinvey.android.AsyncCustomEndpoints
 import com.kinvey.android.Client
 import com.kinvey.android.callback.KinveyPingCallback
 import com.kinvey.android.model.User
 import com.kinvey.androidTest.LooperThread
-import junit.framework.Assert.assertNull
-import junit.framework.Assert.assertTrue
+
 import junit.framework.TestCase.assertEquals
-import org.junit.Assert
-import org.junit.Assert.assertNotNull
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

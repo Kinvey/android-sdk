@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import com.kinvey.android.AndroidCredentialStore
 import com.kinvey.android.SharedPrefCredentialStore
 import com.kinvey.java.auth.Credential
 import com.kinvey.java.auth.CredentialStore

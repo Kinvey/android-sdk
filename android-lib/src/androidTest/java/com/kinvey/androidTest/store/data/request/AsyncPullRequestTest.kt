@@ -2,6 +2,8 @@ package com.kinvey.androidTest.store.data.request
 
 import android.content.Context
 import android.os.Message
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.kinvey.android.Client
 import com.kinvey.android.async.AsyncPullRequest
@@ -20,8 +22,12 @@ import io.mockk.verify
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 
+
+@RunWith(AndroidJUnit4::class)
+@SmallTest
 class AsyncPullRequestTest {
 
     private lateinit var spyNetworkManager: NetworkManager<Person>

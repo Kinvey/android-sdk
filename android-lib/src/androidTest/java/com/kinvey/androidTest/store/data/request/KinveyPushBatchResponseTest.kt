@@ -1,6 +1,6 @@
 package com.kinvey.androidTest.store.data.request
 
-import androidx.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.kinvey.android.sync.KinveyPushBatchResponse
 import com.kinvey.androidTest.model.Person
 import com.kinvey.java.model.KinveyBatchInsertError

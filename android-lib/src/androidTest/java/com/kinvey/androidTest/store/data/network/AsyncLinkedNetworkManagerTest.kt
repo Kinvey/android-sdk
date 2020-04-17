@@ -2,9 +2,9 @@ package com.kinvey.androidTest.store.data.network
 
 import android.content.Context
 import android.os.Message
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
 import com.kinvey.android.AndroidMimeTypeFinder
 import com.kinvey.android.Client
 import com.kinvey.android.Client.Builder
@@ -16,7 +16,6 @@ import com.kinvey.android.store.UserStore.Companion.login
 import com.kinvey.androidTest.LooperThread
 import com.kinvey.androidTest.TestManager.Companion.PASSWORD
 import com.kinvey.androidTest.TestManager.Companion.USERNAME
-import com.kinvey.androidTest.store.datastore.BaseDataStoreTest
 import com.kinvey.java.Query
 import com.kinvey.java.core.*
 import com.kinvey.java.linkedResources.LinkedFile

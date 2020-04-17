@@ -1,9 +1,9 @@
 package com.kinvey.androidTest.store.data
 
 import android.content.Context
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
 import com.kinvey.android.AndroidUserStore
 import org.junit.Assert.assertEquals
 import org.junit.Before

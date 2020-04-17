@@ -1,15 +1,15 @@
 package com.kinvey.androidTest.store.datastore
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
 import com.kinvey.android.Client
 import com.kinvey.android.Client.Builder
 import com.kinvey.android.model.User
 import com.kinvey.android.store.LinkedDataStore
 import com.kinvey.androidTest.store.data.network.LinkedPerson
 import com.kinvey.java.store.StoreType
-import junit.framework.Assert.assertNotNull
+import org.junit.Assert.assertNotNull
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

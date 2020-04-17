@@ -1,9 +1,9 @@
 package com.kinvey.androidTest.store.user
 
 import android.os.Looper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
 import com.google.api.client.http.UrlEncodedContent
 import com.google.api.client.json.JsonFactory
 import com.kinvey.android.Client
@@ -18,7 +18,7 @@ import com.kinvey.java.AbstractClient
 import com.kinvey.java.auth.Credential
 import com.kinvey.java.auth.KinveyAuthRequest
 import com.kinvey.java.store.UserStoreRequestManager
-import junit.framework.Assert.*
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

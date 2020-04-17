@@ -1,22 +1,19 @@
 package com.kinvey.androidTest.store.data.cache
 
 import android.content.Context
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
 import com.kinvey.android.Client
 import com.kinvey.android.Client.Builder
 import com.kinvey.android.model.User
 import com.kinvey.android.store.DataStore
 import com.kinvey.android.store.DataStore.Companion.collection
 import com.kinvey.androidTest.TestManager
-import com.kinvey.androidTest.TestManager.*
 import com.kinvey.androidTest.TestManager.Companion.PASSWORD
 import com.kinvey.androidTest.TestManager.Companion.TEST_USERNAME
 import com.kinvey.androidTest.TestManager.Companion.TEST_USERNAME_2
 import com.kinvey.androidTest.TestManager.Companion.USERNAME
-import com.kinvey.androidTest.callback.DefaultKinveyClientCallback
-import com.kinvey.androidTest.callback.DefaultKinveyReadCallback
 import com.kinvey.androidTest.model.Person
 import com.kinvey.java.store.StoreType
 import junit.framework.Assert.*

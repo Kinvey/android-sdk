@@ -2,9 +2,9 @@ package com.kinvey.androidTest.store.datastore
 
 import android.content.Context
 import android.util.Log
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
 import com.kinvey.android.Client
 import com.kinvey.android.Client.Builder
 import com.kinvey.android.model.User
@@ -12,7 +12,6 @@ import com.kinvey.android.store.DataStore
 import com.kinvey.android.store.DataStore.Companion.collection
 import com.kinvey.androidTest.TestManager
 import com.kinvey.androidTest.TestManager.Companion.PASSWORD
-import com.kinvey.androidTest.TestManager.Companion.TEST_USERNAME
 import com.kinvey.androidTest.TestManager.Companion.USERNAME
 import com.kinvey.androidTest.model.LiveModel
 import com.kinvey.java.AbstractClient
@@ -24,13 +23,12 @@ import com.kinvey.java.store.KinveyDataStoreLiveServiceCallback
 import com.kinvey.java.store.KinveyLiveServiceStatus
 import com.kinvey.java.store.LiveServiceRouter.Companion.instance
 import com.kinvey.java.store.StoreType
-import junit.framework.Assert.*
+import org.junit.Assert.*
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
-import java.lang.reflect.Constructor
 import java.lang.reflect.InvocationTargetException
 
 /**

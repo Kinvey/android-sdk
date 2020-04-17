@@ -6,9 +6,9 @@ import android.net.Uri
 import android.os.Looper
 import android.os.Message
 import android.util.Log
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.AndroidJUnit4
 import com.google.api.client.http.HttpResponseException
 import com.kinvey.android.*
 import com.kinvey.android.Client.Builder
@@ -56,7 +56,7 @@ import com.kinvey.java.core.KinveyJsonResponseException
 import com.kinvey.java.dto.BaseUser
 import com.kinvey.java.model.KinveyMetaData.Companion.KMD
 import com.kinvey.java.store.*
-import junit.framework.Assert.*
+import org.junit.Assert.*
 import org.junit.*
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
