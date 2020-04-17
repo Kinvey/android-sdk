@@ -32,7 +32,7 @@ import java.lang.reflect.Method
 open class AsyncRequest<T>(protected var scope: Any, var mMethod: Method?, callback: KinveyClientCallback<T>?, vararg var args: Any?) : AsyncClientRequest<T>(callback) {
 
     @Throws(IOException::class, InvocationTargetException::class, IllegalAccessException::class)
-    public override fun executeAsync(): T? {
+    override fun executeAsync(): T? {
         return mMethod?.invoke(scope, *args) as T?
     }
 }

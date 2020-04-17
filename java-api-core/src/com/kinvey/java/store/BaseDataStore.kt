@@ -454,7 +454,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @param query query to pull the objects
      */
     @Throws(IOException::class)
-    fun pullBlocking(query: Query?, isAutoPagination: Boolean): KinveyPullResponse {
+    open fun pullBlocking(query: Query?, isAutoPagination: Boolean): KinveyPullResponse {
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType")
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
@@ -470,7 +470,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @param pageSize page size for auto-pagination
      */
     @Throws(IOException::class)
-    fun pullBlocking(query: Query?, pageSize: Int): KinveyPullResponse {
+    open fun pullBlocking(query: Query?, pageSize: Int): KinveyPullResponse {
         var query = query
         Preconditions.checkArgument(storeType != StoreType.NETWORK, "InvalidDataStoreType")
         Preconditions.checkNotNull(client, "client must not be null.")

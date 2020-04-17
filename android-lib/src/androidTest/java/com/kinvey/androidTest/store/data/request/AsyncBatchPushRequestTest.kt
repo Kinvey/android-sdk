@@ -27,11 +27,9 @@ import io.mockk.spyk
 import io.mockk.verifySequence
 import org.junit.After
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.lang.reflect.Field
 import java.util.concurrent.CountDownLatch
 
 @RunWith(AndroidJUnit4::class)
@@ -42,7 +40,7 @@ class AsyncBatchPushRequestTest {
     private lateinit var spyNetworkManager: NetworkManager<Person>
     private var syncManager: SyncManager? = null
 
-    val kinveyPushCallback = object: KinveyPushCallback {
+    private val kinveyPushCallback = object: KinveyPushCallback {
         override fun onSuccess(result: KinveyPushResponse?) {}
         override fun onFailure(error: Throwable?) {}
         override fun onProgress(current: Long, all: Long) {}
@@ -54,7 +52,6 @@ class AsyncBatchPushRequestTest {
         client = Client.Builder<User>(mMockContext).build()
         spyNetworkManager = spyk(NetworkManager(Person.TEST_COLLECTION, Person::class.java, client))
         syncManager = spyk(SyncManager(client?.cacheManager))
-
     }
 
     @After
