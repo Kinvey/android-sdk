@@ -146,11 +146,12 @@ dependencies {
   androidTestImplementation 'junit:junit:4.12'
 
   // Optional -- Mockito framework
-  androidTestImplementation "org.powermock:powermock-core:2.0.2"
-  androidTestImplementation "org.powermock:powermock-module-junit4:1.7.3"
-  androidTestImplementation "org.powermock:powermock-api-mockito2:2.0.2"
-
-  //androidTestImplementation group: 'com.linkedin.dexmaker', name: 'dexmaker-mockito', version: '2.25.0'
+  //androidTestImplementation "org.powermock:powermock-module-junit4:1.7.3"
+  //androidTestImplementation "org.powermock:powermock-api-mockito2:2.0.6"
+  //androidTestImplementation group: 'com.linkedin.dexmaker', name: 'dexmaker-mockito', version: '2.25.1'
+  androidTestImplementation "org.powermock:powermock-core:2.0.6"
+  androidTestImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.3'
+  androidTestImplementation group: 'com.linkedin.dexmaker', name: 'dexmaker-mockito', version: '2.25.1'
 
   // Android Unit Testing
   androidTestImplementation "androidx.test:runner:$androidx_version"
@@ -163,7 +164,7 @@ dependencies {
   // Unit Testing
   testImplementation 'io.reactivex:rxjava:1.3.8'
   testImplementation 'junit:junit:4.12'
-  //testImplementation "org.powermock:powermock-core:2.0.2"
+  testImplementation "org.powermock:powermock-core:2.0.6"
 
   // Optional -- Hamcrest library
   androidTestImplementation 'org.hamcrest:hamcrest-library:2.1'
