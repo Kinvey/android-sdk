@@ -28,7 +28,7 @@ import java.io.IOException
 /**
  * Created by Prots on 2/8/16.
  */
-class DeleteRequest<T : GenericJson>() : AbstractKinveyDataRequest<T>() {
+open class DeleteRequest<T : GenericJson>() : AbstractKinveyDataRequest<T>() {
 
     private var query: Query? = null
     private var id: String? = null
@@ -53,29 +53,36 @@ class DeleteRequest<T : GenericJson>() : AbstractKinveyDataRequest<T>() {
 
     override fun execute(): T? {
         when (writePolicy) {
-            WritePolicy.FORCE_LOCAL -> query?.let { q -> cache?.delete(q) }
-            WritePolicy.FORCE_NETWORK ->
-
-                try {
-                    networkMgr?.deleteBlocking(query)
-                } catch (e: IOException) {
-                    //TODO: add to sync
-                    e.printStackTrace()
-                }
-
-            WritePolicy.LOCAL_THEN_NETWORK -> {
-                //write to local and network, push to sync if network fails
-                query?.let { q -> cache?.delete(q) }
-                try {
-                    networkMgr?.deleteBlocking(query)
-                } catch (e: IOException) {
-                    //TODO: add to sync
-                    e.printStackTrace()
-                }
-            }
+            WritePolicy.FORCE_LOCAL -> deleteForceLocal()
+            WritePolicy.FORCE_NETWORK -> deleteForceNetwork()
+            WritePolicy.LOCAL_THEN_NETWORK -> deleteLocalThenNetwork()
         }//TODO: write to sync
         //write to network, fallback to sync
         return null
+    }
+
+    protected open fun deleteForceLocal() {
+        query?.let { q -> cache?.delete(q) }
+    }
+
+    protected open fun deleteForceNetwork() {
+        try {
+            networkMgr?.deleteBlocking(query)
+        } catch (e: IOException) {
+            //TODO: add to sync
+            e.printStackTrace()
+        }
+    }
+
+    protected open fun deleteLocalThenNetwork() {
+        //write to local and network, push to sync if network fails
+        query?.let { q -> cache?.delete(q) }
+        try {
+            networkMgr?.deleteBlocking(query)
+        } catch (e: IOException) {
+            //TODO: add to sync
+            e.printStackTrace()
+        }
     }
 
     override fun cancel() {}
