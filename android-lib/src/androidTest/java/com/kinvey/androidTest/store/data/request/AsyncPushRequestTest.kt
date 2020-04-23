@@ -35,7 +35,9 @@ import java.util.concurrent.CountDownLatch
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class AsyncPushRequestTest {
+
     private var client: Client<*>? = null
+
     @Before
     fun setUp() {
         val mMockContext: Context? = InstrumentationRegistry.getInstrumentation().targetContext

@@ -36,7 +36,7 @@ import java.util.ArrayList
 
 import com.kinvey.java.Constants._ID
 
-class CreateListBatchRequest<T : GenericJson>(
+open class CreateListBatchRequest<T : GenericJson>(
         private val cache: ICache<T>?,
         private val networkManager: NetworkManager<T>,
         private val writePolicy: WritePolicy,
@@ -59,7 +59,7 @@ class CreateListBatchRequest<T : GenericJson>(
                 retList = cache?.save(objects) ?: ArrayList()
                 syncManager?.enqueueSaveRequests(networkManager.collectionName ?: "", networkManager, retList)
                 res.entities = mutableListOf()
-                res.entities!!.addAll(retList)
+                res.entities?.addAll(retList)
             }
             WritePolicy.LOCAL_THEN_NETWORK -> {
                 doPushRequest()
@@ -81,7 +81,7 @@ class CreateListBatchRequest<T : GenericJson>(
     }
 
     @Throws(IOException::class)
-    protected fun runSaveItemsRequest(objects: Iterable<T>?, useCache: Boolean = true): KinveySaveBatchResponse<T> {
+    protected open fun runSaveItemsRequest(objects: Iterable<T>?, useCache: Boolean = true): KinveySaveBatchResponse<T> {
         Logger.INFO("Start saving entities")
         filterObjects(objects as List<T>)
         val res: KinveySaveBatchResponse<T> = KinveySaveBatchResponse()
@@ -97,19 +97,19 @@ class CreateListBatchRequest<T : GenericJson>(
         return res
     }
 
-    private fun postBatchItems(entities: List<T>, result: KinveySaveBatchResponse<T>, useCache: Boolean = true) {
+    protected open fun postBatchItems(entities: List<T>, result: KinveySaveBatchResponse<T>, useCache: Boolean = true) {
         entities.chunked(MAX_POST_ITEMS).onEach { items ->
             postSaveBatchRequest(items, result, useCache)
         }
     }
 
     @Throws(IOException::class)
-    protected fun postSaveBatchRequest(entities: List<T>,
+    protected open fun postSaveBatchRequest(entities: List<T>,
                                        result: KinveySaveBatchResponse<T>, useCache: Boolean = true): KinveySaveBatchResponse<T>? {
         var response: KinveySaveBatchResponse<T>? = null
         val batchSaveErrors = ArrayList<KinveyBatchInsertError>()
         try {
-            response = networkManager.saveBatchBlocking(entities)?.execute()
+            response = runSaveBatchBlocking(entities)
         } catch (e: KinveyJsonResponseException) {
             if (!multipleRequests) throw e
         } catch (e: IOException) {
@@ -124,13 +124,13 @@ class CreateListBatchRequest<T : GenericJson>(
                 if (result.entities == null) {
                     result.entities = mutableListOf()
                 }
-                result.entities!!.addAll(response.entities!!)
+                result.entities?.addAll(response.entities!!)
             }
             if (response.errors != null) {
                 if (result.errors == null) {
                     result.errors = mutableListOf()
                 }
-                result.errors!!.addAll(response.errors!!)
+                result.errors?.addAll(response.errors!!)
             }
             if (response.haveErrors && useCache) {
                enqueueBatchErrorsRequests(entities, response)
@@ -141,8 +141,12 @@ class CreateListBatchRequest<T : GenericJson>(
         return response
     }
 
+    protected open fun runSaveBatchBlocking(entities: List<T>?): KinveySaveBatchResponse<T>? {
+        return networkManager.saveBatchBlocking(entities)?.execute()
+    }
+
     @Throws(IOException::class)
-    private fun enqueueBatchErrorsRequests(saveList: List<T>?, response: KinveySaveBatchResponse<*>) {
+    protected open fun enqueueBatchErrorsRequests(saveList: List<T>?, response: KinveySaveBatchResponse<*>) {
         val errIndexes = getErrIndexes(response.errors)
         var errorItems: List<T>? = null
         saveList?.let { sList -> errorItems = errIndexes.mapNotNull { idx -> sList.getOrNull(idx) } }
@@ -150,13 +154,13 @@ class CreateListBatchRequest<T : GenericJson>(
     }
 
     @Throws(IOException::class)
-    private fun enqueueSaveRequests(errorItems: List<T>, requestType: SyncRequest.HttpVerb) {
+    protected open fun enqueueSaveRequests(errorItems: List<T>, requestType: SyncRequest.HttpVerb) {
         errorItems.forEach { itm ->
             syncManager?.enqueueRequest(networkManager.collectionName, networkManager, requestType, itm[_ID] as String?)
         }
     }
 
-    private fun doPushRequest() {
+    protected open fun doPushRequest() {
         val pushRequest = PushBatchRequest(networkManager.collectionName ?: "",
                 cache as ICache<T>, networkManager, networkManager.client)
         try {
@@ -166,7 +170,7 @@ class CreateListBatchRequest<T : GenericJson>(
         }
     }
 
-    private fun filterObjects(list: List<T>) {
+    protected open fun filterObjects(list: List<T>) {
         saveList = mutableListOf()
         list.onEach { itm ->
             saveList?.add(itm)
@@ -177,7 +181,7 @@ class CreateListBatchRequest<T : GenericJson>(
         return errList?.map { err -> err.index }.orEmpty()
     }
 
-    private fun removeSuccessBatchItemsFromCache(saveList: List<T>, errList: List<KinveyBatchInsertError>) {
+    protected open fun removeSuccessBatchItemsFromCache(saveList: List<T>, errList: List<KinveyBatchInsertError>) {
         if (cache == null) {
             return
         }
