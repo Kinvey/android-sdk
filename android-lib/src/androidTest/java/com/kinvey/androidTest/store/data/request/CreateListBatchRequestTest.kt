@@ -10,6 +10,7 @@ import com.kinvey.android.Client
 import com.kinvey.android.model.User
 import com.kinvey.androidTest.LooperThread
 import com.kinvey.androidTest.model.Person
+import com.kinvey.java.cache.ICache
 import com.kinvey.java.model.KinveyBatchInsertError
 import com.kinvey.java.model.KinveySaveBatchResponse
 import com.kinvey.java.network.NetworkManager
@@ -33,6 +34,7 @@ class CreateListBatchRequestTest {
     private lateinit var client: Client<*>
     private lateinit var spyNetworkManager: NetworkManager<Person>
     private lateinit var syncManager: SyncManager
+    private var cache: ICache<Person>? = null
 
     private var objects: Iterable<Person> = arrayListOf(Person(), Person())
 
@@ -40,8 +42,9 @@ class CreateListBatchRequestTest {
     fun setUp() {
         val mMockContext: Context? = InstrumentationRegistry.getInstrumentation().targetContext
         client = Client.Builder<User>(mMockContext).build()
-        spyNetworkManager = spyk(NetworkManager(Person.TEST_COLLECTION, Person::class.java, client))
+        spyNetworkManager = spyk(NetworkManager(Person.COLLECTION, Person::class.java, client))
         syncManager = spyk(SyncManager(client?.cacheManager), recordPrivateCalls = true)
+        cache = client?.cacheManager?.getCache(Person.COLLECTION, Person::class.java, ttlValue)
     }
 
     @After
@@ -57,8 +60,8 @@ class CreateListBatchRequestTest {
     }
 
     private fun getCreateListBatchRequest(writePolicy: WritePolicy): CreateListBatchRequest<Person> {
-        return spyk(CreateListBatchRequest(client?.cacheManager?.getCache(Person.COLLECTION, Person::class.java, ttlValue),
-               spyNetworkManager, writePolicy, objects, syncManager), recordPrivateCalls = true)
+        return spyk(CreateListBatchRequest(cache, spyNetworkManager, writePolicy, objects, syncManager),
+                recordPrivateCalls = true)
     }
 
     private fun setPrivateField(mainClassObj: Any, mainClsType: Class<*>, fieldNameStr: String, fieldValue: Any) {
@@ -112,10 +115,68 @@ class CreateListBatchRequestTest {
     @Test
     fun testCreateListBatchRequestExecuteLocal() {
 
+        Assert.assertNotNull(spyNetworkManager)
+
+        val latch = CountDownLatch(1)
+
+        val looperThread = LooperThread(Runnable {
+
+            val createListBatchRequest = getCreateListBatchRequest(WritePolicy.FORCE_LOCAL)
+
+            every { syncManager?.enqueueSaveRequests(Person.COLLECTION, spyNetworkManager, any<List<Person>>()) } returns Unit
+            setPrivateField(createListBatchRequest, CreateListBatchRequest::class.java, saveListFieldName, arrayListOf(Person(), Person()))
+
+            createListBatchRequest.execute()
+
+            excludeRecords { createListBatchRequest.execute() }
+            verifySequence {
+                syncManager?.enqueueSaveRequests(Person.COLLECTION, spyNetworkManager, any<List<Person>>())
+            }
+
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
     }
 
     @Test
     fun testCreateListBatchRequestExecuteLocalThenNetwork() {
 
+        Assert.assertNotNull(spyNetworkManager)
+
+        val latch = CountDownLatch(1)
+
+        val kinveySaveBatchResponse = KinveySaveBatchResponse(arrayListOf(Person(), Person()), arrayListOf())
+
+        val looperThread = LooperThread(Runnable {
+
+            val createListBatchRequest = getCreateListBatchRequest(WritePolicy.LOCAL_THEN_NETWORK)
+
+            every { createListBatchRequest["doPushRequest"]() } returns Unit
+            every { createListBatchRequest["runSaveBatchBlocking"](any<List<Person>>()) } returns kinveySaveBatchResponse
+            every { createListBatchRequest["removeSuccessBatchItemsFromCache"](any<List<Person>>(), any<List<KinveyBatchInsertError>>()) } returns Unit
+            setPrivateField(createListBatchRequest, CreateListBatchRequest::class.java, saveListFieldName, arrayListOf(Person(), Person()))
+
+            createListBatchRequest.execute()
+
+            excludeRecords { createListBatchRequest.execute() }
+            verifySequence {
+                createListBatchRequest["doPushRequest"]()
+                createListBatchRequest["runSaveItemsRequest"](any<List<Person>>(), any<Boolean>())
+                createListBatchRequest["filterObjects"](any<List<Person>>())
+                createListBatchRequest["postBatchItems"](any<List<Person>>(), any<KinveySaveBatchResponse<Person>>(), any<Boolean>())
+                createListBatchRequest["postSaveBatchRequest"](any<List<Person>>(), any<KinveySaveBatchResponse<Person>>(), any<Boolean>())
+                createListBatchRequest["runSaveBatchBlocking"](any<List<Person>>())
+                createListBatchRequest["removeSuccessBatchItemsFromCache"](any<List<Person>>(), any<List<KinveyBatchInsertError>>())
+            }
+
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
     }
 }

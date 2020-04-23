@@ -142,7 +142,7 @@ open class SyncManager(val cacheManager: ICacheManager?) {
     }
 
     @Throws(IOException::class)
-    fun <T : GenericJson> enqueueSaveRequests(collectionName: String, networkManager: NetworkManager<T>?, ret: List<T>?) {
+    open fun <T : GenericJson> enqueueSaveRequests(collectionName: String, networkManager: NetworkManager<T>?, ret: List<T>?) {
         val requestCache = cacheManager?.getCache(SYNC_ITEM_TABLE_NAME, SyncItem::class.java, Long.MAX_VALUE)
         val syncRequests = ret?.mapNotNull { item ->
             val syncItemId = item[ID] as String?
