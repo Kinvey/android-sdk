@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
+import com.google.api.client.json.GenericJson
 import com.kinvey.android.Client
 import com.kinvey.android.model.User
 import com.kinvey.androidTest.LooperThread
@@ -178,5 +179,51 @@ class CreateListBatchRequestTest {
         looperThread.start()
         latch.await()
         looperThread.mHandler?.sendMessage(Message())
+    }
+
+    @Test
+    fun testCreateListBatchRequestExecuteLocalThenNetworkMultipleItems() {
+
+        Assert.assertNotNull(spyNetworkManager)
+
+        val itemsCount = 200
+        val items = getItemsList(itemsCount)
+        val latch = CountDownLatch(1)
+        val kinveySaveBatchResponse = KinveySaveBatchResponse(items, arrayListOf())
+
+        val looperThread = LooperThread(Runnable {
+
+            val createListBatchRequest = getCreateListBatchRequest(WritePolicy.LOCAL_THEN_NETWORK)
+
+            every { createListBatchRequest["doPushRequest"]() } returns Unit
+            every { createListBatchRequest["runSaveBatchBlocking"](any<List<Person>>()) } returns kinveySaveBatchResponse
+            every { createListBatchRequest["removeSuccessBatchItemsFromCache"](any<List<Person>>(), any<List<KinveyBatchInsertError>>()) } returns Unit
+            setPrivateField(createListBatchRequest, CreateListBatchRequest::class.java, saveListFieldName, items)
+
+            createListBatchRequest.execute()
+
+            excludeRecords { createListBatchRequest.execute() }
+            verifySequence {
+                createListBatchRequest["doPushRequest"]()
+                createListBatchRequest["runSaveItemsRequest"](any<List<Person>>(), any<Boolean>())
+                createListBatchRequest["filterObjects"](any<List<Person>>())
+                createListBatchRequest["postBatchItems"](any<List<Person>>(), any<KinveySaveBatchResponse<Person>>(), any<Boolean>())
+                createListBatchRequest["postSaveBatchRequest"](any<List<Person>>(), any<KinveySaveBatchResponse<Person>>(), any<Boolean>())
+                createListBatchRequest["runSaveBatchBlocking"](any<List<Person>>())
+                createListBatchRequest["removeSuccessBatchItemsFromCache"](any<List<Person>>(), any<List<KinveyBatchInsertError>>())
+            }
+
+            latch.countDown()
+        })
+
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+    }
+
+    private fun getItemsList(count: Int): MutableList<Person> {
+        return (1..count)
+                .map { Person("#$it", "Person_$it") }
+                .toMutableList()
     }
 }
