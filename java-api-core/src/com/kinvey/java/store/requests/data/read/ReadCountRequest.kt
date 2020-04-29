@@ -26,7 +26,7 @@ import com.kinvey.java.sync.SyncManager
 
 import java.io.IOException
 
-class ReadCountRequest<T : GenericJson>(cache: ICache<T>?, networkManager: NetworkManager<T>?, readPolicy: ReadPolicy,
+open class ReadCountRequest<T : GenericJson>(cache: ICache<T>?, networkManager: NetworkManager<T>?, readPolicy: ReadPolicy,
                                         private val query: Query?, syncManager: SyncManager?)
     : AbstractReadCountRequest<T>(cache, readPolicy, networkManager, syncManager) {
 

@@ -41,23 +41,11 @@ abstract class AbstractReadCountRequest<T : GenericJson>(protected val cache: IC
                 try { ret = countNetwork() } catch (e: IOException) { e.printStackTrace() }
             }
             ReadPolicy.BOTH -> {
-                val pushRequest = PushRequest(networkManager?.collectionName,
-                        cache, networkManager, networkManager?.client)
-                try {
-                    pushRequest.execute()
-                } catch (t: Throwable) {
-                    // silent fall, will be synced next time
-                }
+                runPushAutoRequest()
                 try { ret = countNetwork() } catch (e: IOException) { e.printStackTrace() }
             }
             ReadPolicy.NETWORK_OTHERWISE_LOCAL -> {
-                val pushAutoRequest = PushRequest(networkManager?.collectionName,
-                        cache, networkManager, networkManager?.client)
-                try {
-                    pushAutoRequest.execute()
-                } catch (t: Throwable) {
-                    // silent fall, will be synced next time
-                }
+                runPushAutoRequest()
                 var networkException: IOException? = null
                 try {
                     ret = countNetwork()
@@ -76,10 +64,23 @@ abstract class AbstractReadCountRequest<T : GenericJson>(protected val cache: IC
         return ret
     }
 
+    protected open fun runPushAutoRequest() {
+        val pushAutoRequest = PushRequest(networkManager?.collectionName,
+                cache, networkManager, networkManager?.client)
+        try {
+            pushAutoRequest.execute()
+        } catch (t: Throwable) {
+            // silent fall, will be synced next time
+        }
+    }
+
     override fun cancel() {}
 
-    protected abstract fun countCached(): Int
+    protected open abstract fun countCached(): Int
 
     @Throws(IOException::class)
-    protected abstract fun countNetwork(): KinveyCountResponse?
+    protected open abstract fun countNetwork(): KinveyCountResponse?
+
+
+
 }
