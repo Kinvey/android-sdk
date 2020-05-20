@@ -168,6 +168,8 @@ dependencies {
   // Multidex Support for testing
   androidTestImplementation group: 'androidx.multidex', name: 'multidex-instrumentation', version: '2.0.0'
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+
+  androidTestImplementation 'androidx.test.ext:junit:1.1.1'
 }
 
 task superJar(type: Jar) {
