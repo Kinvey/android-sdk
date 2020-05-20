@@ -35,6 +35,8 @@ interface ICache<T : GenericJson?> {
      */
     val first: T?
 
+    var isAddCount: Boolean?
+
     /**
      * get current ttl value
      * @return current ttl value

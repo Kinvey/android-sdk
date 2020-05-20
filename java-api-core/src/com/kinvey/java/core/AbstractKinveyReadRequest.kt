@@ -87,6 +87,11 @@ protected constructor(abstractKinveyJsonClient: AbstractClient<*>?, requestMetho
                 } else if (response.headers.containsKey(Constants.X_KINVEY_REQUEST_START_CAMEL_CASE)) {
                     ret.lastRequestTime = response.headers.getHeaderStringValues(Constants.X_KINVEY_REQUEST_START_CAMEL_CASE)[0].toUpperCase(Locale.US)
                 }
+                if (response.headers.containsKey(Constants.X_KINVEY_ITEMS_COUNT)) {
+                    ret.count = response.headers.getHeaderStringValues(Constants.X_KINVEY_ITEMS_COUNT)[0].toInt()
+                } else if (response.headers.containsKey(Constants.X_KINVEY_ITEMS_COUNT_CAMEL_CASE)) {
+                    ret.count = response.headers.getHeaderStringValues(Constants.X_KINVEY_ITEMS_COUNT_CAMEL_CASE)[0].toInt()
+                }
                 ret.result = results
                 ret.listOfExceptions = exceptions
                 return ret

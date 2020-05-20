@@ -90,6 +90,12 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @param deltaSetCachingEnabled boolean representing if we should use delta set caching
      */
     var isDeltaSetCachingEnabled = false
+    var isAddCountHeader = false
+        set(value) {
+            field = value
+            networkManager.isAddCountHeader = value
+            cache?.isAddCount = value
+        }
 
     internal var liveServiceCallback: KinveyDataStoreLiveServiceCallback<T>? = null
 
