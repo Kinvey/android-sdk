@@ -35,6 +35,9 @@ class ReadAllRequest<T : GenericJson>(cache: ICache<T>?, readPolicy: ReadPolicy?
         get() {
             val response = KinveyReadResponse<T>()
             response.result = cache?.get()
+            if (cache?.isAddCount == true) {
+                response.count = response.result?.size
+            }
             return response
         }
 

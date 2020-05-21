@@ -38,6 +38,9 @@ class ReadIdsRequest<T : GenericJson>(cache: ICache<T>?, networkManager: Network
         get() {
             val response = KinveyReadResponse<T>()
             response.result = cache?.get(ids)
+            if (cache?.isAddCount == true) {
+                response.count = response.result?.size
+            }
             return response
         }
 

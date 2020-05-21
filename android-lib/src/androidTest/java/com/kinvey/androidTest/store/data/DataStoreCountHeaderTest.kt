@@ -26,24 +26,31 @@ class DataStoreCountHeaderTest : BaseDataStoreTest() {
         testFindByQueryWithCount(StoreType.AUTO)
     }
 
+    @Test
+    @Throws(InterruptedException::class)
+    fun testFindByQueryWithCountSync() {
+        testFindByQueryWithCount(StoreType.SYNC)
+    }
+
     private fun testFindByQueryWithCount(storeType: StoreType) {
-        val storeNetwork = DataStore.collection(COLLECTION, Person::class.java, storeType, client)
-        clearBackend(storeNetwork)
-        createAndSavePerson(storeNetwork, TEST_USERNAME)
-        createAndSavePerson(storeNetwork, TEST_USERNAME_2)
-        var findCallback = find(storeNetwork, LONG_TIMEOUT)
+        val store = DataStore.collection(COLLECTION, Person::class.java, storeType, client)
+        Assert.assertFalse(store.isAddCountHeader)
+        clearBackend(store)
+        createAndSavePerson(store, TEST_USERNAME)
+        createAndSavePerson(store, TEST_USERNAME_2)
+        var findCallback = find(store, LONG_TIMEOUT)
         Assert.assertNotNull(findCallback.result)
         Assert.assertNull(findCallback.result?.count)
-        storeNetwork.isAddCountHeader = true
-        findCallback = find(storeNetwork, LONG_TIMEOUT)
+        store.isAddCountHeader = true
+        findCallback = find(store, LONG_TIMEOUT)
         Assert.assertNotNull(findCallback.result)
         Assert.assertNotNull(findCallback.result?.count)
         Assert.assertEquals(findCallback.result?.result?.size, 2)
         Assert.assertEquals(findCallback.result?.count, 2)
-        storeNetwork.isAddCountHeader = false
-        findCallback = find(storeNetwork, LONG_TIMEOUT)
+        store.isAddCountHeader = false
+        findCallback = find(store, LONG_TIMEOUT)
         Assert.assertNull(findCallback.result?.count)
-        clearBackend(storeNetwork)
+        clearBackend(store)
     }
 
 }

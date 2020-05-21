@@ -645,6 +645,9 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
             }
             if (query != null && cache != null) {
                 response.result = cache!![query]
+                if (cache?.isAddCount == true) {
+                    response.count = cache?.count(query)?.toInt()
+                }
             }
             response.listOfExceptions = queryCacheResponse?.listOfExceptions ?: ArrayList()
             response.lastRequestTime = queryCacheResponse?.lastRequestTime
