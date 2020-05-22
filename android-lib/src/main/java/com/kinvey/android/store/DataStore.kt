@@ -162,6 +162,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
         try {
             tempMap[KEY_GET_BY_ID] = BaseDataStore::class.java.getMethod(BaseDataStore.FIND, String::class.java, KinveyCachedClientCallback::class.java)
             tempMap[KEY_GET_BY_QUERY] = BaseDataStore::class.java.getMethod(BaseDataStore.FIND, Query::class.java, KinveyCachedClientCallback::class.java)
+            tempMap[KEY_GET_BY_QUERY_WITH_COUNT] = BaseDataStore::class.java.getMethod(BaseDataStore.FIND_WITH_COUNT, Query::class.java)
             tempMap[KEY_GET_ALL] = BaseDataStore::class.java.getMethod(BaseDataStore.FIND, KinveyCachedClientCallback::class.java)
             tempMap[KEY_GET_BY_IDS] = BaseDataStore::class.java.getMethod(BaseDataStore.FIND, Iterable::class.java, KinveyCachedClientCallback::class.java)
 
@@ -305,6 +306,13 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
         Preconditions.checkNotNull(query, "Query must not be null.")
         AsyncRequest(this, methodMap!![KEY_GET_BY_QUERY], callback, query,
                 getWrappedCacheCallback(cachedCallback)).execute()
+    }
+
+    fun findWithCount(query: Query, callback: KinveyReadCallback<T>) {
+        Preconditions.checkNotNull(client, "client must not be null")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
+        Preconditions.checkNotNull(query, "Query must not be null.")
+        AsyncRequest(this, methodMap!![KEY_GET_BY_QUERY_WITH_COUNT], callback, query).execute()
     }
 
     /**
@@ -1130,6 +1138,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
         //This makes it very easy to add new wrappers, and allows for a single implementation of an async client request.
         private const val KEY_GET_BY_ID = "KEY_GET_BY_ID"
         private const val KEY_GET_BY_QUERY = "KEY_GET_BY_QUERY"
+        private const val KEY_GET_BY_QUERY_WITH_COUNT = "KEY_GET_BY_QUERY_WITH_COUNT"
         private const val KEY_GET_ALL = "KEY_GET_ALL"
         private const val KEY_GET_BY_IDS = "KEY_GET_BY_IDS"
 

@@ -519,6 +519,17 @@ open class BaseDataStoreTest {
     }
 
     @Throws(InterruptedException::class)
+    fun findWithCount(store: DataStore<Person>, query: Query, seconds: Int): DefaultKinveyReadCallback {
+        val latch = CountDownLatch(1)
+        val callback = DefaultKinveyReadCallback(latch)
+        val looperThread = LooperThread(Runnable { store.findWithCount(query, callback) })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
     fun testFindByQuery(storeType: StoreType) {
         val store = collection(COLLECTION, Person::class.java, storeType, client)
         clearBackend(store)

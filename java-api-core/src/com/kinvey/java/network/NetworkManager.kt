@@ -155,9 +155,9 @@ open class NetworkManager<T : GenericJson>(
      * @throws java.io.IOException
      */
     @Throws(IOException::class)
-    fun getBlocking(query: Query?): Get<T>? {
+    fun getBlocking(query: Query?, isAddCountHeader: Boolean = false): Get<T>? {
         Preconditions.checkNotNull(query)
-        val get = Get(this, client, query, currentClass)
+        val get = Get(this, client, query, currentClass, isAddCountHeader)
         client?.initializeRequest(get)
         return get
     }
@@ -703,19 +703,22 @@ open class NetworkManager<T : GenericJson>(
         @Key("retainReferences")
         var retainReferences: String? = null
 
+        var isAddCountHeader  = false
+
         private fun addHeaders(networkManager: NetworkManager<T>) {
             getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkManager.clientAppVersion
             if (!networkManager.customRequestProperties.isNullOrEmpty()) {
                 getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkManager.customRequestProperties)
             }
-            if (networkManager.isAddCountHeader) {
+            if (networkManager.isAddCountHeader || isAddCountHeader) {
                 getRequestHeaders()[Constants.X_KINVEY_INCLUDE_ITEMS_COUNT] = "true"
             }
         }
 
-        constructor(networkManager: NetworkManager<T>, client: AbstractClient<*>?, query: Query?, myClass: Class<T>?)
+        constructor(networkManager: NetworkManager<T>, client: AbstractClient<*>?, query: Query?, myClass: Class<T>?,  isAddCountHeader: Boolean = false)
             : super(client, HttpVerb.GET.verb, GET_REST_PATH, null, myClass) {
             this.collectionName = networkManager.collectionName
+            this.isAddCountHeader = isAddCountHeader
             queryFilter = query?.getQueryFilterJson(client?.jsonFactory)
             val queryLimit = query?.limit ?: 0
             val querySkip = query?.skip ?: 0
@@ -727,9 +730,10 @@ open class NetworkManager<T : GenericJson>(
         }
 
         constructor(networkManager: NetworkManager<T>, client: AbstractClient<*>?, query: Query?, myClass: Class<T>?,
-                    resolves: Array<String>?, resolveDepth: Int, retain: Boolean)
+                    resolves: Array<String>?, resolveDepth: Int, retain: Boolean, isAddCountHeader: Boolean = false)
             : super(client, HttpVerb.GET.verb, GET_REST_PATH, null, myClass) {
             this.collectionName = networkManager.collectionName
+            this.isAddCountHeader = isAddCountHeader
             queryFilter = query?.getQueryFilterJson(client?.jsonFactory)
             val queryLimit = query?.limit ?: 0
             val querySkip = query?.skip ?: 0
@@ -743,9 +747,10 @@ open class NetworkManager<T : GenericJson>(
             addHeaders(networkManager)
         }
 
-        constructor(networkManager: NetworkManager<T>, client: AbstractClient<*>?, queryString: String?, myClass: Class<T>?)
+        constructor(networkManager: NetworkManager<T>, client: AbstractClient<*>?, queryString: String?, myClass: Class<T>?,  isAddCountHeader: Boolean = false)
             : super(client, HttpVerb.GET.verb, GET_REST_PATH, null, myClass) {
             this.collectionName = networkManager.collectionName
+            this.isAddCountHeader = isAddCountHeader
             queryFilter = if (queryString != "{}") queryString else null
             setTemplateExpand(false)
             addHeaders(networkManager)

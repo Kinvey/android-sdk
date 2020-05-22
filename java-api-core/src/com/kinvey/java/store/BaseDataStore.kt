@@ -194,6 +194,17 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         }
     }
 
+    fun findWithCount(query: Query): KinveyReadResponse<T>? {
+        Preconditions.checkNotNull(client, "client must not be null.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
+        Preconditions.checkNotNull(query, "query must not be null.")
+        return if (storeType == StoreType.AUTO && isDeltaSetCachingEnabled && !isQueryContainSkipLimit(query)) {
+            findBlockingDeltaSync(query)
+        } else {
+            ReadQueryRequest(cache, networkManager, this.storeType.readPolicy, query, true).execute()
+        }
+    }
+
     /**
      * Get all objects for given collections
      * @param cachedCallback callback to be executed in case of [StoreType.CACHE] is used to get cached data before network
@@ -875,6 +886,8 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         private val BATCH_SIZE = 5
 
         const val FIND = "find"
+
+        const val FIND_WITH_COUNT = "findWithCount"
 
         const val DELETE = "delete"
 
