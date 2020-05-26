@@ -968,6 +968,7 @@ open class BaseDataStoreTest {
         const val COLLECTION = "PersonsNew"
         const val TEST_USERNAME = "Test_UserName"
         const val TEST_USERNAME_2 = "Test_UserName_2"
+        const val TEST_USERNAME_3 = "Test_UserName_3"
         const val TEST_TEMP_USERNAME = "Temp_UserName"
         const val USERNAME = "username"
         const val ID = "_id"

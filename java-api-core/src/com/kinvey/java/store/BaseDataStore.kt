@@ -198,6 +198,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         Preconditions.checkNotNull(query, "query must not be null.")
+        Preconditions.checkArgument(storeType != StoreType.CACHE, "StoreType.CACHE isn't supported")
         return if (storeType == StoreType.AUTO && isDeltaSetCachingEnabled && !isQueryContainSkipLimit(query)) {
             findBlockingDeltaSync(query)
         } else {

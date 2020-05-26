@@ -312,6 +312,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
         Preconditions.checkNotNull(client, "client must not be null")
         Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         Preconditions.checkNotNull(query, "Query must not be null.")
+        Preconditions.checkArgument(storeType != StoreType.CACHE, "StoreType.CACHE isn't supported")
         AsyncRequest(this, methodMap!![KEY_GET_BY_QUERY_WITH_COUNT], callback, query).execute()
     }
 
