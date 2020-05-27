@@ -55,7 +55,6 @@ class DataStoreCountHeaderTest : BaseDataStoreTest() {
         clearBackend(store)
     }
 
-
     @Test
     @Throws(InterruptedException::class)
     fun testFindWithCountSync() {
@@ -73,7 +72,6 @@ class DataStoreCountHeaderTest : BaseDataStoreTest() {
     fun testFindWithCountAuto() {
         testFindWithCount(StoreType.AUTO)
     }
-
 
     @Test
     @Throws(InterruptedException::class)
@@ -118,28 +116,61 @@ class DataStoreCountHeaderTest : BaseDataStoreTest() {
 
     @Test
     @Throws(InterruptedException::class)
-    fun testFindWithCountAutoDelta() {
+    fun testFindWithCountDeltaAuto() {
+        testFindWithCountDelta(StoreType.AUTO)
+    }
 
-        val store = DataStore.collection(COLLECTION, Person::class.java, StoreType.SYNC, client)
+    @Test
+    @Throws(InterruptedException::class)
+    fun testFindWithCountDeltaSync() {
+        testFindWithCountDelta(StoreType.SYNC)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testFindWithCountDeltaNetwork() {
+        testFindWithCountDelta(StoreType.NETWORK)
+    }
+
+    private fun testFindWithCountDelta(storeType: StoreType) {
+        val store = DataStore.collection(COLLECTION, Person::class.java, storeType, client)
         store.isDeltaSetCachingEnabled = true
         store.isAddCountHeader = false
         clearBackend(store)
         createAndSavePerson(store, TEST_USERNAME)
         createAndSavePerson(store, TEST_USERNAME_2)
         createAndSavePerson(store, TEST_USERNAME_3)
-        val query = client?.query()
-        query?.setSkip(1)
-        var findCallback = findWithCount(store, client!!.query(), LONG_TIMEOUT)
+        var query = client?.query()
+
+        //query contains skip and limit
+        query?.setSkip(1)?.setLimit(2)
+        var findCallback = findWithCount(store, query!!, LONG_TIMEOUT)
         Assert.assertNotNull(findCallback.result)
         Assert.assertNotNull(findCallback.result?.count)
-        Assert.assertEquals(2, findCallback.result?.count)
+        Assert.assertEquals(3, findCallback.result?.count)
+        Assert.assertEquals(2, findCallback.result?.result?.size)
 
-
-        store.isAddCountHeader = true
-        findCallback = findWithCount(store, client!!.query(), LONG_TIMEOUT)
+        //query does not contain skip and limit
+        query = client?.query()
+        findCallback = findWithCount(store, query!!, LONG_TIMEOUT)
         Assert.assertNotNull(findCallback.result)
         Assert.assertNotNull(findCallback.result?.count)
-        Assert.assertEquals(2, findCallback.result?.count)
+        Assert.assertEquals(3, findCallback.result?.count)
+        Assert.assertEquals(3, findCallback.result?.result?.size)
+
+        store.isDeltaSetCachingEnabled = false
+        query.setSkip(1).setLimit(2)
+        findCallback = findWithCount(store, query, LONG_TIMEOUT)
+        Assert.assertNotNull(findCallback.result)
+        Assert.assertNotNull(findCallback.result?.count)
+        Assert.assertEquals(3, findCallback.result?.count)
+        Assert.assertEquals(2, findCallback.result?.result?.size)
+
+        query = client?.query()
+        findCallback = find(store, query, LONG_TIMEOUT)
+        Assert.assertNotNull(findCallback.result)
+        Assert.assertNull(findCallback.result?.count)
+        Assert.assertEquals(3, findCallback.result?.result?.size)
 
         clearBackend(store)
     }
