@@ -17,6 +17,7 @@
 package com.kinvey.java.store.requests.data.read
 
 import com.google.api.client.json.GenericJson
+import com.kinvey.java.AbstractClient
 import com.kinvey.java.Query
 import com.kinvey.java.cache.ICache
 import com.kinvey.java.model.KinveyReadResponse
@@ -36,7 +37,7 @@ class ReadQueryRequest<T : GenericJson>(cache: ICache<T>?, networkManager: Netwo
             val response = KinveyReadResponse<T>()
             response.result = cache?.get(query)
             if (cache?.isAddCount == true || isAddCountHeader) {
-                response.count = cache?.count(query)?.toInt()
+                response.count = cache?.count(AbstractClient.sharedInstance?.query())?.toInt()
             }
             return response
         }
