@@ -308,6 +308,20 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
                 getWrappedCacheCallback(cachedCallback)).execute()
     }
 
+    /**
+     * Asynchronous request to fetch an list of Entities using a Query object with getting count of all items in collection.
+     *
+     *
+     * Constructs an asynchronous request to fetch an List of Entities, filtering by a Query object
+     * with getting count of all items in collection.  Uses KinveyReadCallback<T> to return an List of type T,
+     * count of all items which contains in collection for the query.
+     * Queries can be constructed with [Query].
+     * An empty Query object will return all items in the collection.
+    </T> *
+     *
+     * @param query [Query] to filter the results.
+     * @param callback either successfully returns list of resolved entities, count of all items or an error
+     */
     fun findWithCount(query: Query, callback: KinveyReadCallback<T>) {
         Preconditions.checkNotNull(client, "client must not be null")
         Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")

@@ -49,7 +49,7 @@ class ReadRequest<T : GenericJson>(cache: ICache<T>?, query: Query?, private val
                 val response = KinveyReadResponse<T>()
                 response.result = cache?.get(query)
                 if (cache?.isAddCount == true) {
-                    response.count = cache?.count(AbstractClient.sharedInstance?.query())?.toInt()
+                    response.count = cache?.count(query)?.toInt()
                 }
                 ret = response
             }
@@ -69,7 +69,7 @@ class ReadRequest<T : GenericJson>(cache: ICache<T>?, query: Query?, private val
                     val res = KinveyReadResponse<T>()
                     res.result = cache?.get(query)
                     if (cache?.isAddCount == true) {
-                        res.count = cache?.count(AbstractClient.sharedInstance?.query())?.toInt()
+                        res.count = cache?.count(query)?.toInt()
                     }
                     ret = res
                 }

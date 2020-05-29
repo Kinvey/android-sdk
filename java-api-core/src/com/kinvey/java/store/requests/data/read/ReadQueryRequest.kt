@@ -37,7 +37,7 @@ class ReadQueryRequest<T : GenericJson>(cache: ICache<T>?, networkManager: Netwo
             val response = KinveyReadResponse<T>()
             response.result = cache?.get(query)
             if (cache?.isAddCount == true || isAddCountHeader) {
-                response.count = cache?.count(AbstractClient.sharedInstance?.query())?.toInt()
+                response.count = cache?.count(query)?.toInt()
             }
             return response
         }

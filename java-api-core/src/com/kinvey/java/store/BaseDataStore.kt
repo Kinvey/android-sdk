@@ -194,6 +194,11 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         }
     }
 
+    /**
+     * Lookup objects in given collection by given query and count of all items in the collection which satisfy the query
+     * @param query prepared query we have to look with
+     * @return list of objects that are found
+     */
     fun findWithCount(query: Query): KinveyReadResponse<T>? {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
@@ -658,7 +663,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
             if (query != null && cache != null) {
                 response.result = cache!![query]
                 if (cache?.isAddCount == true || isAddCountHeader) {
-                    response.count = cache?.count(client?.query())?.toInt()
+                    response.count = cache?.count(query)?.toInt()
                 }
             }
             response.listOfExceptions = queryCacheResponse?.listOfExceptions ?: ArrayList()
