@@ -28,11 +28,7 @@ import com.kinvey.java.cache.ICache
 import com.kinvey.java.cache.KinveyCachedClientCallback
 import com.kinvey.java.core.KinveyCachedAggregateCallback
 import com.kinvey.java.core.KinveyJsonResponseException
-import com.kinvey.java.model.AggregateType
-import com.kinvey.java.model.Aggregation
-import com.kinvey.java.model.KinveyCountResponse
-import com.kinvey.java.model.KinveyReadResponse
-import com.kinvey.java.model.KinveyPullResponse
+import com.kinvey.java.model.*
 import com.kinvey.java.network.NetworkManager
 import com.kinvey.java.query.AbstractQuery
 import com.kinvey.java.store.requests.data.AggregationRequest
@@ -45,6 +41,7 @@ import com.kinvey.java.store.requests.data.read.ReadCountRequest
 import com.kinvey.java.store.requests.data.read.ReadIdsRequest
 import com.kinvey.java.store.requests.data.read.ReadQueryRequest
 import com.kinvey.java.store.requests.data.read.ReadSingleRequest
+import com.kinvey.java.store.requests.data.save.CreateListBatchRequest
 import com.kinvey.java.store.requests.data.save.SaveListBatchRequest
 import com.kinvey.java.store.requests.data.save.SaveListRequest
 import com.kinvey.java.store.requests.data.save.SaveRequest
@@ -321,6 +318,21 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         Preconditions.checkNotNull(objects, "objects must not be null.")
         Logger.INFO("Calling BaseDataStore#save(listObjects)")
         return SaveListRequest(cache, networkManager, this.storeType.writePolicy, objects, client?.syncManager).execute()
+    }
+
+    /**
+     * create multiple objects for collections
+     * @param objects list of objects to be created
+     * @return object with list of successful created entities and with list of errors
+     * @throws IOException
+     */
+    @Throws(IOException::class)
+    fun createBatch(objects: Iterable<T>): KinveySaveBatchResponse<T> {
+        Preconditions.checkNotNull(client, "client must not be null.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
+        Preconditions.checkNotNull(objects, "objects must not be null.")
+        Logger.INFO("Calling BaseDataStore#createBatch(listObjects)")
+        return CreateListBatchRequest(cache, networkManager, this.storeType.writePolicy, objects, client?.syncManager).execute()
     }
 
     /**
