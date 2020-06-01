@@ -33,7 +33,7 @@ android {
     minSdkVersion 16
     targetSdkVersion 29
     multiDexEnabled true
-    testInstrumentationRunner "com.kinvey.androidTest.store.data.cache.TestRunner"
+    testInstrumentationRunner "com.kinvey.androidTest.TestRunner"
   }
   buildTypes {
     release {

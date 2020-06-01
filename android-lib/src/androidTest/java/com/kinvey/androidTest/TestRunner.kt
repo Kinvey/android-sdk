@@ -1,4 +1,4 @@
-package com.kinvey.androidTest.store.data.cache
+package com.kinvey.androidTest
 
 import android.os.Bundle
 import androidx.multidex.MultiDex
