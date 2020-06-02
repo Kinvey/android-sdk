@@ -175,4 +175,58 @@ class DataStoreCountHeaderTest : BaseDataStoreTest() {
         clearBackend(store)
     }
 
+    @Test
+    @Throws(InterruptedException::class)
+    fun testQueryNetwork() {
+        testQuery(StoreType.NETWORK)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testQuerySync() {
+        testQuery(StoreType.SYNC)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testQueryAuto() {
+        testQuery(StoreType.AUTO)
+    }
+
+    private fun testQuery(storeType: StoreType) {
+        val store = DataStore.collection(COLLECTION, Person::class.java, storeType, client)
+        clearBackend(store)
+        createAndSavePerson(store, TEST_USERNAME)
+        createAndSavePerson(store, TEST_USERNAME)
+        createAndSavePerson(store, TEST_USERNAME)
+
+        var query = client?.query()
+        query?.equals("username", TEST_USERNAME)
+        var findCallback = findWithCount(store, query!!, LONG_TIMEOUT)
+        Assert.assertNotNull(findCallback.result)
+        Assert.assertNotNull(findCallback.result?.count)
+        Assert.assertEquals(3, findCallback.result?.count)
+        Assert.assertEquals(3, findCallback.result?.result?.size)
+
+        //check that request ignores `limit` parameter for count
+        query = client?.query()
+        query?.equals("username", TEST_USERNAME)?.setLimit(1)
+        findCallback = findWithCount(store, query!!, LONG_TIMEOUT)
+        Assert.assertNotNull(findCallback.result)
+        Assert.assertNotNull(findCallback.result?.count)
+        Assert.assertEquals(3, findCallback.result?.count)
+        Assert.assertEquals(1, findCallback.result?.result?.size)
+
+        //check that request ignores `skip` parameter for count
+        query = client?.query()
+        query?.equals("username", TEST_USERNAME)?.setSkip(1)
+        findCallback = findWithCount(store, query!!, LONG_TIMEOUT)
+        Assert.assertNotNull(findCallback.result)
+        Assert.assertNotNull(findCallback.result?.count)
+        Assert.assertEquals(3, findCallback.result?.count)
+        Assert.assertEquals(2, findCallback.result?.result?.size)
+
+        clearBackend(store)
+    }
+
 }
