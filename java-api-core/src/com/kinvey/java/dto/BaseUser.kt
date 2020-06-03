@@ -20,6 +20,7 @@ import com.google.api.client.json.GenericJson
 import com.google.api.client.util.Key
 
 import com.kinvey.java.Constants.AUTH_TOKEN
+import com.kinvey.java.Constants._LLT
 import com.kinvey.java.model.KinveyMetaData.Companion.KMD
 
 /**
@@ -41,4 +42,7 @@ open class BaseUser : GenericJson() {
             }
         }
     }
+
+    val lastLoginTime:() -> String? = {(get(KMD) as? MutableMap<*, *>)?.get(_LLT) as String?}
+
 }
