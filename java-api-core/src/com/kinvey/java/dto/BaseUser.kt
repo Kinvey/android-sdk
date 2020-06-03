@@ -43,6 +43,8 @@ open class BaseUser : GenericJson() {
         }
     }
 
-    val lastLoginTime:() -> String? = {(get(KMD) as? MutableMap<*, *>)?.get(_LLT) as String?}
+    fun getLastLoginTime(): String? {
+        return (get(KMD) as? MutableMap<*, *>)?.get(_LLT) as String?
+    }
 
 }

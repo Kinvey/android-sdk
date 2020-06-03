@@ -2596,12 +2596,13 @@ class UserStoreTest {
     @Throws(InterruptedException::class)
     fun testLastLoginTime() {
         val user = login(USERNAME, PASSWORD).result
-        assertNotNull(user?.lastLoginTime)
+        assertNotNull(user?.getLastLoginTime())
         val callback = convenience(client)
         assertNull(callback.error)
         assertNotNull(callback.result)
         assertEquals(user?.id, callback.result?.id)
-        assertNotNull(callback.result?.lastLoginTime)
+        assertNotNull(callback.result?.getLastLoginTime())
+        assertEquals(user?.getLastLoginTime(), callback.result?.getLastLoginTime())
     }
 
     companion object {
