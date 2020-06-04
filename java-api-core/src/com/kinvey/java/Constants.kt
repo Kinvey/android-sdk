@@ -20,7 +20,7 @@ object Constants {
     const val _KMD = "_kmd"
     const val _LMT = "_lmt"
     const val _ACL = "_acl"
-    const val _LLT = "llt"
+    const val LLT = "llt"
 
     const val META_ID = "meta.id"
 
