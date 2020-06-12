@@ -581,7 +581,7 @@ open class BaseDataStoreMultiInsertTest {
             result = result and (idx == err?.index)
             if (checkErrMsg) {
                 val msg = errMessages?.get(curIdx) ?: ""
-                result = result and (err?.errorMessage?.contains(msg) == true)
+                result = result and (err?.description?.contains(msg) == true)
             }
         }
         return result
