@@ -18,6 +18,7 @@ package com.kinvey.java.store.requests.data.save
 
 import com.google.api.client.http.HttpResponseException
 import com.google.api.client.json.GenericJson
+import com.kinvey.java.Constants
 import com.kinvey.java.KinveySaveBatchException
 import com.kinvey.java.Logger
 import com.kinvey.java.cache.ICache
@@ -65,7 +66,6 @@ class CreateListBatchRequest<T : GenericJson>(
                 doPushRequest()
                 val itemsToSend = cache?.save(objects)
                 res = runSaveItemsRequest(itemsToSend)
-                cache?.save(res.entities)
                 if (exception is IOException) {
                     throw IOException(exception)
                 }
@@ -108,8 +108,22 @@ class CreateListBatchRequest<T : GenericJson>(
                                        result: KinveySaveBatchResponse<T>, useCache: Boolean = true): KinveySaveBatchResponse<T>? {
         var response: KinveySaveBatchResponse<T>? = null
         val batchSaveErrors = ArrayList<KinveyBatchInsertError>()
+        var tempIds: List<String> = mutableListOf()
+        if (useCache) tempIds = entities.filter { networkManager.isTempId(it) }.map { it[_ID] as String }
         try {
-            response = networkManager.saveBatchBlocking(entities)?.execute()
+            response = if (useCache && tempIds.isNotEmpty()) {
+                val entitiesWithoutIds =
+                        entities.map {
+                            if (networkManager.isTempId(it)) {
+                                it.set(_ID, null) as T
+                            } else {
+                                it
+                            }
+                        }
+                networkManager.saveBatchBlocking(entitiesWithoutIds)?.execute()
+            } else {
+                networkManager.saveBatchBlocking(entities)?.execute()
+            }
         } catch (e: KinveyJsonResponseException) {
             if (!multipleRequests) throw e
         } catch (e: IOException) {
@@ -125,6 +139,18 @@ class CreateListBatchRequest<T : GenericJson>(
                     result.entities = mutableListOf()
                 }
                 result.entities!!.addAll(response.entities!!)
+                // If object does not have an _id, then it is being created locally. The cache may
+                // provide an _id in this case, but before it is saved to the network, this temporary
+                // _id should be removed prior to saving to the backend. This way, the backend
+                // will generate a permanent _id that will be used by the cache. Once we get the
+                // result from the backend with the permanent _id, the record in the cache with the
+                // temporary _id should be removed, and the new record should be saved.
+                if (useCache && tempIds.isNotEmpty()) {
+                    // The result from the network has the entity with its permanent ID. Need
+                    // to remove the entity from the local cache with the temporary ID.
+                    cache?.delete(tempIds)
+                    cache?.save(response.entities)
+                }
             }
             if (response.errors != null) {
                 if (result.errors == null) {
