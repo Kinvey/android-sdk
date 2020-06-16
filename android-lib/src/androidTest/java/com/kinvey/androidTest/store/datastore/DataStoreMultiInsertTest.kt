@@ -12,6 +12,8 @@ import com.kinvey.java.KinveySaveBatchException
 import com.kinvey.java.core.KinveyJsonResponseException
 import com.kinvey.java.store.StoreType
 import com.kinvey.java.sync.dto.SyncRequest
+import com.kinvey.java.AbstractClient.Companion.kinveyApiVersion
+
 
 import org.junit.Ignore
 import org.junit.Test
@@ -173,6 +175,21 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
     fun testCreateListReturnErrorForEmptyListSync() {
         val list = ArrayList<Person>()
         testCreateEmptyList(list, Person::class.java, Person.COLLECTION, StoreType.SYNC)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun <T : GenericJson> testCreateApiV6() {
+        val personList = createPersonsList(false)
+        kinveyApiVersion = "6"
+        val personStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
+        clearBackend(personStore)
+        client.syncManager.clear(Person.COLLECTION)
+        val saveCallback = createList(personStore, personList)
+        assertNull(saveCallback.error)
+        assertNotNull(saveCallback.result)
+        clearBackend(personStore)
+        kinveyApiVersion = "5"
     }
 
     // SAVE METHOD TESTS
