@@ -22,6 +22,7 @@ import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.JsonObjectParser
 import com.google.api.client.util.Key
 import com.kinvey.java.Constants.AUTH_TOKEN
+import com.kinvey.java.Constants.LLT
 import java.io.IOException
 
 /**
@@ -40,6 +41,8 @@ open class KinveyAuthResponse : GenericJson() {
     class KinveyUserMetadata : GenericJson() {
         @Key("lmt")
         val lastModifiedTime: String? = null
+        @Key(LLT)
+        val lastLoginTime: String? = null
         @Key(AUTH_TOKEN)
         val authToken: String? = null
     }
