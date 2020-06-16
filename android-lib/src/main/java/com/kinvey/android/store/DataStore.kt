@@ -423,7 +423,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
         Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         Preconditions.checkNotNull(entities, "Entity cannot be null.")
         Preconditions.checkState(entities.size > 0, "Entity list cannot be empty.")
-        Preconditions.checkState(kinveyApiVersion == KINVEY_API_VERSION_5, "Kinvey api version cannot be less than 5.")
+        Preconditions.checkState(kinveyApiVersion >= KINVEY_API_VERSION_5, "Kinvey api version cannot be less than 5.")
         Logger.INFO("Calling DataStore#createBatch(listObjects)")
         CreateListBatchRequest(this, entities, callback).execute()
     }

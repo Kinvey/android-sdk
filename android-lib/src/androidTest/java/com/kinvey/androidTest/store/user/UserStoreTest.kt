@@ -2592,6 +2592,19 @@ class UserStoreTest {
         assertNull(logout(client).error)
     }
 
+    @Test
+    @Throws(InterruptedException::class)
+    fun testLastLoginTime() {
+        val user = login(USERNAME, PASSWORD).result
+        assertNotNull(user?.getLastLoginTime())
+        val callback = convenience(client)
+        assertNull(callback.error)
+        assertNotNull(callback.result)
+        assertEquals(user?.id, callback.result?.id)
+        assertNotNull(callback.result?.getLastLoginTime())
+        assertEquals(user?.getLastLoginTime(), callback.result?.getLastLoginTime())
+    }
+
     companion object {
         const val INSUFFICIENT_CREDENTIAL_TYPE = "InsufficientCredentials"
         private const val ACTIVE_USER_COLLECTION_NAME = "active_user_info"
