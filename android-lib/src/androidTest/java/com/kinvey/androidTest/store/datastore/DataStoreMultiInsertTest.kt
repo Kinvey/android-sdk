@@ -1443,4 +1443,39 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         // find using syncstore, should return all items including the invalid one
         testSyncItemsList(true, StoreType.AUTO)
     }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testErrorMessageIfSameIdExistsNetwork() {
+        testErrorMessageIfSameIdExists(StoreType.NETWORK)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testErrorMessageIfSameIdExistsAuto() {
+        testErrorMessageIfSameIdExists(StoreType.AUTO)
+    }
+
+    @Test
+    @Ignore("Should work after fixing: https://kinvey.atlassian.net/browse/KDEV-781")
+    @Throws(InterruptedException::class)
+    fun testErrorMessageIfSameIdExistsSync() {
+        testErrorMessageIfSameIdExists(StoreType.SYNC)
+    }
+
+    @Throws(InterruptedException::class)
+    fun testErrorMessageIfSameIdExists(storeType: StoreType) {
+        val personList = createPersonsList(true)
+        val netStore = DataStore.collection(Person.COLLECTION, Person::class.java, storeType, client)
+        clearBackend(netStore)
+        var saveCallback = createList(netStore, personList)
+        assertNull(saveCallback.error)
+        assertNotNull(saveCallback.result)
+        assertTrue(checkPersonIfSameObjects(personList, saveCallback.result?.entities, false))
+        saveCallback = createList(netStore, personList)
+        assertNull(saveCallback.error)
+        assertNotNull(saveCallback.result?.errors)
+        assertNotNull(saveCallback.result?.errors?.get(0)?.description)
+        assertNotNull(saveCallback.result?.errors?.get(0)?.debug)
+    }
 }

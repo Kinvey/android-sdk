@@ -15,7 +15,7 @@ class KinveySaveBatchResponseTest : TestCase() {
         assertTrue(response?.haveErrors == false)
 
         val entities = mutableListOf(Entity("test1"), Entity("test2"))
-        val errors = mutableListOf(KinveyBatchInsertError(0, 400, "test error"))
+        val errors = mutableListOf(KinveyBatchInsertError(0))
 
         response?.entities = entities
         response?.errors = errors

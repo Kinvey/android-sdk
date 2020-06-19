@@ -8,7 +8,7 @@ class KinveySyncSaveBatchResponseTest : TestCase() {
     fun testConstructor() {
 
         val entities = listOf(Entity("test1"), Entity("test2"))
-        val errors = listOf(KinveyBatchInsertError(0, 400, "test error"))
+        val errors = listOf(KinveyBatchInsertError(0))
 
         response = KinveySyncSaveBatchResponse(entities, errors)
 
