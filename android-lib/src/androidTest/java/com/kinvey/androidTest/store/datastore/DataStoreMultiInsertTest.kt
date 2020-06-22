@@ -1446,6 +1446,59 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
 
     @Test
     @Throws(InterruptedException::class)
+    fun testTempIdSync() {
+        testTempId(StoreType.SYNC)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testTempIdCache() {
+        testTempId(StoreType.CACHE)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testTempIdAuto() {
+        testTempId(StoreType.AUTO)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testTempIdNetwork() {
+        testTempId(StoreType.NETWORK)
+    }
+
+    @Throws(InterruptedException::class)
+    private fun testTempId(storeType: StoreType) {
+        val personList = createPersonsList(false)
+        val personStore = DataStore.collection(Person.COLLECTION, Person::class.java, storeType, client)
+        clearBackend(personStore)
+        client.syncManager.clear(Person.COLLECTION)
+        val saveCallback = createList(personStore, personList)
+        assertNull(saveCallback.error)
+        assertNotNull(saveCallback.result)
+        if (storeType == StoreType.SYNC) {
+            saveCallback.result!!.entities?.forEach {
+                assertTrue(it.id?.startsWith("temp")!!)
+            }
+            val pushCallback = push(personStore, DEFAULT_TIMEOUT)
+            assertNull(pushCallback.error)
+            assertNotNull(pushCallback.result)
+        } else {
+            saveCallback.result!!.entities?.forEach {
+                assertTrue(!it.id?.startsWith("temp")!!)
+            }
+        }
+        val findCallback = find(personStore, LONG_TIMEOUT)
+        assertNotNull(findCallback.result)
+        assertNotNull(findCallback.result!!.result)
+        findCallback.result!!.result?.forEach {
+            assertTrue(!it.id?.contains("temp")!!)
+        }
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
     fun testErrorMessageIfSameIdExistsNetwork() {
         testErrorMessageIfSameIdExists(StoreType.NETWORK)
     }
@@ -1478,4 +1531,5 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         assertNotNull(saveCallback.result?.errors?.get(0)?.description)
         assertNotNull(saveCallback.result?.errors?.get(0)?.debug)
     }
+
 }
