@@ -33,12 +33,10 @@ import com.kinvey.java.cache.ICache
 import com.kinvey.java.core.*
 import com.kinvey.java.deltaset.DeltaSetItem
 import com.kinvey.java.deltaset.DeltaSetMerge
-import com.kinvey.java.dto.BaseUser
 import com.kinvey.java.dto.BatchList
 import com.kinvey.java.dto.DeviceId
 import com.kinvey.java.model.*
 import com.kinvey.java.query.MongoQueryFilter.MongoQueryFilterBuilder
-import com.sun.security.ntlm.Client
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -429,6 +427,15 @@ open class NetworkManager<T : GenericJson>(
         val batch = SaveBatch(this, client, list, responseClassType as Class<KinveySaveBatchResponse<T>>, currentClass, SaveMode.POST)
         client?.initializeRequest(batch)
         return batch
+    }
+
+
+    @Throws(IOException::class)
+    open fun createBlocking(entity: T?): Create<T>? {
+        val responseClassType = KinveySaveBatchResponse::class.java
+        val create = Create(this, client, entity, responseClassType as Class<KinveySaveBatchResponse<T>>, currentClass, SaveMode.POST)
+        client?.initializeRequest(create)
+        return create
     }
 
     fun isTempId(item: T?): Boolean {
@@ -919,6 +926,28 @@ open class NetworkManager<T : GenericJson>(
                     responseClassType: Class<KinveySaveBatchResponse<T>>, parClassType: Class<T>?, update: SaveMode?)
         : KinveyJsonStringClientRequest<KinveySaveBatchResponse<T>>(client, update.toString(), SAVE_BATCH_REST_PATH,
             BatchList<Any?>(itemsList).toString(), responseClassType, parClassType) {
+        @Key
+        var collectionName: String? = networkManager.collectionName
+
+        init {
+            val customRequestProperties = networkManager.customRequestProperties
+            val clientAppVersion = networkManager.clientAppVersion
+            getRequestHeaders()["X-Kinvey-Client-App-Version"] = clientAppVersion
+            if (!customRequestProperties.isNullOrEmpty()) {
+                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(customRequestProperties)
+            }
+        }
+    }
+
+    /**
+     * SaveBatch class. Constructs the HTTP request object to
+     * create multi-insert requests.
+     *
+     */
+    class Create<T : GenericJson>(networkManager: NetworkManager<T>, client : AbstractClient<*>?, item: T?,
+                    responseClassType: Class<KinveySaveBatchResponse<T>>, parClassType: Class<T>?, update: SaveMode?)
+        : KinveyJsonStringClientRequest<KinveySaveBatchResponse<T>>(client, update.toString(), SAVE_BATCH_REST_PATH,
+            item.toString(), responseClassType, parClassType) {
         @Key
         var collectionName: String? = networkManager.collectionName
 
