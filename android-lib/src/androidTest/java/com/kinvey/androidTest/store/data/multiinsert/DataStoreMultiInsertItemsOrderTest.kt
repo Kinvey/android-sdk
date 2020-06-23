@@ -1,4 +1,4 @@
-package com.kinvey.androidTest.store.datastore
+package com.kinvey.androidTest.store.data.multiinsert
 
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
@@ -39,9 +39,9 @@ class DataStoreMultiInsertItemsOrderTest : BaseDataStoreMultiInsertTest() {
 
         val personList = createCombineList()
 
-        val store = DataStore.collection(Person.COLLECTION, Person::class.java, storeType, client)
+        val store = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, storeType, client)
         clearBackend(store)
-        client.syncManager.clear(Person.COLLECTION)
+        client.syncManager.clear(MULTI_INSERT_COLLECTION)
 
         val saveCallback = saveList(store, personList)
 
