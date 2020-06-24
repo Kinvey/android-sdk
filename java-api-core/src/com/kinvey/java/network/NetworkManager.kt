@@ -947,7 +947,7 @@ open class NetworkManager<T : GenericJson>(
     class Create<T : GenericJson>(networkManager: NetworkManager<T>, client : AbstractClient<*>?, item: T?,
                     responseClassType: Class<KinveySaveBatchResponse<T>>, parClassType: Class<T>?, update: SaveMode?)
         : KinveyJsonStringClientRequest<KinveySaveBatchResponse<T>>(client, update.toString(), SAVE_BATCH_REST_PATH,
-            item.toString(), responseClassType, parClassType) {
+            Gson().toJson(item), responseClassType, parClassType) {
         @Key
         var collectionName: String? = networkManager.collectionName
 
