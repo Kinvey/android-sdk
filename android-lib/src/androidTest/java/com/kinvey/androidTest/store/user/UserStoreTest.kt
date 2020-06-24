@@ -702,7 +702,7 @@ class UserStoreTest {
 
     @Test
     @Throws(RuntimeException::class)
-    fun loginKinveyAuthError() {
+    fun loginKinveyAuthErrorDeprecated() {
         var isExceptionThrown = false
         val latch = CountDownLatch(1)
         val looperThread: LooperThread
@@ -731,7 +731,7 @@ class UserStoreTest {
 
     @Test
     @Throws(RuntimeException::class)
-    fun LoginKinveyAuthError() {
+    fun loginKinveyAuthError() {
         var isExceptionThrown = false
         val latch = CountDownLatch(1)
         val looperThread: LooperThread
