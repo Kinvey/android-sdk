@@ -2,7 +2,6 @@ package com.kinvey.androidTest.store.data
 
 import androidx.test.filters.SmallTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.kinvey.android.callback.KinveyReadCallback
 import com.kinvey.android.store.DataStore
 import com.kinvey.androidTest.model.Person
 import com.kinvey.androidTest.store.datastore.BaseDataStoreTest
@@ -36,20 +35,20 @@ class DataStoreCountHeaderTest : BaseDataStoreTest() {
 
     private fun testFindByQueryWithCount(storeType: StoreType) {
         val store = DataStore.collection(COLLECTION, Person::class.java, storeType, client)
-        Assert.assertFalse(store.isAddCountHeader)
+        Assert.assertFalse(store.hasCountHeader)
         clearBackend(store)
         createAndSavePerson(store, TEST_USERNAME)
         createAndSavePerson(store, TEST_USERNAME_2)
         var findCallback = find(store, LONG_TIMEOUT)
         Assert.assertNotNull(findCallback.result)
         Assert.assertNull(findCallback.result?.count)
-        store.isAddCountHeader = true
+        store.hasCountHeader = true
         findCallback = find(store, LONG_TIMEOUT)
         Assert.assertNotNull(findCallback.result)
         Assert.assertNotNull(findCallback.result?.count)
         Assert.assertEquals(findCallback.result?.result?.size, 2)
         Assert.assertEquals(findCallback.result?.count, 2)
-        store.isAddCountHeader = false
+        store.hasCountHeader = false
         findCallback = find(store, LONG_TIMEOUT)
         Assert.assertNull(findCallback.result?.count)
         clearBackend(store)
@@ -93,7 +92,7 @@ class DataStoreCountHeaderTest : BaseDataStoreTest() {
 
     private fun testFindWithCount(storeType: StoreType) {
         val store = DataStore.collection(COLLECTION, Person::class.java, storeType, client)
-        Assert.assertFalse(store.isAddCountHeader)
+        Assert.assertFalse(store.hasCountHeader)
         clearBackend(store)
         createAndSavePerson(store, TEST_USERNAME)
         createAndSavePerson(store, TEST_USERNAME_2)
@@ -106,7 +105,7 @@ class DataStoreCountHeaderTest : BaseDataStoreTest() {
         Assert.assertEquals(findCallback.result?.result?.size, 2)
         Assert.assertNull(findCallback.result?.count)
 
-        store.isAddCountHeader = false
+        store.hasCountHeader = false
         findCallback = find(store, LONG_TIMEOUT)
         Assert.assertNotNull(findCallback.result)
         Assert.assertEquals(findCallback.result?.result?.size, 2)
@@ -135,7 +134,7 @@ class DataStoreCountHeaderTest : BaseDataStoreTest() {
     private fun testFindWithCountDelta(storeType: StoreType) {
         val store = DataStore.collection(COLLECTION, Person::class.java, storeType, client)
         store.isDeltaSetCachingEnabled = true
-        store.isAddCountHeader = false
+        store.hasCountHeader = false
         clearBackend(store)
         createAndSavePerson(store, TEST_USERNAME)
         createAndSavePerson(store, TEST_USERNAME_2)

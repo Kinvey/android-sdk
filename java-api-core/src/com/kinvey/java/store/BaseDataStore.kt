@@ -87,10 +87,10 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @param deltaSetCachingEnabled boolean representing if we should use delta set caching
      */
     var isDeltaSetCachingEnabled = false
-    var isAddCountHeader = false
+    var hasCountHeader = false
         set(value) {
             field = value
-            networkManager.isAddCountHeader = value
+            networkManager.hasCountHeader = value
             cache?.isAddCount = value
         }
 
@@ -602,9 +602,9 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @throws IOException
      */
     @Throws(IOException::class)
-    private fun findBlockingDeltaSync(query: Query?, isAddCountHeader: Boolean = false): KinveyReadResponse<T>? {
-        val cacheItem = getQueryCacheItem(query, isAddCountHeader) //one is correct number of query cache item count for any request.
-        return if (cacheItem != null) findBlockingDeltaSync(cacheItem, query, isAddCountHeader) else getBlocking(query, isAddCountHeader)
+    private fun findBlockingDeltaSync(query: Query?, hasCountHeader: Boolean = false): KinveyReadResponse<T>? {
+        val cacheItem = getQueryCacheItem(query) //one is correct number of query cache item count for any request.
+        return if (cacheItem != null) findBlockingDeltaSync(cacheItem, query, hasCountHeader) else getBlocking(query, hasCountHeader)
     }
 
     /**
@@ -641,8 +641,8 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @throws IOException
      */
     @Throws(IOException::class)
-    private fun getBlocking(query: Query?, isAddCountHeader: Boolean = false): KinveyReadResponse<T>? {
-        val response = networkManager.getBlocking(query, isAddCountHeader)?.execute()
+    private fun getBlocking(query: Query?, hasCountHeader: Boolean = false): KinveyReadResponse<T>? {
+        val response = networkManager.getBlocking(query, hasCountHeader)?.execute()
         cache?.delete(query)
         response?.result?.let { list -> cache?.save(list) }
         response?.lastRequestTime?.let { timeStr ->
@@ -659,7 +659,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @throws IOException
      */
     @Throws(IOException::class)
-    private fun findBlockingDeltaSync(cacheItem: QueryCacheItem, query: Query?, isAddCountHeader: Boolean = false): KinveyReadResponse<T>? {
+    private fun findBlockingDeltaSync(cacheItem: QueryCacheItem, query: Query?, hasCountHeader: Boolean = false): KinveyReadResponse<T>? {
         try {
             val response = KinveyReadResponse<T>()
             val queryCacheResponse = networkManager.queryCacheGetBlocking(query, cacheItem.lastRequestTime)?.execute()
@@ -674,7 +674,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
             }
             if (query != null && cache != null) {
                 response.result = cache!![query]
-                if (cache?.isAddCount == true || isAddCountHeader) {
+                if (cache?.isAddCount == true || hasCountHeader) {
                     response.count = cache?.count(query)?.toInt()
                 }
             }
@@ -689,7 +689,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
             return if (statusCode == 400 && jsonError?.error == RESULT_SIZE_ERROR ||
                     statusCode == 400 && jsonError?.error == PARAMETER_VALUE_OF_RANGE_ERROR ||
                     statusCode == 403 && jsonError?.error == MISSING_CONFIGURATION_ERROR) {
-                getBlocking(query, isAddCountHeader)
+                getBlocking(query, hasCountHeader)
             } else {
                 throw responseException
             }
@@ -734,11 +734,11 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         }
     }
 
-    private fun getQueryCacheItem(query: Query?, isAddCountHeader: Boolean = false): QueryCacheItem? {
-        return getQueryCacheItem(query?.queryFilterMap.toString(), isAddCountHeader)
+    private fun getQueryCacheItem(query: Query?): QueryCacheItem? {
+        return getQueryCacheItem(query?.queryFilterMap.toString())
     }
 
-    private fun getQueryCacheItem(stringQuery: String, isAddCountHeader: Boolean = false): QueryCacheItem? {
+    private fun getQueryCacheItem(stringQuery: String): QueryCacheItem? {
         if (queryCache == null) {
             queryCache = client?.cacheManager?.getCache(Constants.QUERY_CACHE_COLLECTION, QueryCacheItem::class.java, java.lang.Long.MAX_VALUE)
         }

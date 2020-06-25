@@ -17,7 +17,6 @@
 package com.kinvey.java.store.requests.data.read
 
 import com.google.api.client.json.GenericJson
-import com.kinvey.java.AbstractClient
 import com.kinvey.java.Query
 import com.kinvey.java.cache.ICache
 import com.kinvey.java.model.KinveyReadResponse
@@ -30,13 +29,13 @@ import java.io.IOException
  * Created by Prots on 2/15/16.
  */
 class ReadQueryRequest<T : GenericJson>(cache: ICache<T>?, networkManager: NetworkManager<T>?, readPolicy: ReadPolicy?,
-                                        private val query: Query, private val isAddCountHeader: Boolean = false) : AbstractReadRequest<T>(cache, readPolicy, networkManager) {
+                                        private val query: Query, private val hasCountHeader: Boolean = false) : AbstractReadRequest<T>(cache, readPolicy, networkManager) {
 
     override val cached: KinveyReadResponse<T>?
         get() {
             val response = KinveyReadResponse<T>()
             response.result = cache?.get(query)
-            if (cache?.isAddCount == true || isAddCountHeader) {
+            if (cache?.isAddCount == true || hasCountHeader) {
                 response.count = cache?.count(query)?.toInt()
             }
             return response
@@ -45,6 +44,6 @@ class ReadQueryRequest<T : GenericJson>(cache: ICache<T>?, networkManager: Netwo
     override val network: KinveyReadResponse<T>?
         @Throws(IOException::class)
         get() {
-            return networkData?.getBlocking(query, isAddCountHeader)?.execute()
+            return networkData?.getBlocking(query, hasCountHeader)?.execute()
         }
 }
