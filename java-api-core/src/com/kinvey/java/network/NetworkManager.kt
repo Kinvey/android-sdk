@@ -432,8 +432,7 @@ open class NetworkManager<T : GenericJson>(
 
     @Throws(IOException::class)
     open fun createBlocking(entity: T?): Create<T>? {
-        val responseClassType = KinveySaveBatchResponse::class.java
-        val create = Create(this, client, entity, responseClassType as Class<KinveySaveBatchResponse<T>>, currentClass, SaveMode.POST)
+        val create = Create(this, client, entity, currentClass!!, currentClass, SaveMode.POST)
         client?.initializeRequest(create)
         return create
     }
@@ -945,8 +944,8 @@ open class NetworkManager<T : GenericJson>(
      *
      */
     class Create<T : GenericJson>(networkManager: NetworkManager<T>, client : AbstractClient<*>?, item: T?,
-                    responseClassType: Class<KinveySaveBatchResponse<T>>, parClassType: Class<T>?, update: SaveMode?)
-        : KinveyJsonStringClientRequest<KinveySaveBatchResponse<T>>(client, update.toString(), SAVE_BATCH_REST_PATH,
+                    responseClassType: Class<T>, parClassType: Class<T>?, update: SaveMode?)
+        : KinveyJsonStringClientRequest<T>(client, update.toString(), SAVE_BATCH_REST_PATH,
             Gson().toJson(item), responseClassType, parClassType) {
         @Key
         var collectionName: String? = networkManager.collectionName

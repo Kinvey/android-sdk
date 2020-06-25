@@ -316,9 +316,9 @@ open class BaseDataStoreMultiInsertTest {
     }
 
     @Throws(InterruptedException::class)
-    protected fun <T : GenericJson> create(store: DataStore<T>, item: T): DefaultKinveyClientListCreateCallback<T> {
+    protected fun <T : GenericJson> create(store: DataStore<T>, item: T): DefaultKinveyClientCallback<T> {
         val latch = CountDownLatch(1)
-        val callback = DefaultKinveyClientListCreateCallback<T>(latch)
+        val callback = DefaultKinveyClientCallback<T>(latch)
         val looperThread = LooperThread(Runnable {
             store.create(item, callback)
         })

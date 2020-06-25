@@ -421,7 +421,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      *
      *
      * Constructs an asynchronous request to create an entity <T> to a collection.
-     * Creates the entity if it doesn't exist, return error in error list of response for entity if it does exist.
+     * Creates the entity if it doesn't exist, return error for entity if it does exist.
      * If an "_id" property is not present, the Kinvey backend will generate one.
     </T> *
      *
@@ -429,18 +429,18 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
      * Sample Usage:
      * <pre>
      * `DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, StoreType.SYNC, myClient);
-     * myAppData.create(entity, new KinveyClientCallback<KinveySaveBatchResponse<EventEntity>> {
+     * myAppData.create(entity, new KinveyClientCallback<EventEntity> {
      * public void onFailure(Throwable t) { ... }
-     * public void onSuccess(KinveySaveBatchResponse<EventEntity> entity) { ... }
+     * public void onSuccess(EventEntity entity) { ... }
      * });
     ` *
     </pre> *
      *
      *
      * @param entity The entity to create
-     * @param callback KinveyClientCallback<KinveySaveBatchResponse<T>>
+     * @param callback KinveyClientCallback<T>
     </T> */
-    fun create(entity: T, callback: KinveyClientCallback<KinveySaveBatchResponse<T>>) {
+    fun create(entity: T, callback: KinveyClientCallback<T>) {
         Preconditions.checkNotNull(client, "client must not be null")
         Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         Preconditions.checkNotNull(entity, "Entity cannot be null.")

@@ -8,11 +8,11 @@ import com.kinvey.java.core.KinveyClientCallback
 import com.kinvey.java.model.KinveySaveBatchResponse
 import java.io.IOException
 
-class AsyncCreateRequest<T: GenericJson>(val store: DataStore<T>, var entity: T, callback: KinveyClientCallback<KinveySaveBatchResponse<T>>?)
-    : AsyncClientRequest<KinveySaveBatchResponse<T>>(callback) {
+class AsyncCreateRequest<T: GenericJson>(val store: DataStore<T>, var entity: T, callback: KinveyClientCallback<T>)
+    : AsyncClientRequest<T>(callback) {
 
     @Throws(IOException::class)
-    override fun executeAsync(): KinveySaveBatchResponse<T> {
+    override fun executeAsync(): T? {
         Logger.INFO("Calling CreateRequest#executeAsync()")
         return store.create(entity)
     }

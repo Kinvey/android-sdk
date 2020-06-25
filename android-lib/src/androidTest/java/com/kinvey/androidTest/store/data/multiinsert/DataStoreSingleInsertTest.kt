@@ -58,9 +58,7 @@ class DataStoreSingleInsertTest : BaseDataStoreMultiInsertTest() {
         val saveCallback = create(personStore, person)
         assertNull(saveCallback.error)
         assertNotNull(saveCallback.result)
-        assertNotNull(saveCallback.result!!.entities)
-        assertEquals(1, saveCallback.result!!.entities!!.size)
-        assertEquals(person.username, saveCallback.result!!.entities!![0].username)
+        assertEquals(person.username, saveCallback.result!!.username)
 
         val findCallback = find(personStore, LONG_TIMEOUT)
         assertNotNull(findCallback.result)
@@ -118,7 +116,7 @@ class DataStoreSingleInsertTest : BaseDataStoreMultiInsertTest() {
         val saveCallback = create(netStore, person)
         assertNotNull(saveCallback.result)
         assertNull(saveCallback.error)
-        val resultPerson = saveCallback.result?.entities?.get(0) as Person
+        val resultPerson = saveCallback.result!!
         assertNotNull(resultPerson.id)
         assertEquals(person.username, resultPerson.username)
     }
@@ -169,19 +167,23 @@ class DataStoreSingleInsertTest : BaseDataStoreMultiInsertTest() {
         val saveCallback = create(personStore, person)
         assertNull(saveCallback.error)
         assertNotNull(saveCallback.result)
-        assertNotNull(saveCallback.result!!.entities)
         if (storeType == StoreType.SYNC) {
-            Assert.assertTrue(saveCallback.result!!.entities?.get(0)?.id?.startsWith("temp")!!)
+            Assert.assertTrue(saveCallback.result!!.id?.startsWith("temp")!!)
             val pushCallback = push(personStore, DEFAULT_TIMEOUT)
             assertNull(pushCallback.error)
             assertNotNull(pushCallback.result)
         } else {
-            Assert.assertTrue(saveCallback.result!!.entities?.get(0)?.id?.startsWith("temp")!!)
+            Assert.assertTrue(!saveCallback.result!!.id?.startsWith("temp")!!)
         }
         val findCallback = find(personStore, LONG_TIMEOUT)
         assertNotNull(findCallback.result)
         assertNotNull(findCallback.result!!.result)
-        Assert.assertTrue(!saveCallback.result!!.entities?.get(0)?.id?.startsWith("temp")!!)
+        if (storeType == StoreType.SYNC) {
+            Assert.assertTrue(saveCallback.result!!.id?.startsWith("temp")!!)
+        } else {
+            Assert.assertTrue(!saveCallback.result!!.id?.startsWith("temp")!!)
+        }
+
     }
 
     @Test

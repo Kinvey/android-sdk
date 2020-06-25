@@ -27,6 +27,7 @@ import com.kinvey.java.Query
 import com.kinvey.java.cache.ICache
 import com.kinvey.java.cache.KinveyCachedClientCallback
 import com.kinvey.java.core.KinveyCachedAggregateCallback
+import com.kinvey.java.core.KinveyClientCallback
 import com.kinvey.java.core.KinveyJsonResponseException
 import com.kinvey.java.model.*
 import com.kinvey.java.network.NetworkManager
@@ -316,7 +317,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun create(`object`: T): KinveySaveBatchResponse<T> {
+    fun create(`object`: T): T? {
         Preconditions.checkNotNull(client, "client must not be null.")
         Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         Preconditions.checkNotNull(`object`, "object must not be null.")

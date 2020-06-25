@@ -18,43 +18,39 @@ package com.kinvey.java.store.requests.data.save
 
 import com.google.api.client.http.HttpResponseException
 import com.google.api.client.json.GenericJson
+import com.kinvey.java.Constants._ID
 import com.kinvey.java.KinveySaveBatchException
 import com.kinvey.java.Logger
 import com.kinvey.java.cache.ICache
 import com.kinvey.java.core.KinveyJsonResponseException
-import com.kinvey.java.model.KinveyBatchInsertError
-import com.kinvey.java.model.KinveySaveBatchResponse
 import com.kinvey.java.network.NetworkManager
 import com.kinvey.java.store.WritePolicy
 import com.kinvey.java.store.requests.data.IRequest
 import com.kinvey.java.store.requests.data.PushBatchRequest
 import com.kinvey.java.sync.SyncManager
 import com.kinvey.java.sync.dto.SyncRequest
-
 import java.io.IOException
-
-import com.kinvey.java.Constants._ID
 
 class CreateRequest<T : GenericJson>(
         private val cache: ICache<T>?,
         private val networkManager: NetworkManager<T>,
         private val writePolicy: WritePolicy,
         private val entity: T,
-        private val syncManager: SyncManager?) : IRequest<KinveySaveBatchResponse<T>> {
+        private val syncManager: SyncManager?) : IRequest<T> {
 
     private var exception: IOException? = null
     private var wasException = false
 
     @Throws(IOException::class)
-    override fun execute(): KinveySaveBatchResponse<T>  {
-        var res = KinveySaveBatchResponse<T>()
+    override fun execute(): T?  {
+        var res: T? = null
         when (writePolicy) {
             WritePolicy.FORCE_LOCAL -> {
                 val ret: T? = cache?.save(entity)
                 ret?.let {
                     syncManager?.enqueueSaveRequests(networkManager.collectionName
                             ?: "", networkManager, listOf(ret))
-                    res.entities = mutableListOf(ret)
+                    res = ret
                 }
             }
             WritePolicy.LOCAL_THEN_NETWORK -> {
@@ -76,11 +72,11 @@ class CreateRequest<T : GenericJson>(
     }
 
     @Throws(IOException::class)
-    private fun runSaveItemsRequest(entity: T?, useCache: Boolean = true): KinveySaveBatchResponse<T> {
+    private fun runSaveItemsRequest(entity: T?, useCache: Boolean = true): T? {
         Logger.INFO("Start saving entities")
-        val res: KinveySaveBatchResponse<T> = KinveySaveBatchResponse()
+        var res: T? = null
         if (entity != null) {
-            postCreateRequest(entity, res, useCache)
+            res = postCreateRequest(entity, useCache)
         }
         if (wasException && exception == null) {
             exception = KinveySaveBatchException(null, null, null)
@@ -90,9 +86,8 @@ class CreateRequest<T : GenericJson>(
     }
 
     @Throws(IOException::class)
-    private fun postCreateRequest(entity: T,
-                                     result: KinveySaveBatchResponse<T>, useCache: Boolean = true): KinveySaveBatchResponse<T>? {
-        var response: KinveySaveBatchResponse<T>? = null
+    private fun postCreateRequest(entity: T, useCache: Boolean = true): T? {
+        var response: T? = null
         var tempIds: String? = null
         if (useCache) tempIds = if (networkManager.isTempId(entity)) entity[_ID] as String  else null
         try {
@@ -116,46 +111,14 @@ class CreateRequest<T : GenericJson>(
             if (useCache) { enqueueSaveRequest(entity, SyncRequest.HttpVerb.POST) }
         }
         if (response != null) {
-            if (response.entities != null) {
-                if (result.entities == null) {
-                    result.entities = mutableListOf()
-                }
-                result.entities!!.addAll(response.entities!!)
-                // If object does not have an _id, then it is being created locally. The cache may
-                // provide an _id in this case, but before it is saved to the network, this temporary
-                // _id should be removed prior to saving to the backend. This way, the backend
-                // will generate a permanent _id that will be used by the cache. Once we get the
-                // result from the backend with the permanent _id, the record in the cache with the
-                // temporary _id should be removed, and the new record should be saved.
-                if (useCache && !tempIds.isNullOrEmpty()) {
-                    // The result from the network has the entity with its permanent ID. Need
-                    // to remove the entity from the local cache with the temporary ID.
-                    cache?.delete(tempIds)
-                    cache?.save(response.entities)
-                }
+            if (useCache && !tempIds.isNullOrEmpty()) {
+                // The result from the network has the entity with its permanent ID. Need
+                // to remove the entity from the local cache with the temporary ID.
+                cache?.delete(tempIds)
+                cache?.save(response)
             }
-            if (response.errors != null) {
-                if (result.errors == null) {
-                    result.errors = mutableListOf()
-                }
-                result.errors!!.addAll(response.errors!!)
-            }
-            if (response.haveErrors && useCache) {
-               enqueueErrorRequest(entity, response)
-            }
-            if (response.haveErrors) {
-                removeSuccessItemFromCache(entity, response.errors!![0])
-            }
-
         }
         return response
-    }
-
-    @Throws(IOException::class)
-    private fun enqueueErrorRequest(saveItem: T, response: KinveySaveBatchResponse<*>) {
-        if (response.haveErrors) {
-            enqueueSaveRequest(saveItem, SyncRequest.HttpVerb.POST)
-        }
     }
 
     @Throws(IOException::class)
@@ -171,21 +134,6 @@ class CreateRequest<T : GenericJson>(
         } catch (t: Throwable) {
             Logger.ERROR(t.message)
         }
-    }
-
-    private fun removeSuccessItemFromCache(saveItem: T, error: KinveyBatchInsertError?) {
-        if (cache != null && error != null) {
-            removeFromCache(saveItem)
-        }
-    }
-
-    private fun removeFromCache(item: T): String {
-        var itemId = ""
-        cache?.let {
-            itemId = item[_ID]?.toString() ?: ""
-            it.delete(itemId)
-        }
-        return itemId
     }
 
     //TODO: put async and track cancel
