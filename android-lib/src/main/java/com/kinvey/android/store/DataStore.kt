@@ -1192,7 +1192,7 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
 
         private const val KINVEY_API_VERSION_5 = 5
 
-        private const val DEFAULT_KINVEY_API_VERSION = 4
+        private const val DEFAULT_KINVEY_API_VERSION = 5
 
         private val KEY_GROUP = "KEY_GROUP"
 
