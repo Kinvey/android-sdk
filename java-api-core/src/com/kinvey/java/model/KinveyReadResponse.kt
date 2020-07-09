@@ -6,5 +6,6 @@ package com.kinvey.java.model
 
 data class KinveyReadResponse<T>(
     var lastRequestTime: String? = null,
-    var result: List<T>? = null
+    var result: List<T>? = null,
+    var count: Int? = null
 ) : AbstractKinveyExceptionsListResponse()

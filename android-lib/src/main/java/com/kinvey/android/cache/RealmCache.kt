@@ -49,6 +49,8 @@ class RealmCache<T : GenericJson>(val collection: String, private val mCacheMana
             field = if (value > 0) value else 0
         }
 
+    override var isAddCount: Boolean? = false
+
     /**
      * Get items from the realm with sorting it it exists
      * @param realmQuery

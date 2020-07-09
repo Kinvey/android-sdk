@@ -17,6 +17,7 @@
 package com.kinvey.java.store.requests.data
 
 import com.google.api.client.json.GenericJson
+import com.kinvey.java.AbstractClient
 import com.kinvey.java.Query
 import com.kinvey.java.cache.ICache
 import com.kinvey.java.model.KinveyReadResponse
@@ -47,6 +48,9 @@ class ReadRequest<T : GenericJson>(cache: ICache<T>?, query: Query?, private val
             ReadPolicy.FORCE_LOCAL -> {
                 val response = KinveyReadResponse<T>()
                 response.result = cache?.get(query)
+                if (cache?.isAddCount == true) {
+                    response.count = cache?.count(query)?.toInt()
+                }
                 ret = response
             }
             ReadPolicy.FORCE_NETWORK, ReadPolicy.BOTH -> ret = readItem(query)
@@ -64,6 +68,9 @@ class ReadRequest<T : GenericJson>(cache: ICache<T>?, query: Query?, private val
                 if (networkException != null) {
                     val res = KinveyReadResponse<T>()
                     res.result = cache?.get(query)
+                    if (cache?.isAddCount == true) {
+                        res.count = cache?.count(query)?.toInt()
+                    }
                     ret = res
                 }
             }

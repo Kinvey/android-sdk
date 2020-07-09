@@ -87,6 +87,12 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @param deltaSetCachingEnabled boolean representing if we should use delta set caching
      */
     var isDeltaSetCachingEnabled = false
+    var hasCountHeader = false
+        set(value) {
+            field = value
+            networkManager.hasCountHeader = value
+            cache?.isAddCount = value
+        }
 
     internal var liveServiceCallback: KinveyDataStoreLiveServiceCallback<T>? = null
 
@@ -182,6 +188,23 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
             } else {
                 ReadQueryRequest(cache, networkManager, this.storeType.readPolicy, query!!).execute()
             }
+        }
+    }
+
+    /**
+     * Lookup objects in given collection by given query and count of all items in the collection which satisfy the query
+     * @param query prepared query we have to look with
+     * @return list of objects that are found
+     */
+    fun findWithCount(query: Query): KinveyReadResponse<T>? {
+        Preconditions.checkNotNull(client, "client must not be null.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
+        Preconditions.checkNotNull(query, "query must not be null.")
+        Preconditions.checkArgument(storeType != StoreType.CACHE, "StoreType.CACHE isn't supported")
+        return if (storeType == StoreType.AUTO && isDeltaSetCachingEnabled && !isQueryContainSkipLimit(query)) {
+            findBlockingDeltaSync(query, true)
+        } else {
+            ReadQueryRequest(cache, networkManager, this.storeType.readPolicy, query, true).execute()
         }
     }
 
@@ -579,9 +602,9 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @throws IOException
      */
     @Throws(IOException::class)
-    private fun findBlockingDeltaSync(query: Query?): KinveyReadResponse<T>? {
+    private fun findBlockingDeltaSync(query: Query?, hasCountHeader: Boolean = false): KinveyReadResponse<T>? {
         val cacheItem = getQueryCacheItem(query) //one is correct number of query cache item count for any request.
-        return if (cacheItem != null) findBlockingDeltaSync(cacheItem, query) else getBlocking(query)
+        return if (cacheItem != null) findBlockingDeltaSync(cacheItem, query, hasCountHeader) else getBlocking(query, hasCountHeader)
     }
 
     /**
@@ -618,8 +641,8 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @throws IOException
      */
     @Throws(IOException::class)
-    private fun getBlocking(query: Query?): KinveyReadResponse<T>? {
-        val response = networkManager.getBlocking(query)?.execute()
+    private fun getBlocking(query: Query?, hasCountHeader: Boolean = false): KinveyReadResponse<T>? {
+        val response = networkManager.getBlocking(query, hasCountHeader)?.execute()
         cache?.delete(query)
         response?.result?.let { list -> cache?.save(list) }
         response?.lastRequestTime?.let { timeStr ->
@@ -636,7 +659,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
      * @throws IOException
      */
     @Throws(IOException::class)
-    private fun findBlockingDeltaSync(cacheItem: QueryCacheItem, query: Query?): KinveyReadResponse<T>? {
+    private fun findBlockingDeltaSync(cacheItem: QueryCacheItem, query: Query?, hasCountHeader: Boolean = false): KinveyReadResponse<T>? {
         try {
             val response = KinveyReadResponse<T>()
             val queryCacheResponse = networkManager.queryCacheGetBlocking(query, cacheItem.lastRequestTime)?.execute()
@@ -651,6 +674,9 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
             }
             if (query != null && cache != null) {
                 response.result = cache!![query]
+                if (cache?.isAddCount == true || hasCountHeader) {
+                    response.count = cache?.count(query)?.toInt()
+                }
             }
             response.listOfExceptions = queryCacheResponse?.listOfExceptions ?: ArrayList()
             response.lastRequestTime = queryCacheResponse?.lastRequestTime
@@ -663,7 +689,7 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
             return if (statusCode == 400 && jsonError?.error == RESULT_SIZE_ERROR ||
                     statusCode == 400 && jsonError?.error == PARAMETER_VALUE_OF_RANGE_ERROR ||
                     statusCode == 403 && jsonError?.error == MISSING_CONFIGURATION_ERROR) {
-                getBlocking(query)
+                getBlocking(query, hasCountHeader)
             } else {
                 throw responseException
             }
@@ -878,6 +904,8 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         private val BATCH_SIZE = 5
 
         const val FIND = "find"
+
+        const val FIND_WITH_COUNT = "findWithCount"
 
         const val DELETE = "delete"
 

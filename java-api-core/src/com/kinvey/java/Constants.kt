@@ -46,4 +46,8 @@ object Constants {
     const val HOSTNAME_API = "baas.kinvey.com"
     const val HOSTNAME_AUTH = "auth.kinvey.com"
 
+    //Count header
+    const val X_KINVEY_INCLUDE_ITEMS_COUNT = "X-Kinvey-Include-Items-Count"
+    const val X_KINVEY_ITEMS_COUNT_CAMEL_CASE = "X-Kinvey-Items-Count"
+    const val X_KINVEY_ITEMS_COUNT = "x-kinvey-items-count"
 }

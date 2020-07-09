@@ -29,18 +29,21 @@ import java.io.IOException
  * Created by Prots on 2/15/16.
  */
 class ReadQueryRequest<T : GenericJson>(cache: ICache<T>?, networkManager: NetworkManager<T>?, readPolicy: ReadPolicy?,
-                                        private val query: Query) : AbstractReadRequest<T>(cache, readPolicy, networkManager) {
+                                        private val query: Query, private val hasCountHeader: Boolean = false) : AbstractReadRequest<T>(cache, readPolicy, networkManager) {
 
     override val cached: KinveyReadResponse<T>?
         get() {
             val response = KinveyReadResponse<T>()
             response.result = cache?.get(query)
+            if (cache?.isAddCount == true || hasCountHeader) {
+                response.count = cache?.count(query)?.toInt()
+            }
             return response
         }
 
     override val network: KinveyReadResponse<T>?
         @Throws(IOException::class)
         get() {
-            return networkData?.getBlocking(query)?.execute()
+            return networkData?.getBlocking(query, hasCountHeader)?.execute()
         }
 }

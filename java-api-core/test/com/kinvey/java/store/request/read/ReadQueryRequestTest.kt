@@ -11,6 +11,7 @@ import com.kinvey.java.store.request.Person
 import com.kinvey.java.store.requests.data.read.ReadQueryRequest
 import junit.framework.TestCase
 import org.junit.Before
+import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyList
 import org.mockito.Mockito.*
@@ -41,7 +42,14 @@ class ReadQueryRequestTest : TestCase() {
         val query = Query(MongoQueryFilter.MongoQueryFilterBuilder())
         val request = spy(ReadQueryRequest(cache, spyNetworkManager, ReadPolicy.FORCE_NETWORK, query))
         request.execute()
-        verify(spyNetworkManager, times(1))?.getBlocking(any(Query::class.java))?.execute()
+        verify(spyNetworkManager, times(1))?.getBlocking(any(Query::class.java), ArgumentMatchers.eq(false))?.execute()
+    }
+
+    fun testForceNetworkWithCount() {
+        val query = Query(MongoQueryFilter.MongoQueryFilterBuilder())
+        val request = spy(ReadQueryRequest(cache, spyNetworkManager, ReadPolicy.FORCE_NETWORK, query, true))
+        request.execute()
+        verify(spyNetworkManager, times(1))?.getBlocking(any(Query::class.java), ArgumentMatchers.eq(true))?.execute()
     }
 
     fun  testNetworkOtherwiseLocal() {

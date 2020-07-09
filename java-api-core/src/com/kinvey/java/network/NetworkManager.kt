@@ -33,12 +33,10 @@ import com.kinvey.java.cache.ICache
 import com.kinvey.java.core.*
 import com.kinvey.java.deltaset.DeltaSetItem
 import com.kinvey.java.deltaset.DeltaSetMerge
-import com.kinvey.java.dto.BaseUser
 import com.kinvey.java.dto.BatchList
 import com.kinvey.java.dto.DeviceId
 import com.kinvey.java.model.*
 import com.kinvey.java.query.MongoQueryFilter.MongoQueryFilterBuilder
-import com.sun.security.ntlm.Client
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -81,6 +79,7 @@ open class NetworkManager<T : GenericJson>(
         }
 
     var clientAppVersion: String? = null
+    var hasCountHeader: Boolean = false
     var customRequestProperties: GenericData? = GenericData()
         private set
 
@@ -154,9 +153,9 @@ open class NetworkManager<T : GenericJson>(
      * @throws java.io.IOException
      */
     @Throws(IOException::class)
-    fun getBlocking(query: Query?): Get<T>? {
+    fun getBlocking(query: Query?, hasCountHeader: Boolean = false): Get<T>? {
         Preconditions.checkNotNull(query)
-        val get = Get(this, client, query, currentClass)
+        val get = Get(this, client, query, currentClass, hasCountHeader)
         client?.initializeRequest(get)
         return get
     }
@@ -702,9 +701,22 @@ open class NetworkManager<T : GenericJson>(
         @Key("retainReferences")
         var retainReferences: String? = null
 
-        constructor(networkManager: NetworkManager<T>, client: AbstractClient<*>?, query: Query?, myClass: Class<T>?)
+        var hasCountHeader  = false
+
+        private fun addHeaders(networkManager: NetworkManager<T>) {
+            getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkManager.clientAppVersion
+            if (!networkManager.customRequestProperties.isNullOrEmpty()) {
+                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkManager.customRequestProperties)
+            }
+            if (networkManager.hasCountHeader || hasCountHeader) {
+                getRequestHeaders()[Constants.X_KINVEY_INCLUDE_ITEMS_COUNT] = "true"
+            }
+        }
+
+        constructor(networkManager: NetworkManager<T>, client: AbstractClient<*>?, query: Query?, myClass: Class<T>?,  hasCountHeader: Boolean = false)
             : super(client, HttpVerb.GET.verb, GET_REST_PATH, null, myClass) {
             this.collectionName = networkManager.collectionName
+            this.hasCountHeader = hasCountHeader
             queryFilter = query?.getQueryFilterJson(client?.jsonFactory)
             val queryLimit = query?.limit ?: 0
             val querySkip = query?.skip ?: 0
@@ -712,16 +724,14 @@ open class NetworkManager<T : GenericJson>(
             skip = if (querySkip > 0) querySkip.toString() else null
             val sortString = query?.sortString
             sortFilter = if (sortString != "") sortString else null
-            getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkManager.clientAppVersion
-            if (!networkManager.customRequestProperties.isNullOrEmpty()) {
-                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkManager.customRequestProperties)
-            }
+            addHeaders(networkManager)
         }
 
         constructor(networkManager: NetworkManager<T>, client: AbstractClient<*>?, query: Query?, myClass: Class<T>?,
-                    resolves: Array<String>?, resolveDepth: Int, retain: Boolean)
+                    resolves: Array<String>?, resolveDepth: Int, retain: Boolean, hasCountHeader: Boolean = false)
             : super(client, HttpVerb.GET.verb, GET_REST_PATH, null, myClass) {
             this.collectionName = networkManager.collectionName
+            this.hasCountHeader = hasCountHeader
             queryFilter = query?.getQueryFilterJson(client?.jsonFactory)
             val queryLimit = query?.limit ?: 0
             val querySkip = query?.skip ?: 0
@@ -732,21 +742,16 @@ open class NetworkManager<T : GenericJson>(
             this.resolve = Joiner.on(",").join(resolves)
             this.resolveDepth = if (resolveDepth > 0) resolveDepth.toString() else null
             retainReferences = retain.toString()
-            getRequestHeaders()["X-Kinvey-Client-App-Version"] = client?.clientAppVersion
-            if (!networkManager.customRequestProperties.isNullOrEmpty()) {
-                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkManager.customRequestProperties)
-            }
+            addHeaders(networkManager)
         }
 
-        constructor(networkManager: NetworkManager<T>, client: AbstractClient<*>?, queryString: String?, myClass: Class<T>?)
+        constructor(networkManager: NetworkManager<T>, client: AbstractClient<*>?, queryString: String?, myClass: Class<T>?,  hasCountHeader: Boolean = false)
             : super(client, HttpVerb.GET.verb, GET_REST_PATH, null, myClass) {
             this.collectionName = networkManager.collectionName
+            this.hasCountHeader = hasCountHeader
             queryFilter = if (queryString != "{}") queryString else null
             setTemplateExpand(false)
-            getRequestHeaders()["X-Kinvey-Client-App-Version"] = networkManager.clientAppVersion
-            if (!networkManager.customRequestProperties.isNullOrEmpty()) {
-                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(networkManager.customRequestProperties)
-            }
+            addHeaders(networkManager)
         }
 
         @Throws(IOException::class)

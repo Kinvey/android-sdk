@@ -4138,4 +4138,6 @@ class DataStoreTest() : BaseDataStoreTest() {
         val store = collection(COLLECTION, Person::class.java, StoreType.SYNC, client)
         assertNotNull(store.query())
     }
+
+
 }
