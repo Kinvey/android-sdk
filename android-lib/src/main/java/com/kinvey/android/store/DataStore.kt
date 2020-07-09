@@ -444,7 +444,6 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
         Preconditions.checkNotNull(client, "client must not be null")
         Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
         Preconditions.checkNotNull(entity, "Entity cannot be null.")
-        Preconditions.checkState(kinveyApiVersion >= KINVEY_API_VERSION_5, "Kinvey api version cannot be less than 5.")
         Logger.INFO("Calling DataStore#create(entity)")
         AsyncCreateRequest(this, entity, callback).execute()
     }

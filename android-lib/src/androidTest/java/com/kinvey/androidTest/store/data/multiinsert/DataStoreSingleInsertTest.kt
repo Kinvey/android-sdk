@@ -219,5 +219,12 @@ class DataStoreSingleInsertTest : BaseDataStoreMultiInsertTest() {
         assertNotNull(saveCallback.result?.errors)
         assertNotNull(saveCallback.result?.errors?.get(0)?.description)
         assertNotNull(saveCallback.result?.errors?.get(0)?.debug)
+        assertEquals(saveCallback.result?.errors?.get(0)?.description, ERROR_DESCRIPTION)
+        assertEquals(saveCallback.result?.errors?.get(0)?.debug, ERROR_DEBUG)
+    }
+
+    companion object {
+        const val ERROR_DEBUG = "An entity with that _id already exists in this collection"
+        const val ERROR_DESCRIPTION = "The Kinvey server encountered an unexpected error. Please retry your request."
     }
 }
