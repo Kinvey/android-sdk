@@ -1,4 +1,4 @@
-package com.kinvey.androidTest.store.datastore
+package com.kinvey.androidTest.store.data.multiinsert
 
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
@@ -20,15 +20,15 @@ class DataStoreMultiInsertOfflinePushTest : BaseDataStoreMultiInsertTest() {
         print("should push item with connectivity error")
 
         val person = Person(TEST_USERNAME)
-        val autoStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.AUTO, client)
+        val autoStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.AUTO, client)
         clearBackend(autoStore)
-        client.syncManager.clear(Person.COLLECTION)
+        client.syncManager.clear(MULTI_INSERT_COLLECTION)
 
         mockInvalidConnection()
         val saveResult = save(autoStore, person)
         val pushResult = push(autoStore, LONG_TIMEOUT)
         cancelMockInvalidConnection()
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
 
         assertNotNull(syncItems)
         assertEquals(1, syncItems?.count())
@@ -43,12 +43,12 @@ class DataStoreMultiInsertOfflinePushTest : BaseDataStoreMultiInsertTest() {
         print("should push item with connectivity error and store item in local cache")
 
         val person = Person(TEST_USERNAME)
-        val autoStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.AUTO, client)
-        val syncStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
+        val autoStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.AUTO, client)
+        val syncStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.SYNC, client)
 
         clearBackend(syncStore)
         clearBackend(autoStore)
-        client.syncManager.clear(Person.COLLECTION)
+        client.syncManager.clear(MULTI_INSERT_COLLECTION)
 
         mockInvalidConnection()
         val saveResult = save(autoStore, person)
@@ -60,7 +60,7 @@ class DataStoreMultiInsertOfflinePushTest : BaseDataStoreMultiInsertTest() {
         assertNull(findResult.error)
         assertEquals(1, findResult.result?.result?.count())
 
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         assertNotNull(syncItems)
         assertEquals(1, syncItems?.count())
     
@@ -74,15 +74,15 @@ class DataStoreMultiInsertOfflinePushTest : BaseDataStoreMultiInsertTest() {
         print("should save item in local cache")
 
         val person = Person(TEST_USERNAME)
-        val autoStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.AUTO, client)
+        val autoStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.AUTO, client)
         clearBackend(autoStore)
-        client.syncManager.clear(Person.COLLECTION)
+        client.syncManager.clear(MULTI_INSERT_COLLECTION)
 
         mockInvalidConnection()
         val saveResult = save(autoStore, person)
         cancelMockInvalidConnection()
 
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         assertNotNull(syncItems)
         assertEquals(1, syncItems?.count())
 

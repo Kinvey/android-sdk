@@ -27,6 +27,7 @@ import com.kinvey.java.Query
 import com.kinvey.java.cache.ICache
 import com.kinvey.java.cache.KinveyCachedClientCallback
 import com.kinvey.java.core.KinveyCachedAggregateCallback
+import com.kinvey.java.core.KinveyClientCallback
 import com.kinvey.java.core.KinveyJsonResponseException
 import com.kinvey.java.model.*
 import com.kinvey.java.network.NetworkManager
@@ -41,10 +42,7 @@ import com.kinvey.java.store.requests.data.read.ReadCountRequest
 import com.kinvey.java.store.requests.data.read.ReadIdsRequest
 import com.kinvey.java.store.requests.data.read.ReadQueryRequest
 import com.kinvey.java.store.requests.data.read.ReadSingleRequest
-import com.kinvey.java.store.requests.data.save.CreateListBatchRequest
-import com.kinvey.java.store.requests.data.save.SaveListBatchRequest
-import com.kinvey.java.store.requests.data.save.SaveListRequest
-import com.kinvey.java.store.requests.data.save.SaveRequest
+import com.kinvey.java.store.requests.data.save.*
 
 import java.io.IOException
 import java.security.AccessControlException
@@ -333,6 +331,21 @@ open class BaseDataStore<T : GenericJson> @JvmOverloads protected constructor(
         Preconditions.checkNotNull(objects, "objects must not be null.")
         Logger.INFO("Calling BaseDataStore#createBatch(listObjects)")
         return CreateListBatchRequest(cache, networkManager, this.storeType.writePolicy, objects, client?.syncManager).execute()
+    }
+
+    /**
+     * create object for collections
+     * @param object object to be created
+     * @return object with list of successful created entities and with list of errors
+     * @throws IOException
+     */
+    @Throws(IOException::class)
+    fun create(`object`: T): T? {
+        Preconditions.checkNotNull(client, "client must not be null.")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
+        Preconditions.checkNotNull(`object`, "object must not be null.")
+        Logger.INFO("Calling BaseDataStore#create(item)")
+        return CreateRequest(cache, networkManager, this.storeType.writePolicy, `object`, client?.syncManager).execute()
     }
 
     /**

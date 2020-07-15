@@ -18,12 +18,9 @@ package com.kinvey.android.store
 import com.google.api.client.json.GenericJson
 import com.google.common.base.Preconditions
 import com.kinvey.android.AsyncClientRequest
-import com.kinvey.android.async.AsyncBatchPushRequest
-import com.kinvey.android.async.AsyncPullRequest
 import com.kinvey.android.KinveyCallbackHandler
 import com.kinvey.android.KinveyLiveServiceCallbackHandler
-import com.kinvey.android.async.AsyncPushRequest
-import com.kinvey.android.async.AsyncRequest
+import com.kinvey.android.async.*
 import com.kinvey.android.callback.KinveyCountCallback
 import com.kinvey.android.callback.KinveyDeleteCallback
 import com.kinvey.android.callback.KinveyReadCallback
@@ -46,6 +43,7 @@ import com.kinvey.java.store.BaseDataStore
 import com.kinvey.java.store.KinveyDataStoreLiveServiceCallback
 import com.kinvey.java.store.KinveyLiveServiceStatus
 import com.kinvey.java.store.StoreType
+import com.kinvey.java.store.requests.data.save.CreateRequest
 
 import java.io.IOException
 import java.lang.reflect.Method
@@ -439,6 +437,38 @@ open class DataStore<T : GenericJson> : BaseDataStore<T> {
     </T> */
     fun create(entities: List<T>, callback: KinveyClientCallback<KinveySaveBatchResponse<T>>) {
         createBatch(entities, callback)
+    }
+
+    /**
+     * Asynchronous request to create an entity to a collection.
+     *
+     *
+     * Constructs an asynchronous request to create an entity <T> to a collection.
+     * Creates the entity if it doesn't exist, return error for entity if it does exist.
+     * If an "_id" property is not present, the Kinvey backend will generate one.
+    </T> *
+     *
+     *
+     * Sample Usage:
+     * <pre>
+     * `DataStore<EventEntity> myAppData = DataStore.collection("myCollection", EventEntity.class, StoreType.SYNC, myClient);
+     * myAppData.create(entity, new KinveyClientCallback<EventEntity> {
+     * public void onFailure(Throwable t) { ... }
+     * public void onSuccess(EventEntity entity) { ... }
+     * });
+    ` *
+    </pre> *
+     *
+     *
+     * @param entity The entity to create
+     * @param callback KinveyClientCallback<T>
+    </T> */
+    fun create(entity: T, callback: KinveyClientCallback<T>) {
+        Preconditions.checkNotNull(client, "client must not be null")
+        Preconditions.checkArgument(client?.isInitialize ?: false, "client must be initialized.")
+        Preconditions.checkNotNull(entity, "Entity cannot be null.")
+        Logger.INFO("Calling DataStore#create(entity)")
+        AsyncCreateRequest(this, entity, callback).execute()
     }
 
     private fun createBatch(entities: List<T>, callback: KinveyClientCallback<KinveySaveBatchResponse<T>>) {

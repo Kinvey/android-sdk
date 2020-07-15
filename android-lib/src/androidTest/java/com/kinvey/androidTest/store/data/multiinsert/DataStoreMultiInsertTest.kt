@@ -1,4 +1,4 @@
-package com.kinvey.androidTest.store.datastore
+package com.kinvey.androidTest.store.data.multiinsert
 
 import androidx.test.filters.LargeTest
 import androidx.test.runner.AndroidJUnit4
@@ -53,9 +53,9 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
     fun createMultiInsertList(storeType: StoreType) {
         val personList = createPersonsList(false)
 
-        val personStore = DataStore.collection(Person.COLLECTION, Person::class.java, storeType, client)
+        val personStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, storeType, client)
         clearBackend(personStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val saveCallback = createList(personStore, personList)
         assertNull(saveCallback.error)
@@ -81,9 +81,9 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
     fun createMultiListWithId() {
         val personList = createPersonsList(true)
 
-        val personStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.NETWORK, client)
+        val personStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.NETWORK, client)
         clearBackend(personStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val saveCallback = createList(personStore, personList)
         assertNull(saveCallback.error)
@@ -116,17 +116,17 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
     fun testCreateListCombineWithIdAndWithoutIdSync() {
         val personList = createCombineList()
 
-        val syncStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
+        val syncStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.SYNC, client)
 
         clearBackend(syncStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val saveCallback = createList(syncStore, personList)
         assertNull(saveCallback.error)
         assertNotNull(saveCallback.result)
         assertTrue(checkPersonIfSameObjects(personList, saveCallback.result?.entities, false))
 
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         assertNotNull(syncItems)
         assertEquals(syncItems!!.size.toLong(), personList.size.toLong())
         assertEquals(syncItems[0].requestMethod, SyncRequest.HttpVerb.POST)
@@ -144,15 +144,15 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
     fun testCreateListCombineWithIdAndWithoutIdAuto() {
         val personList = createCombineList()
 
-        val mockNetManager = MockMultiInsertNetworkManager(Person.COLLECTION, Person::class.java, client as Client)
-        val autoStore = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.AUTO, mockNetManager)
-        val syncStore = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.SYNC, mockNetManager)
-        val netStore = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.NETWORK, mockNetManager)
+        val mockNetManager = MockMultiInsertNetworkManager(MULTI_INSERT_COLLECTION, Person::class.java, client as Client)
+        val autoStore = DataStore(MULTI_INSERT_COLLECTION, Person::class.java, client, StoreType.AUTO, mockNetManager)
+        val syncStore = DataStore(MULTI_INSERT_COLLECTION, Person::class.java, client, StoreType.SYNC, mockNetManager)
+        val netStore = DataStore(MULTI_INSERT_COLLECTION, Person::class.java, client, StoreType.NETWORK, mockNetManager)
 
         clearBackend(autoStore)
         clearBackend(syncStore)
         clearBackend(netStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         mockNetManager.clear()
         val saveCallback = createList(autoStore, personList)
@@ -174,7 +174,7 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
     @Throws(InterruptedException::class)
     fun testCreateListReturnErrorForEmptyListSync() {
         val list = ArrayList<Person>()
-        testCreateEmptyList(list, Person::class.java, Person.COLLECTION, StoreType.SYNC)
+        testCreateEmptyList(list, Person::class.java, MULTI_INSERT_COLLECTION, StoreType.SYNC)
     }
 
     @Test
@@ -182,9 +182,9 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
     fun <T : GenericJson> testCreateApiV6() {
         val personList = createPersonsList(false)
         kinveyApiVersion = "6"
-        val personStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
+        val personStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.SYNC, client)
         clearBackend(personStore)
-        client.syncManager.clear(Person.COLLECTION)
+        client.syncManager.clear(MULTI_INSERT_COLLECTION)
         val saveCallback = createList(personStore, personList)
         assertNull(saveCallback.error)
         assertNotNull(saveCallback.result)
@@ -203,9 +203,9 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         // call save() with it
         // find using network store
 
-        val netStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.NETWORK, client)
+        val netStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.NETWORK, client)
         clearBackend(netStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val person = createPerson(TEST_USERNAME)
         val saveCallback = save(netStore, person)
@@ -233,9 +233,9 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         // call save() with it
         // find using network store
 
-        val netStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.NETWORK, client)
+        val netStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.NETWORK, client)
         clearBackend(netStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val id = "123456"
         val person = createPerson(TEST_USERNAME)
@@ -267,9 +267,9 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
 
         val personList = createPersonsList(false)
 
-        val personStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.NETWORK, client)
+        val personStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.NETWORK, client)
         clearBackend(personStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val saveCallback = saveList(personStore, personList)
         assertNull(saveCallback.error)
@@ -291,9 +291,9 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
 
         val personList = createPersonsList(true)
 
-        val personStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.NETWORK, client)
+        val personStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.NETWORK, client)
         clearBackend(personStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val saveCallback = saveList(personStore, personList)
         assertNull(saveCallback.error)
@@ -315,9 +315,9 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
 
         val personList = createCombineList()
 
-        val personStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.NETWORK, client)
+        val personStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.NETWORK, client)
         clearBackend(personStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val saveCallback = saveList(personStore, personList)
         assertNull(saveCallback.error)
@@ -336,7 +336,7 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         // create an empty array
         // save() using the array
         val list = ArrayList<Person>()
-        testSaveEmptyList(list, Person::class.java, Person.COLLECTION, StoreType.NETWORK)
+        testSaveEmptyList(list, Person::class.java, MULTI_INSERT_COLLECTION, StoreType.NETWORK)
     }
 
     @Test
@@ -366,7 +366,7 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         val personList = createErrList()
         val checkIndexes = intArrayOf(0, 1)
 
-        val personStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.NETWORK, client)
+        val personStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.NETWORK, client)
         clearBackend(personStore)
 
         val saveCallback = saveList(personStore, personList)
@@ -393,7 +393,7 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         val checkIndexesSuccess = intArrayOf(0)
         val checkIndexesErr = intArrayOf(1)
 
-        val personStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.NETWORK, client)
+        val personStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.NETWORK, client)
         clearBackend(personStore)
 
         val saveCallback = saveList(personStore, personList)
@@ -424,7 +424,7 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         val checkIndexesSuccess = intArrayOf(1, 3)
         val checkIndexesErr = intArrayOf(0, 2)
 
-        val personStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.NETWORK, client)
+        val personStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.NETWORK, client)
         clearBackend(personStore)
 
         val saveCallback = saveList(personStore, personList)
@@ -454,9 +454,9 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         // pendingSyncEntities()
         // find() using sync store
 
-        val syncStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
+        val syncStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.SYNC, client)
         clearBackend(syncStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val person = createPerson(TEST_USERNAME)
 
@@ -467,7 +467,7 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         assertNotNull(resultPerson.id)
         assertEquals(person.username, resultPerson.username)
 
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         assertNotNull(syncItems)
         assertEquals(syncItems?.count(), 1)
         assertEquals(syncItems?.get(0)?.requestMethod, SyncRequest.HttpVerb.POST)
@@ -491,9 +491,9 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         // pendingSyncEntities()
         // find() using syncstore
 
-        val syncStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
+        val syncStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.SYNC, client)
         clearBackend(syncStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val id = "123456"
         val person = createPerson(TEST_USERNAME)
@@ -506,7 +506,7 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         assertNotNull(resultPerson)
         assertEquals(id, resultPerson.id)
 
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         assertNotNull(syncItems)
         assertEquals(syncItems?.count(), 1)
         assertEquals(syncItems?.get(0)?.requestMethod, SyncRequest.HttpVerb.PUT)
@@ -531,17 +531,17 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
 
         val personList = createPersonsList(false)
 
-        val syncStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
+        val syncStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.SYNC, client)
 
         clearBackend(syncStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val saveCallback = saveList(syncStore, personList)
         assertNull(saveCallback.error)
         assertNotNull(saveCallback.result)
         assertTrue(checkPersonIfSameObjects(personList, saveCallback.result, false))
 
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         assertNotNull(syncItems)
         assertTrue(checkSyncItems<GenericJson>(syncItems, personList.size, SyncRequest.HttpVerb.POST))
 
@@ -561,17 +561,17 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
 
         val personList = createPersonsList(true)
 
-        val syncStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
+        val syncStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.SYNC, client)
 
         clearBackend(syncStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val saveCallback = saveList(syncStore, personList)
         assertNull(saveCallback.error)
         assertNotNull(saveCallback.result)
         assertTrue(checkPersonIfSameObjects(personList, saveCallback.result, false))
 
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         assertNotNull(syncItems)
         assertTrue(checkSyncItems<GenericJson>(syncItems, personList.size, SyncRequest.HttpVerb.PUT))
 
@@ -590,17 +590,17 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         // find() using syncstore, should return the items from step 1 with _ids of the items that were assigned
         val personList = createCombineList()
 
-        val syncStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
+        val syncStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.SYNC, client)
 
         clearBackend(syncStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val saveCallback = saveList(syncStore, personList)
         assertNull(saveCallback.error)
         assertNotNull(saveCallback.result)
         assertTrue(checkPersonIfSameObjects(personList, saveCallback.result, false))
 
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         assertNotNull(syncItems)
         assertEquals(syncItems!!.size.toLong(), personList.size.toLong())
         assertEquals(syncItems[0].requestMethod, SyncRequest.HttpVerb.POST)
@@ -620,7 +620,7 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         // create an empty array
         // save() using the array
         val list = ArrayList<Person>()
-        testSaveEmptyList(list, Person::class.java, Person.COLLECTION, StoreType.SYNC)
+        testSaveEmptyList(list, Person::class.java, MULTI_INSERT_COLLECTION, StoreType.SYNC)
     }
 
     @Test
@@ -634,9 +634,9 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         // find using syncstore, should return the items with ect and lmt
         val personsList = createPersonsList(false)
 
-        val storeSync = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
+        val storeSync = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.SYNC, client)
         clearBackend(storeSync)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val saveCallbackSecond = saveList(storeSync, personsList)
         assertNull(saveCallbackSecond.error)
@@ -647,7 +647,7 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         assertNotNull(pushCallback.result)
         assertEquals(personsList.count(), pushCallback.result?.successCount)
 
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         assertTrue(syncItems.isNullOrEmpty())
 
         val findCallback = find(storeSync, LONG_TIMEOUT)
@@ -666,9 +666,9 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         // find using syncstore, should return the items with ect and lmt
         val personsList = createCombineList()
 
-        val storeSync = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
+        val storeSync = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.SYNC, client)
         clearBackend(storeSync)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val saveCallbackSecond = saveList(storeSync, personsList)
         assertNull(saveCallbackSecond.error)
@@ -679,7 +679,7 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         assertNotNull(pushCallback.result)
         assertEquals(personsList.count(), pushCallback.result?.successCount)
 
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         assertTrue(syncItems.isNullOrEmpty())
 
         val findCallback = find(storeSync, LONG_TIMEOUT)
@@ -698,10 +698,10 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         // find using syncstore, should return the items with ect and lmt
         val personsList = createCombineList()
 
-        val mockNetManager = MockMultiInsertNetworkManager(Person.COLLECTION, Person::class.java, client as Client)
-        val storeSync = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.SYNC, mockNetManager)
+        val mockNetManager = MockMultiInsertNetworkManager(MULTI_INSERT_COLLECTION, Person::class.java, client as Client)
+        val storeSync = DataStore(MULTI_INSERT_COLLECTION, Person::class.java, client, StoreType.SYNC, mockNetManager)
         clearBackend(storeSync)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         saveList(storeSync, personsList)
 
@@ -710,7 +710,7 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         assertEquals(personsList.count(), pushCallback.result?.successCount)
         assertTrue(mockNetManager.useMultiInsertSave)
 
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         assertTrue(syncItems == null || syncItems.isEmpty())
 
         val findCallback = find(storeSync, LONG_TIMEOUT)
@@ -774,9 +774,9 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         val personsList = createPushErrList()
         val successItemsIdx = intArrayOf(2)
 
-        val storeSync = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
+        val storeSync = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.SYNC, client)
         clearBackend(storeSync)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         saveList(storeSync, personsList)
 
@@ -784,7 +784,7 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         assertNotNull(pushCallback.result)
         assertEquals(1, pushCallback.result?.successCount)
 
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         assertNotNull(syncItems)
         assertTrue(checkSyncItems<GenericJson>(syncItems, 2, SyncRequest.HttpVerb.POST))
 
@@ -830,13 +830,13 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         // call find() with sync store
         // find using network store
 
-        val autoStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.AUTO, client)
-        val syncStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
-        val netStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.NETWORK, client)
+        val autoStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.AUTO, client)
+        val syncStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.SYNC, client)
+        val netStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.NETWORK, client)
         clearBackend(autoStore)
         clearBackend(syncStore)
         clearBackend(netStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val person = createPerson(TEST_USERNAME)
 
@@ -875,13 +875,13 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         // call find() with syncstore
         // find using networkstore
 
-        val autoStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.AUTO, client)
-        val syncStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
-        val netStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.NETWORK, client)
+        val autoStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.AUTO, client)
+        val syncStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.SYNC, client)
+        val netStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.NETWORK, client)
         clearBackend(autoStore)
         clearBackend(syncStore)
         clearBackend(netStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val id = "123456"
         val person = createPerson(TEST_USERNAME)
@@ -923,11 +923,11 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         val person = Person(TEST_USERNAME)
         person.geoloc = ERR_GEOLOC
 
-        val autoStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.AUTO, client)
-        val syncStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
+        val autoStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.AUTO, client)
+        val syncStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.SYNC, client)
         clearBackend(autoStore)
         clearBackend(syncStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         mockInvalidConnection()
         save(autoStore, person)
@@ -939,7 +939,7 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         assertEquals(1, list?.count())
         assertNotNull(list?.get(0)?.id)
 
-        val pendingList = pendingSyncEntities(Person.COLLECTION)
+        val pendingList = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         assertNotNull(pendingList)
         assertEquals(1, pendingList?.count())
         val item = pendingList?.get(0)
@@ -958,11 +958,11 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         val testId = "TEST_ID_123"
         val person = Person(testId, TEST_USERNAME)
 
-        val autoStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.AUTO, client)
-        val syncStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
+        val autoStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.AUTO, client)
+        val syncStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.SYNC, client)
         clearBackend(autoStore)
         clearBackend(syncStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         mockInvalidConnection()
         save(autoStore, person)
@@ -974,7 +974,7 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         assertEquals(1, list?.count())
         assertEquals(testId, list?.get(0)?.id)
 
-        val pendingList = pendingSyncEntities(Person.COLLECTION)
+        val pendingList = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         assertNotNull(pendingList)
         assertEquals(1, pendingList?.count())
         val item = pendingList?.get(0)
@@ -994,13 +994,13 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
 
         val personList = createPersonsList(false)
 
-        val autoStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.AUTO, client)
-        val syncStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
-        val netStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.NETWORK, client)
+        val autoStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.AUTO, client)
+        val syncStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.SYNC, client)
+        val netStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.NETWORK, client)
         clearBackend(autoStore)
         clearBackend(syncStore)
         clearBackend(netStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val saveCallback = saveList(autoStore, personList)
         assertNull(saveCallback.error)
@@ -1026,11 +1026,11 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
 
         val personList = createPersonsList(true)
 
-        val autoStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.AUTO, client)
-        val netStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.NETWORK, client)
+        val autoStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.AUTO, client)
+        val netStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.NETWORK, client)
         clearBackend(autoStore)
         clearBackend(netStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val saveCallback = saveList(autoStore, personList)
         assertNull(saveCallback.error)
@@ -1053,15 +1053,15 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
 
         val personList = createCombineList()
 
-        val mockNetManager = MockMultiInsertNetworkManager(Person.COLLECTION, Person::class.java, client as Client)
-        val autoStore = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.AUTO, mockNetManager)
-        val syncStore = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.SYNC, mockNetManager)
-        val netStore = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.NETWORK, mockNetManager)
+        val mockNetManager = MockMultiInsertNetworkManager(MULTI_INSERT_COLLECTION, Person::class.java, client as Client)
+        val autoStore = DataStore(MULTI_INSERT_COLLECTION, Person::class.java, client, StoreType.AUTO, mockNetManager)
+        val syncStore = DataStore(MULTI_INSERT_COLLECTION, Person::class.java, client, StoreType.SYNC, mockNetManager)
+        val netStore = DataStore(MULTI_INSERT_COLLECTION, Person::class.java, client, StoreType.NETWORK, mockNetManager)
 
         clearBackend(autoStore)
         clearBackend(syncStore)
         clearBackend(netStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         mockNetManager.clear()
         val saveCallback = saveList(autoStore, personList)
@@ -1087,9 +1087,9 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         // save() using the array
         // pendingSyncEntities()
         val list = ArrayList<Person>()
-        testSaveEmptyList(list, Person::class.java, Person.COLLECTION, StoreType.AUTO)
+        testSaveEmptyList(list, Person::class.java, MULTI_INSERT_COLLECTION, StoreType.AUTO)
 
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         val pendingCount = syncItems?.size ?: 0
         //assertNotNull(syncItems);
         assertEquals(pendingCount.toLong(), list.size.toLong())
@@ -1139,11 +1139,11 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         val personList = createErrList()
         val checkIndexes = intArrayOf(0, 1)
 
-        val autoStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.AUTO, client)
-        val syncStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
+        val autoStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.AUTO, client)
+        val syncStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.SYNC, client)
         clearBackend(autoStore)
         clearBackend(syncStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val saveCallback = saveList(autoStore, personList)
         assertNotNull(saveCallback.error)
@@ -1159,7 +1159,7 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         assertNotNull(findCallback.result)
         assertTrue(checkPersonIfSameObjects(personList, findCallback.result?.result))
 
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         assertNotNull(syncItems)
         assertTrue(checkSyncItems<GenericJson>(syncItems, personList.size, SyncRequest.HttpVerb.POST))
     }
@@ -1178,13 +1178,13 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         val checkIndexesSuccess = intArrayOf(0)
         val checkIndexesErr = intArrayOf(1)
 
-        val autoStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.AUTO, client)
-        val syncStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
-        val netStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.NETWORK, client)
+        val autoStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.AUTO, client)
+        val syncStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.SYNC, client)
+        val netStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.NETWORK, client)
         clearBackend(autoStore)
         clearBackend(syncStore)
         clearBackend(netStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val saveCallback = saveList(autoStore, personList)
         assertNotNull(saveCallback.error)
@@ -1197,7 +1197,7 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
             assertTrue(checkBatchResponseErrors(errorsList, checkIndexesErr, true, errMessages))
         }
 
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         assertNotNull(syncItems)
         assertTrue(checkSyncItems<GenericJson>(syncItems, 1, SyncRequest.HttpVerb.POST))
 
@@ -1224,11 +1224,11 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         val checkIndexesSuccess = intArrayOf(1, 3)
         val checkIndexesErr = intArrayOf(0, 2)
 
-        val autoStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.AUTO, client)
-        val syncStore = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
+        val autoStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.AUTO, client)
+        val syncStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.SYNC, client)
         clearBackend(autoStore)
         clearBackend(syncStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val saveCallback = saveList(autoStore, personList)
         assertNotNull(saveCallback.error)
@@ -1241,7 +1241,7 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
             assertTrue(checkBatchResponseErrors(errorsList, checkIndexesErr, true, errMessages))
         }
 
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         assertNotNull(syncItems)
         syncItems?.let { sItems ->
             assertEquals(sItems[0].requestMethod, SyncRequest.HttpVerb.POST)
@@ -1263,11 +1263,11 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         // find() using networkstore : should return the items from step 1
         val personsList = createPersonsList(false)
 
-        val storeNet = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.NETWORK, client)
-        val storeAuto = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.AUTO, client)
+        val storeNet = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.NETWORK, client)
+        val storeAuto = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.AUTO, client)
         clearBackend(storeNet)
         clearBackend(storeAuto)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         mockInvalidConnection()
         saveList(storeAuto, personsList)
@@ -1277,7 +1277,7 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         assertNotNull(pushCallback.result)
         assertEquals(pushCallback.result?.successCount, personsList.count())
 
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         assertTrue(syncItems.isNullOrEmpty())
 
         val findCallback = find(storeNet, LONG_TIMEOUT)
@@ -1296,11 +1296,11 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         // find() using networkstore, should return the items from step 1
         val personsList = createCombineList()
 
-        val autoSync = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.AUTO, client)
-        val netSync = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.NETWORK, client)
+        val autoSync = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.AUTO, client)
+        val netSync = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.NETWORK, client)
         clearBackend(autoSync)
         clearBackend(netSync)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         mockInvalidConnection()
         saveList(autoSync, personsList)
@@ -1310,7 +1310,7 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         assertNotNull(pushCallback.result)
         assertEquals(personsList.count(), pushCallback.result?.successCount)
 
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         assertTrue(syncItems.isNullOrEmpty())
 
         val findCallback = find(netSync, LONG_TIMEOUT)
@@ -1329,13 +1329,13 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         // find() using networkstore, should return the items from step 1
         val personsList = createCombineList()
 
-        val mockNetManager = MockMultiInsertNetworkManager(Person.COLLECTION, Person::class.java, client as Client)
-        val autoSync = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.AUTO, mockNetManager)
-        val netSync = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.NETWORK, mockNetManager)
+        val mockNetManager = MockMultiInsertNetworkManager(MULTI_INSERT_COLLECTION, Person::class.java, client as Client)
+        val autoSync = DataStore(MULTI_INSERT_COLLECTION, Person::class.java, client, StoreType.AUTO, mockNetManager)
+        val netSync = DataStore(MULTI_INSERT_COLLECTION, Person::class.java, client, StoreType.NETWORK, mockNetManager)
 
         clearBackend(autoSync)
         clearBackend(netSync)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         mockInvalidConnection()
         saveList(autoSync, personsList)
@@ -1346,7 +1346,7 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         assertEquals(personsList.count(), pushCallback.result?.successCount)
         assertTrue(mockNetManager.useMultiInsertSave)
 
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         assertTrue(syncItems.isNullOrEmpty())
 
         val findCallback = find(netSync, LONG_TIMEOUT)
@@ -1401,9 +1401,9 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
 
         val personsList = createPushErrList()
 
-        val autoSync = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.AUTO, client)
+        val autoSync = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.AUTO, client)
         clearBackend(autoSync)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         mockInvalidConnection()
         saveList(autoSync, personsList)
@@ -1413,7 +1413,7 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         assertNotNull(pushCallback.result)
         assertEquals(personsList.count(), pushCallback.result?.successCount)
 
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         assertNotNull(syncItems)
         assertTrue(checkSyncItems<GenericJson>(syncItems, 2, SyncRequest.HttpVerb.PUT))
     }
@@ -1471,9 +1471,9 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
     @Throws(InterruptedException::class)
     private fun testTempId(storeType: StoreType) {
         val personList = createPersonsList(false)
-        val personStore = DataStore.collection(Person.COLLECTION, Person::class.java, storeType, client)
+        val personStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, storeType, client)
         clearBackend(personStore)
-        client.syncManager.clear(Person.COLLECTION)
+        client.syncManager.clear(MULTI_INSERT_COLLECTION)
         val saveCallback = createList(personStore, personList)
         assertNull(saveCallback.error)
         assertNotNull(saveCallback.result)
@@ -1519,7 +1519,7 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
     @Throws(InterruptedException::class)
     fun testErrorMessageIfSameIdExists(storeType: StoreType) {
         val personList = createPersonsList(true)
-        val netStore = DataStore.collection(Person.COLLECTION, Person::class.java, storeType, client)
+        val netStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, storeType, client)
         clearBackend(netStore)
         var saveCallback = createList(netStore, personList)
         assertNull(saveCallback.error)

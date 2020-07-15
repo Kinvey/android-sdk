@@ -1,4 +1,4 @@
-package com.kinvey.androidTest.store.datastore
+package com.kinvey.androidTest.store.data.multiinsert
 
 import android.os.Message
 import androidx.test.platform.app.InstrumentationRegistry
@@ -42,6 +42,7 @@ open class BaseDataStoreMultiInsertTest {
 
     companion object {
         const val TEST_USERNAME = "Test_UserName"
+        const val MULTI_INSERT_COLLECTION = "MultiInsertCollection"
         const val DEFAULT_TIMEOUT = 60
         const val MAX_PERSONS_COUNT = 5
         const val LONG_TIMEOUT = 6 * DEFAULT_TIMEOUT
@@ -307,6 +308,19 @@ open class BaseDataStoreMultiInsertTest {
             } catch (e: Exception) {
                 callback.onFailure(e)
             }
+        })
+        looperThread.start()
+        latch.await()
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+    @Throws(InterruptedException::class)
+    protected fun <T : GenericJson> create(store: DataStore<T>, item: T): DefaultKinveyClientCallback<T> {
+        val latch = CountDownLatch(1)
+        val callback = DefaultKinveyClientCallback<T>(latch)
+        val looperThread = LooperThread(Runnable {
+            store.create(item, callback)
         })
         looperThread.start()
         latch.await()
@@ -628,7 +642,7 @@ open class BaseDataStoreMultiInsertTest {
     fun <T : GenericJson> testCreateEmptyList(list: List<T>, cls: Class<T>, collection: String, storeType: StoreType) {
         val personStore = DataStore.collection(collection, cls, storeType, client)
         clearBackend(personStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val saveCallback = createList(personStore, list)
         Assert.assertNull(saveCallback.result)
@@ -642,7 +656,7 @@ open class BaseDataStoreMultiInsertTest {
     fun <T : GenericJson> testSaveEmptyList(list: List<T>, cls: Class<T>, collection: String, storeType: StoreType) {
         val personStore = DataStore.collection(collection, cls, storeType, client)
         clearBackend(personStore)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         val saveCallback = saveList(personStore, list)
         Assert.assertNull(saveCallback.result)
@@ -662,13 +676,13 @@ open class BaseDataStoreMultiInsertTest {
 
         val personsList = createPersonsList(2, false)
 
-        val netManager = MockMultiInsertNetworkManager(Person.COLLECTION, Person::class.java, client as Client)
-        val personStore = DataStore(Person.COLLECTION, Person::class.java, client, storeType, netManager)
-        val storeSync = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.SYNC, netManager)
+        val netManager = MockMultiInsertNetworkManager(MULTI_INSERT_COLLECTION, Person::class.java, client as Client)
+        val personStore = DataStore(MULTI_INSERT_COLLECTION, Person::class.java, client, storeType, netManager)
+        val storeSync = DataStore(MULTI_INSERT_COLLECTION, Person::class.java, client, StoreType.SYNC, netManager)
 
         clearBackend(personStore)
         clearBackend(storeSync)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         personsList.onEach { item -> save(storeSync, item) }
 
@@ -678,7 +692,7 @@ open class BaseDataStoreMultiInsertTest {
         Assert.assertEquals(pushCallback.result?.successCount, personsList.count())
         Assert.assertTrue(netManager.useMultiInsertSave)
 
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         Assert.assertTrue(syncItems == null || syncItems.isEmpty())
 
         val findCallback = find(storeSync, LONG_TIMEOUT)
@@ -698,14 +712,14 @@ open class BaseDataStoreMultiInsertTest {
         val personList = createErrList2()
         val checkIndexesSuccess = intArrayOf(0, 2)
         val checkIndexesErr = intArrayOf(1)
-        val personStoreCurrent = DataStore.collection(Person.COLLECTION, Person::class.java, storeType, client)
-        val personStoreNet = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.NETWORK, client)
-        val personStoreSync = DataStore.collection(Person.COLLECTION, Person::class.java, StoreType.SYNC, client)
+        val personStoreCurrent = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, storeType, client)
+        val personStoreNet = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.NETWORK, client)
+        val personStoreSync = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.SYNC, client)
 
         clearBackend(personStoreCurrent)
         clearBackend(personStoreNet)
         clearBackend(personStoreSync)
-        client?.syncManager?.clear(Person.COLLECTION)
+        client?.syncManager?.clear(MULTI_INSERT_COLLECTION)
 
         if (mockConnectionErr) {
             mockInvalidConnection()
@@ -726,7 +740,7 @@ open class BaseDataStoreMultiInsertTest {
             Assert.assertTrue(checkBatchResponseErrors(errorsList, checkIndexesErr, true, errMessages))
         }
 
-        val syncItems = pendingSyncEntities(Person.COLLECTION)
+        val syncItems = pendingSyncEntities(MULTI_INSERT_COLLECTION)
         Assert.assertNotNull(syncItems)
         Assert.assertEquals(syncItems?.count(), 1)
 

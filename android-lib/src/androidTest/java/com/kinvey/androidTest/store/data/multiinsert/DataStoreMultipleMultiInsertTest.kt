@@ -1,4 +1,4 @@
-package com.kinvey.androidTest.store.datastore
+package com.kinvey.androidTest.store.data.multiinsert
 
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
@@ -22,10 +22,10 @@ class DataStoreMultipleMultiInsertTest : BaseDataStoreMultiInsertTest() {
     @Throws(InterruptedException::class)
     fun testSaveMultipleBatchRequests() {
         print("should send multiple multi-insert POST requests")
-        val netManager = MockMultiInsertNetworkManager(Person.COLLECTION, Person::class.java, client)
-        val store = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.NETWORK, netManager)
+        val netManager = MockMultiInsertNetworkManager(MULTI_INSERT_COLLECTION, Person::class.java, client)
+        val store = DataStore(MULTI_INSERT_COLLECTION, Person::class.java, client, StoreType.NETWORK, netManager)
         clearBackend(store)
-        client.syncManager.clear(Person.COLLECTION)
+        client.syncManager.clear(MULTI_INSERT_COLLECTION)
 
         val itemsList = createPersonsList(200, false)
 
@@ -40,10 +40,10 @@ class DataStoreMultipleMultiInsertTest : BaseDataStoreMultiInsertTest() {
     @Throws(InterruptedException::class)
     fun testSaveMultipleBatchRequestsIfWasErrors() {
         print("should send multiple multi-insert POST requests, if was errors then should return empty array and array of errors")
-        val netManager = MockMultiInsertNetworkManager(Person.COLLECTION, Person::class.java, client)
-        val store = DataStore(Person.COLLECTION, Person::class.java, client, StoreType.NETWORK, netManager)
+        val netManager = MockMultiInsertNetworkManager(MULTI_INSERT_COLLECTION, Person::class.java, client)
+        val store = DataStore(MULTI_INSERT_COLLECTION, Person::class.java, client, StoreType.NETWORK, netManager)
         clearBackend(store)
-        client.syncManager.clear(Person.COLLECTION)
+        client.syncManager.clear(MULTI_INSERT_COLLECTION)
         val itemsList = createPersonsListErr(200, 50, 50)
         val saveCallback = saveList(store, itemsList)
         assertNotNull(saveCallback.result)

@@ -430,6 +430,14 @@ open class NetworkManager<T : GenericJson>(
         return batch
     }
 
+
+    @Throws(IOException::class)
+    open fun createBlocking(entity: T?): Create<T>? {
+        val create = Create(this, client, entity, currentClass!!, currentClass, SaveMode.POST)
+        client?.initializeRequest(create)
+        return create
+    }
+
     fun isTempId(item: T?): Boolean {
         INFO("Start checking for isTempId(entity)")
         var isTempId = false
@@ -924,6 +932,28 @@ open class NetworkManager<T : GenericJson>(
                     responseClassType: Class<KinveySaveBatchResponse<T>>, parClassType: Class<T>?, update: SaveMode?)
         : KinveyJsonStringClientRequest<KinveySaveBatchResponse<T>>(client, update.toString(), SAVE_BATCH_REST_PATH,
             BatchList<Any?>(itemsList).toString(), responseClassType, parClassType) {
+        @Key
+        var collectionName: String? = networkManager.collectionName
+
+        init {
+            val customRequestProperties = networkManager.customRequestProperties
+            val clientAppVersion = networkManager.clientAppVersion
+            getRequestHeaders()["X-Kinvey-Client-App-Version"] = clientAppVersion
+            if (!customRequestProperties.isNullOrEmpty()) {
+                getRequestHeaders()["X-Kinvey-Custom-Request-Properties"] = Gson().toJson(customRequestProperties)
+            }
+        }
+    }
+
+    /**
+     * SaveBatch class. Constructs the HTTP request object to
+     * create multi-insert requests.
+     *
+     */
+    class Create<T : GenericJson>(networkManager: NetworkManager<T>, client : AbstractClient<*>?, item: T?,
+                    responseClassType: Class<T>, parClassType: Class<T>?, update: SaveMode?)
+        : KinveyJsonStringClientRequest<T>(client, update.toString(), SAVE_BATCH_REST_PATH,
+            Gson().toJson(item), responseClassType, parClassType) {
         @Key
         var collectionName: String? = networkManager.collectionName
 
