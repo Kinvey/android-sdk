@@ -8,13 +8,14 @@ import com.kinvey.android.Client
 import com.kinvey.android.Client.Builder
 import com.kinvey.android.model.User
 import com.kinvey.androidTest.TestManager
+import com.kinvey.java.AbstractClient
 import com.kinvey.java.auth.KinveyAuthRequest
 import com.kinvey.java.core.KinveyHeaders
 import com.kinvey.java.store.UserStoreRequestManager
 import com.kinvey.java.store.UserStoreRequestManager.LoginRequest
-import junit.framework.Assert.assertNotNull
-import junit.framework.Assert.assertTrue
+import junit.framework.Assert.*
 import org.junit.After
+import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -45,6 +46,29 @@ class HeaderTest {
             } catch (throwable: Throwable) {
                 throwable.printStackTrace()
             }
+        }
+    }
+
+    @Test
+    fun kinveyApiVersionDefaultTest() {
+        val headers = KinveyHeaders()
+        var field: Field? = null
+        try {
+            field = KinveyHeaders::class.java.getDeclaredField("kinveyApiVersion")
+        } catch (e: NoSuchFieldException) {
+            e.printStackTrace()
+        }
+        assert(field != null)
+        field?.isAccessible = true
+        var version = "0"
+        try {
+           version =  field?.get(headers) as String
+        } catch (e: IllegalAccessException) {
+            e.printStackTrace()
+        }
+        assertNotEquals(version, "0")
+        if (AbstractClient.kinveyApiVersion.isEmpty()) {
+            assertEquals(version, "5")
         }
     }
 

@@ -5,7 +5,7 @@ allprojects  {
   group = 'com.kinvey'
   version = '4.3.6'
   description = "The Kinvey SDK makes it easy to write Android apps with Kinvey"
-  ext.kinveyApiVersion = '4'
+  ext.kinveyApiVersion = '5'
   ext.dokkaVersion = '0.9.17'
 }
 
