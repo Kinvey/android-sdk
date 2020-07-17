@@ -25,6 +25,9 @@ object Constants {
     const val META_ID = "meta.id"
 
     const val ACCESS_ERROR = "Access Error"
+    const val SAVE_BATCH_ERROR = "KinveyInternalErrorRetry"
+    const val SAVE_BATCH_ERROR_DEBUG = "An entity with that _id already exists in this collection"
+    const val SAVE_BATCH_ERROR_DESCRIPTION = "The Kinvey database encountered an unexpected error. Please retry your request."
 
     const val DELETE = "DELETE"
     const val REQUEST_METHOD = "requestMethod"

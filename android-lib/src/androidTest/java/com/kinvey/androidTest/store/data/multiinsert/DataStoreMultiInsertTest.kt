@@ -60,6 +60,8 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         val saveCallback = createList(personStore, personList)
         assertNull(saveCallback.error)
         assertNotNull(saveCallback.result)
+        assertEquals(saveCallback.result?.errors?.size, 0)
+        assertEquals(saveCallback.result?.entities?.size, 5)
 
         val findCallback = find(personStore, LONG_TIMEOUT)
         assertNotNull(findCallback.result)
@@ -70,10 +72,9 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         val saveCallbackSecond = createList(personStore, personListSecond)
         assertNull(saveCallbackSecond.error)
         assertNotNull(saveCallbackSecond.result)
-        if (!storeType.equals(StoreType.SYNC)) {
-            assertNotNull(saveCallbackSecond.result?.errors)
-            assertEquals(saveCallbackSecond.result?.errors?.size, 5)
-        }
+        assertNotNull(saveCallbackSecond.result?.errors)
+        assertEquals(saveCallbackSecond.result?.errors?.size, 5)
+        assertEquals(saveCallbackSecond.result?.entities?.size, 1)
     }
 
     @Test
@@ -1510,7 +1511,6 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
     }
 
     @Test
-    @Ignore("Should work after fixing: https://kinvey.atlassian.net/browse/KDEV-781")
     @Throws(InterruptedException::class)
     fun testErrorMessageIfSameIdExistsSync() {
         testErrorMessageIfSameIdExists(StoreType.SYNC)

@@ -18,7 +18,9 @@ package com.kinvey.java.store.requests.data.save
 
 import com.google.api.client.http.HttpResponseException
 import com.google.api.client.json.GenericJson
-import com.kinvey.java.Constants
+import com.kinvey.java.Constants.SAVE_BATCH_ERROR
+import com.kinvey.java.Constants.SAVE_BATCH_ERROR_DEBUG
+import com.kinvey.java.Constants.SAVE_BATCH_ERROR_DESCRIPTION
 import com.kinvey.java.KinveySaveBatchException
 import com.kinvey.java.Logger
 import com.kinvey.java.cache.ICache
@@ -52,20 +54,23 @@ class CreateListBatchRequest<T : GenericJson>(
     private val MAX_POST_ITEMS = 100
 
     @Throws(IOException::class)
-    override fun execute(): KinveySaveBatchResponse<T>  {
-        val retList: List<T>
+    override fun execute(): KinveySaveBatchResponse<T> {
+
         var res = KinveySaveBatchResponse<T>()
         when (writePolicy) {
             WritePolicy.FORCE_LOCAL -> {
-                retList = cache?.save(objects) ?: ArrayList()
-                syncManager?.enqueueSaveRequests(networkManager.collectionName ?: "", networkManager, retList)
-                res.entities = mutableListOf()
-                res.entities!!.addAll(retList)
+                res = saveLocally()
             }
             WritePolicy.LOCAL_THEN_NETWORK -> {
                 doPushRequest()
-                val itemsToSend = cache?.save(objects)
-                res = runSaveItemsRequest(itemsToSend)
+                val cacheRes = saveLocally()
+                res = runSaveItemsRequest(cacheRes.entities)
+                cacheRes.errors?.let {
+                    if (res.errors == null && !it.isNullOrEmpty()) {
+                        res.errors = mutableListOf()
+                    }
+                    res.errors?.addAll(it)
+                }
                 if (exception is IOException) {
                     throw IOException(exception)
                 }
@@ -77,6 +82,34 @@ class CreateListBatchRequest<T : GenericJson>(
                 }
             }
         }
+        return res
+    }
+
+    private fun saveLocally(): KinveySaveBatchResponse<T> {
+        val res = KinveySaveBatchResponse<T>()
+        val retList: List<T>
+        val saveList: MutableList<T> = mutableListOf()
+        val errorList: MutableList<KinveyBatchInsertError> = mutableListOf()
+        val ids = objects.filter { it[_ID] != null }.map { it[_ID] as String }
+        val itemsInCache = cache?.get(ids) ?: mutableListOf()
+        objects.filter { item -> //save only items which doesn't exist in database yet
+            itemsInCache.none { it[_ID] == item[_ID] }
+        }.forEach {
+            saveList.add(it)
+        }
+        retList = cache?.save(saveList) ?: ArrayList()
+        itemsInCache.forEach {
+            val error = KinveyBatchInsertError(objects.indexOf(it))
+            error.debug = SAVE_BATCH_ERROR_DEBUG
+            error.description = SAVE_BATCH_ERROR_DESCRIPTION
+            error.error = SAVE_BATCH_ERROR
+            errorList.add(error)
+        }
+        syncManager?.enqueueSaveRequests(networkManager.collectionName
+                ?: "", networkManager, retList)
+        res.entities = mutableListOf()
+        res.entities!!.addAll(retList)
+        res.errors = errorList
         return res
     }
 
@@ -131,14 +164,17 @@ class CreateListBatchRequest<T : GenericJson>(
                 wasException = true
                 exception = e
             }
-            if (useCache) { enqueueSaveRequests(entities, SyncRequest.HttpVerb.POST) }
+            if (useCache) {
+                enqueueSaveRequests(entities, SyncRequest.HttpVerb.POST)
+            }
         }
         if (response != null) {
             if (response.entities != null) {
                 if (result.entities == null) {
                     result.entities = mutableListOf()
                 }
-                result.entities!!.addAll(response.entities!!)
+
+                result.entities!!.addAll(response.entities!!.filter { it[_ID] != null })
                 // If object does not have an _id, then it is being created locally. The cache may
                 // provide an _id in this case, but before it is saved to the network, this temporary
                 // _id should be removed prior to saving to the backend. This way, the backend
@@ -159,9 +195,9 @@ class CreateListBatchRequest<T : GenericJson>(
                 result.errors!!.addAll(response.errors!!)
             }
             if (response.haveErrors && useCache) {
-               enqueueBatchErrorsRequests(entities, response)
+                enqueueBatchErrorsRequests(entities, response)
             }
-            response.errors?.let{ errors -> batchSaveErrors.addAll(errors) }
+            response.errors?.let { errors -> batchSaveErrors.addAll(errors) }
             removeSuccessBatchItemsFromCache(entities, batchSaveErrors)
         }
         return response
