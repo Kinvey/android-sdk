@@ -9,6 +9,7 @@ import com.kinvey.androidTest.model.Person
 import com.kinvey.java.core.KinveyJsonResponseException
 import com.kinvey.java.store.StoreType
 import com.kinvey.java.AbstractClient.Companion.kinveyApiVersion
+import com.kinvey.java.Constants
 import com.kinvey.java.Constants._ID
 import org.junit.Assert
 
@@ -199,7 +200,6 @@ class DataStoreSingleInsertTest : BaseDataStoreMultiInsertTest() {
     }
 
     @Test
-    @Ignore("Should work after fixing: https://kinvey.atlassian.net/browse/KDEV-781")
     @Throws(InterruptedException::class)
     fun testErrorMessageIfSameIdExistsSync() {
         testErrorMessageIfSameIdExists(StoreType.SYNC)
@@ -219,8 +219,13 @@ class DataStoreSingleInsertTest : BaseDataStoreMultiInsertTest() {
         assertNotNull(saveCallback.result?.errors)
         assertNotNull(saveCallback.result?.errors?.get(0)?.description)
         assertNotNull(saveCallback.result?.errors?.get(0)?.debug)
-        assertEquals(saveCallback.result?.errors?.get(0)?.description, ERROR_DESCRIPTION)
-        assertEquals(saveCallback.result?.errors?.get(0)?.debug, ERROR_DEBUG)
+        if (storeType == StoreType.NETWORK) {
+            assertEquals(saveCallback.result?.errors?.get(0)?.description, ERROR_DESCRIPTION)
+            assertEquals(saveCallback.result?.errors?.get(0)?.debug, ERROR_DEBUG)
+        } else {
+            assertEquals(saveCallback.result?.errors?.get(0)?.description, Constants.SAVE_BATCH_ERROR_DESCRIPTION)
+            assertEquals(saveCallback.result?.errors?.get(0)?.debug, Constants.SAVE_BATCH_ERROR_DEBUG)
+        }
     }
 
     companion object {

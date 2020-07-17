@@ -13,6 +13,7 @@ import com.kinvey.java.core.KinveyJsonResponseException
 import com.kinvey.java.store.StoreType
 import com.kinvey.java.sync.dto.SyncRequest
 import com.kinvey.java.AbstractClient.Companion.kinveyApiVersion
+import com.kinvey.java.Constants
 
 
 import org.junit.Ignore
@@ -1530,6 +1531,13 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         assertNotNull(saveCallback.result?.errors)
         assertNotNull(saveCallback.result?.errors?.get(0)?.description)
         assertNotNull(saveCallback.result?.errors?.get(0)?.debug)
+        if (storeType == StoreType.NETWORK) {
+            assertEquals(saveCallback.result?.errors?.get(0)?.description, DataStoreSingleInsertTest.ERROR_DESCRIPTION)
+            assertEquals(saveCallback.result?.errors?.get(0)?.debug, DataStoreSingleInsertTest.ERROR_DEBUG)
+        } else {
+            assertEquals(saveCallback.result?.errors?.get(0)?.description, Constants.SAVE_BATCH_ERROR_DESCRIPTION)
+            assertEquals(saveCallback.result?.errors?.get(0)?.debug, Constants.SAVE_BATCH_ERROR_DEBUG)
+        }
     }
 
 }
