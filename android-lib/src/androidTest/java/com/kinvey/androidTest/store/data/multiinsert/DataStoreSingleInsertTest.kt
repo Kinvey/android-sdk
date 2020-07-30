@@ -10,6 +10,7 @@ import com.kinvey.java.core.KinveyJsonResponseException
 import com.kinvey.java.store.StoreType
 import com.kinvey.java.AbstractClient.Companion.kinveyApiVersion
 import com.kinvey.java.Constants._ID
+import com.kinvey.java.KinveyException
 import org.junit.Assert
 
 
@@ -21,7 +22,6 @@ import java.util.ArrayList
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
-import org.junit.Ignore
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
@@ -67,11 +67,18 @@ class DataStoreSingleInsertTest : BaseDataStoreMultiInsertTest() {
         personListSecond.addAll(findCallback.result?.result!!)
         personListSecond.add(Person())
         val saveCallbackSecond = createList(personStore, personListSecond)
-        assertNull(saveCallbackSecond.error)
-        assertNotNull(saveCallbackSecond.result)
-        if (storeType != StoreType.SYNC) {
+
+        if (storeType == StoreType.NETWORK) {
+            assertNull(saveCallbackSecond.error)
+            assertNotNull(saveCallbackSecond.result)
             assertNotNull(saveCallbackSecond.result?.errors)
             assertEquals(1, saveCallbackSecond.result?.errors?.size)
+        } else {
+            assertNotNull(saveCallbackSecond.error)
+            assertNull(saveCallbackSecond.result)
+            Assert.assertTrue(saveCallbackSecond.error is KinveyException)
+            Assert.assertTrue((saveCallbackSecond.error as KinveyException).reason!!.startsWith(LOCAL_ERROR_THE_SAME_ID_START))
+            Assert.assertTrue((saveCallbackSecond.error as KinveyException).reason!!.contains(LOCAL_ERROR_THE_SAME_ID_END))
         }
     }
 
@@ -199,7 +206,6 @@ class DataStoreSingleInsertTest : BaseDataStoreMultiInsertTest() {
     }
 
     @Test
-    @Ignore("Should work after fixing: https://kinvey.atlassian.net/browse/KDEV-781")
     @Throws(InterruptedException::class)
     fun testErrorMessageIfSameIdExistsSync() {
         testErrorMessageIfSameIdExists(StoreType.SYNC)
@@ -215,16 +221,27 @@ class DataStoreSingleInsertTest : BaseDataStoreMultiInsertTest() {
         assertNotNull(saveCallback.result)
         Assert.assertTrue(checkPersonIfSameObjects(personList, saveCallback.result?.entities, false))
         saveCallback = createList(netStore, personList)
-        assertNull(saveCallback.error)
-        assertNotNull(saveCallback.result?.errors)
-        assertNotNull(saveCallback.result?.errors?.get(0)?.description)
-        assertNotNull(saveCallback.result?.errors?.get(0)?.debug)
-        assertEquals(saveCallback.result?.errors?.get(0)?.description, ERROR_DESCRIPTION)
-        assertEquals(saveCallback.result?.errors?.get(0)?.debug, ERROR_DEBUG)
+        if (storeType == StoreType.NETWORK) {
+            assertNull(saveCallback.error)
+            assertNotNull(saveCallback.result?.errors)
+            assertNotNull(saveCallback.result?.errors?.get(0)?.description)
+            assertNotNull(saveCallback.result?.errors?.get(0)?.debug)
+            assertEquals(saveCallback.result?.errors?.get(0)?.description, ERROR_DESCRIPTION)
+            assertEquals(saveCallback.result?.errors?.get(0)?.debug, ERROR_DEBUG)
+        } else {
+            assertNotNull(saveCallback.error)
+            Assert.assertTrue(saveCallback.error is KinveyException)
+            assertNull(saveCallback.result)
+            Assert.assertTrue((saveCallback.error as KinveyException).reason!!.startsWith(LOCAL_ERROR_THE_SAME_ID_START))
+            Assert.assertTrue((saveCallback.error as KinveyException).reason!!.contains(LOCAL_ERROR_THE_SAME_ID_END))
+        }
     }
 
     companion object {
         const val ERROR_DEBUG = "An entity with that _id already exists in this collection"
         const val ERROR_DESCRIPTION = "The Kinvey server encountered an unexpected error. Please retry your request."
+        const val LOCAL_ERROR_MORE_THEN_ONE = "The array contains more than one entity with _id"
+        const val LOCAL_ERROR_THE_SAME_ID_START = "An entity with _id"
+        const val LOCAL_ERROR_THE_SAME_ID_END = "already exists."
     }
 }

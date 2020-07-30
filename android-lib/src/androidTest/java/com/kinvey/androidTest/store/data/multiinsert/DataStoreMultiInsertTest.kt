@@ -8,11 +8,16 @@ import com.kinvey.android.store.DataStore
 import com.kinvey.androidTest.model.EntitySet
 import com.kinvey.androidTest.model.Person
 import com.kinvey.androidTest.network.MockMultiInsertNetworkManager
+import com.kinvey.androidTest.store.data.multiinsert.DataStoreSingleInsertTest.Companion.LOCAL_ERROR_MORE_THEN_ONE
+import com.kinvey.androidTest.store.data.multiinsert.DataStoreSingleInsertTest.Companion.LOCAL_ERROR_THE_SAME_ID_END
+import com.kinvey.androidTest.store.data.multiinsert.DataStoreSingleInsertTest.Companion.LOCAL_ERROR_THE_SAME_ID_START
 import com.kinvey.java.KinveySaveBatchException
 import com.kinvey.java.core.KinveyJsonResponseException
 import com.kinvey.java.store.StoreType
 import com.kinvey.java.sync.dto.SyncRequest
 import com.kinvey.java.AbstractClient.Companion.kinveyApiVersion
+import com.kinvey.java.Constants._ID
+import com.kinvey.java.KinveyException
 
 
 import org.junit.Ignore
@@ -60,6 +65,8 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         val saveCallback = createList(personStore, personList)
         assertNull(saveCallback.error)
         assertNotNull(saveCallback.result)
+        assertEquals(0, saveCallback.result?.errors?.size)
+        assertEquals(5, saveCallback.result?.entities?.size)
 
         val findCallback = find(personStore, LONG_TIMEOUT)
         assertNotNull(findCallback.result)
@@ -68,11 +75,19 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         personListSecond.addAll(findCallback.result?.result!!)
         personListSecond.add(Person())
         val saveCallbackSecond = createList(personStore, personListSecond)
-        assertNull(saveCallbackSecond.error)
-        assertNotNull(saveCallbackSecond.result)
-        if (!storeType.equals(StoreType.SYNC)) {
+
+        if (storeType == StoreType.NETWORK ) {
+            assertNull(saveCallbackSecond.error)
+            assertNotNull(saveCallbackSecond.result)
             assertNotNull(saveCallbackSecond.result?.errors)
             assertEquals(saveCallbackSecond.result?.errors?.size, 5)
+            assertEquals(saveCallbackSecond.result?.entities?.size, 1)
+        } else {
+            assertNotNull(saveCallbackSecond.error)
+            assertTrue(saveCallbackSecond.error is KinveyException)
+            assertNull(saveCallbackSecond.result)
+            assertTrue((saveCallbackSecond.error as KinveyException).reason!!.startsWith(LOCAL_ERROR_THE_SAME_ID_START))
+            assertTrue((saveCallbackSecond.error as KinveyException).reason!!.contains(LOCAL_ERROR_THE_SAME_ID_END))
         }
     }
 
@@ -1510,7 +1525,6 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
     }
 
     @Test
-    @Ignore("Should work after fixing: https://kinvey.atlassian.net/browse/KDEV-781")
     @Throws(InterruptedException::class)
     fun testErrorMessageIfSameIdExistsSync() {
         testErrorMessageIfSameIdExists(StoreType.SYNC)
@@ -1526,10 +1540,74 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         assertNotNull(saveCallback.result)
         assertTrue(checkPersonIfSameObjects(personList, saveCallback.result?.entities, false))
         saveCallback = createList(netStore, personList)
-        assertNull(saveCallback.error)
-        assertNotNull(saveCallback.result?.errors)
-        assertNotNull(saveCallback.result?.errors?.get(0)?.description)
-        assertNotNull(saveCallback.result?.errors?.get(0)?.debug)
+        if (storeType == StoreType.NETWORK) {
+            assertNull(saveCallback.error)
+            assertNotNull(saveCallback.result?.errors)
+            assertNotNull(saveCallback.result?.errors?.get(0)?.description)
+            assertNotNull(saveCallback.result?.errors?.get(0)?.debug)
+            assertEquals(saveCallback.result?.errors?.get(0)?.description, DataStoreSingleInsertTest.ERROR_DESCRIPTION)
+            assertEquals(saveCallback.result?.errors?.get(0)?.debug, DataStoreSingleInsertTest.ERROR_DEBUG)
+        } else {
+            assertNotNull(saveCallback.error)
+            assertTrue(saveCallback.error is KinveyException)
+            assertNull(saveCallback.result)
+            assertTrue((saveCallback.error as KinveyException).reason!!.startsWith(LOCAL_ERROR_THE_SAME_ID_START))
+            assertTrue((saveCallback.error as KinveyException).reason!!.contains(LOCAL_ERROR_THE_SAME_ID_END))
+        }
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testErrorMessageIfSameIdExistsInListNetwork() {
+        testErrorMessageIfSameIdExistsInList(StoreType.NETWORK)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testErrorMessageIfSameIdExistsInListAuto() {
+        testErrorMessageIfSameIdExistsInList(StoreType.AUTO)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testErrorMessageIfSameIdExistsInListSync() {
+        testErrorMessageIfSameIdExistsInList(StoreType.SYNC)
+    }
+
+    @Throws(InterruptedException::class)
+    fun testErrorMessageIfSameIdExistsInList(storeType: StoreType) {
+        val personList = mutableListOf<Person>()
+        val person1 = createPerson(TEST_USERNAME + 1)
+        val person2 = createPerson(TEST_USERNAME + 2)
+        val person3 = createPerson(TEST_USERNAME + 3)
+        val person4 = createPerson(TEST_USERNAME + 3)
+        val person5 = createPerson(TEST_USERNAME + 3)
+        person1[_ID] = "test_id"
+        person2[_ID] = "test_id"
+        person3[_ID] = "test_id"
+        person4[_ID] = "test_id_2"
+        person5[_ID] = "test_id_2"
+        personList.add(person1)
+        personList.add(person2)
+        personList.add(person3)
+        personList.add(person4)
+        personList.add(person5)
+        val netStore = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, storeType, client)
+        clearBackend(netStore)
+        val saveCallback = createList(netStore, personList)
+        if (storeType == StoreType.NETWORK) {
+            assertNull(saveCallback.error)
+            assertNotNull(saveCallback.result?.errors)
+            assertNotNull(saveCallback.result?.errors?.get(0)?.description)
+            assertNotNull(saveCallback.result?.errors?.get(0)?.debug)
+            assertEquals(saveCallback.result?.errors?.get(0)?.description, DataStoreSingleInsertTest.ERROR_DESCRIPTION)
+            assertEquals(saveCallback.result?.errors?.get(0)?.debug, DataStoreSingleInsertTest.ERROR_DEBUG)
+        } else {
+            assertNotNull(saveCallback.error)
+            assertTrue(saveCallback.error is KinveyException)
+            assertNull(saveCallback.result)
+            assertTrue((saveCallback.error as KinveyException).reason!!.startsWith(LOCAL_ERROR_MORE_THEN_ONE))
+        }
     }
 
 }
