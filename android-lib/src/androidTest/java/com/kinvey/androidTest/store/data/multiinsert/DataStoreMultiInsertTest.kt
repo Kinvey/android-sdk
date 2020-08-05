@@ -1302,6 +1302,71 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
 
     @Test
     @Throws(InterruptedException::class)
+    fun testPullAuto() {
+        val storeAuto = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.AUTO, client)
+        clearBackend(storeAuto)
+        client.syncManager.clear(MULTI_INSERT_COLLECTION)
+        storeAuto.clear()
+        val personsList = createPersonsList(false)
+        val createListCallback = createList(storeAuto, personsList)
+        assertNotNull(createListCallback.result)
+        assertTrue(createListCallback.result?.entities?.size == MAX_PERSONS_COUNT)
+        assertNull(createListCallback.error)
+        val pullCallback = pull(storeAuto, LONG_TIMEOUT)
+        assertNotNull(pullCallback.result)
+        assertNull(pullCallback.error)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testPullSync() {
+        val store = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.SYNC, client)
+        clearBackend(store)
+        client.syncManager.clear(MULTI_INSERT_COLLECTION)
+        store.clear()
+        val personsList = createPersonsList(false)
+        val createListCallback = createList(store, personsList)
+        assertNotNull(createListCallback.result)
+        assertTrue(createListCallback.result?.entities?.size == MAX_PERSONS_COUNT)
+        assertNull(createListCallback.error)
+        val pullCallback = pull(store, LONG_TIMEOUT)
+        assertNotNull(pullCallback.error)
+        assertNull(pullCallback.result)
+        val pushCallback = push(store, LONG_TIMEOUT)
+        assertNotNull(pushCallback.result)
+        assertNull(pushCallback.error)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testPushCombineWithIdAndWithoutIdAuto() {
+        val person1 = createPerson(TEST_USERNAME)
+        val person2 = createPerson(TEST_USERNAME)
+        person2[_ID] = "123"
+        val persons = arrayListOf<Person>()
+        persons.add(person1)
+        persons.add(person2)
+        val autoSync = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.AUTO, client)
+        clearBackend(autoSync)
+        autoSync.clear()
+        client.syncManager.clear(MULTI_INSERT_COLLECTION)
+        val createListCallback = createList(autoSync, persons)
+        assertNotNull(createListCallback.result)
+        val person3 = createPerson(TEST_USERNAME)
+        val person4 = createPerson(TEST_USERNAME)
+        val person5 = createPerson(TEST_USERNAME)
+        person5[_ID] = "123"
+        val persons2 = arrayListOf<Person>()
+        persons2.add(person3)
+        persons2.add(person4)
+        persons2.add(person5)
+        val badListCallback = createList(autoSync, persons)
+        assertNull(badListCallback.result)
+        assertNotNull(badListCallback.error)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
     fun testPushItemsListCombineWithIdAndWithoutIdAuto() {
         print("should combine POST and PUT requests for items with and without _id")
         // create an array that has 2 items with _id and 2 without in the following order - [no _id, _id, no_id, _id]

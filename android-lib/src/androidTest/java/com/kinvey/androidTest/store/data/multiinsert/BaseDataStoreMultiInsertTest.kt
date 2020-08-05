@@ -17,6 +17,7 @@ import com.kinvey.androidTest.TestManager
 import com.kinvey.androidTest.model.EntitySet
 import com.kinvey.androidTest.model.Person
 import com.kinvey.androidTest.network.MockMultiInsertNetworkManager
+import com.kinvey.androidTest.store.datastore.BaseDataStoreTest
 import com.kinvey.java.*
 import com.kinvey.java.AbstractClient.Companion.kinveyApiVersion
 import com.kinvey.java.core.AbstractKinveyClient
@@ -361,6 +362,18 @@ open class BaseDataStoreMultiInsertTest {
         val latch = CountDownLatch(1)
         val callback = DefaultKinveyPushCallback(latch)
         val looperThread = LooperThread(Runnable { store.push(callback) })
+        looperThread.start()
+        latch.await(seconds.toLong(), TimeUnit.SECONDS)
+        looperThread.mHandler?.sendMessage(Message())
+        return callback
+    }
+
+
+    @Throws(InterruptedException::class)
+    protected fun <T : GenericJson> pull(store: DataStore<T>, seconds: Int): BaseDataStoreTest.DefaultKinveyPullCallback {
+        val latch = CountDownLatch(1)
+        val callback = BaseDataStoreTest.DefaultKinveyPullCallback(latch)
+        val looperThread = LooperThread(Runnable { store.pull(callback) })
         looperThread.start()
         latch.await(seconds.toLong(), TimeUnit.SECONDS)
         looperThread.mHandler?.sendMessage(Message())

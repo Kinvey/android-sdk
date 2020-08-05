@@ -58,7 +58,7 @@ class CreateListBatchRequest<T : GenericJson>(
         var res = KinveySaveBatchResponse<T>()
         when (writePolicy) {
             WritePolicy.FORCE_LOCAL -> {
-                res = saveLocally()
+                res = saveLocally(true)
             }
             WritePolicy.LOCAL_THEN_NETWORK -> {
                 doPushRequest()
@@ -84,7 +84,7 @@ class CreateListBatchRequest<T : GenericJson>(
         return res
     }
 
-    private fun saveLocally(): KinveySaveBatchResponse<T> {
+    private fun saveLocally(addToSyncManager: Boolean = false): KinveySaveBatchResponse<T> {
         Logger.INFO("Start saving entities locally")
         val res = KinveySaveBatchResponse<T>()
         val ids = objects.filter { it[_ID] != null }.map { it[_ID] as String }
@@ -105,8 +105,10 @@ class CreateListBatchRequest<T : GenericJson>(
         }
         val retList: List<T> = cache?.save(objects) ?: ArrayList()
 
-        syncManager?.enqueueSaveRequests(networkManager.collectionName
-                ?: "", networkManager, retList)
+        if (addToSyncManager) {
+            syncManager?.enqueueSaveRequests(networkManager.collectionName
+                    ?: "", networkManager, retList)
+        }
         res.entities = mutableListOf()
         res.entities!!.addAll(retList)
         res.errors = mutableListOf()
