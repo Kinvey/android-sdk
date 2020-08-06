@@ -97,11 +97,13 @@ class CreateListBatchRequest<T : GenericJson>(
         }
         //items already in the cache
 
-        val itemsInCache = cache?.get(ids) ?: mutableListOf()
-        if (itemsInCache.isNotEmpty()) {
-            val idsInCache = itemsInCache.map { it[_ID] as String }
-            val kinveyException = KinveyException("An entity with _id $idsInCache already exists.")
-            throw kinveyException
+        if (ids.isNotEmpty()) {
+            val itemsInCache = cache?.get(ids) ?: mutableListOf()
+            if (itemsInCache.isNotEmpty()) {
+                val idsInCache = itemsInCache.map { it[_ID] as String }
+                val kinveyException = KinveyException("An entity with _id $idsInCache already exists.")
+                throw kinveyException
+            }
         }
         val retList: List<T> = cache?.save(objects) ?: ArrayList()
 

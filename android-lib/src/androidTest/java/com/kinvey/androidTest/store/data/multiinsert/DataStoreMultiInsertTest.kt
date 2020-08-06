@@ -1360,9 +1360,36 @@ class DataStoreMultiInsertTest : BaseDataStoreMultiInsertTest() {
         persons2.add(person3)
         persons2.add(person4)
         persons2.add(person5)
-        val badListCallback = createList(autoSync, persons)
+        val badListCallback = createList(autoSync, persons2)
         assertNull(badListCallback.result)
         assertNotNull(badListCallback.error)
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun testCreateAuto() {
+        val person1 = createPerson(TEST_USERNAME)
+        val person2 = createPerson(TEST_USERNAME)
+        person2[_ID] = "123"
+        val persons = arrayListOf<Person>()
+        persons.add(person1)
+        persons.add(person2)
+        val autoSync = DataStore.collection(MULTI_INSERT_COLLECTION, Person::class.java, StoreType.AUTO, client)
+        clearBackend(autoSync)
+        autoSync.clear()
+        client.syncManager.clear(MULTI_INSERT_COLLECTION)
+        val createListCallback = createList(autoSync, persons)
+        assertNotNull(createListCallback.result)
+        val person3 = createPerson(TEST_USERNAME)
+        val person4 = createPerson(TEST_USERNAME)
+        val person5 = createPerson(TEST_USERNAME)
+        val persons2 = arrayListOf<Person>()
+        persons2.add(person3)
+        persons2.add(person4)
+        persons2.add(person5)
+        val secondListCallback = createList(autoSync, persons2)
+        assertNotNull(secondListCallback.result)
+        assertNull(secondListCallback.error)
     }
 
     @Test
