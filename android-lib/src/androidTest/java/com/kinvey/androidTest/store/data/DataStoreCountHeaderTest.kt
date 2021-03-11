@@ -68,12 +68,6 @@ class DataStoreCountHeaderTest : BaseDataStoreTest() {
 
     @Test
     @Throws(InterruptedException::class)
-    fun testFindWithCountAuto() {
-        testFindWithCount(StoreType.AUTO)
-    }
-
-    @Test
-    @Throws(InterruptedException::class)
     fun testFindWithCountCache() {
         val store = DataStore.collection(COLLECTION, Person::class.java, StoreType.CACHE, client)
         try {
